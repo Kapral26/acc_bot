@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from setting.cinema import Cinema
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
+from setting.cinema import Cinema
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
 	ConversationHandler, Filters
 from telegram.utils.request import Request
 
 FIND_MOVIE, FIND_DONE = range(2)
-NEXT, PREVIEW, VIEW_ALL = range(3)
+NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
 
 CALLBACK_BEGIN = 'x1'
 
@@ -23,7 +23,7 @@ class newVersionBot(BotSetting):
 	@log_error
 	def help_handler(self, update: Update, context: CallbackContext):
 		""" Не относится к сценарию диалога, но создаёт начальные inline-кнопки
-		"""
+        """
 
 		update.message.reply_text(
 				'Cписок команд:\n'
@@ -40,7 +40,7 @@ class newVersionBot(BotSetting):
 	@log_error
 	def start_handler(self, update: Update, context: CallbackContext):
 		""" Не относится к сценарию диалога, но создаёт начальные inline-кнопки
-		"""
+        """
 
 		update.message.reply_text(
 				'Бот АлкоКиноКлуба\n'
@@ -66,7 +66,7 @@ class newVersionBot(BotSetting):
 	# /add команда для добавления фильма в список
 	def add_handler(self, update: Update, context: CallbackContext):
 		""" Начало взаимодействия по клику на inline-кнопку
-		"""
+        """
 		chat_id = update.message.chat_id
 
 		update.message.bot.send_message(
@@ -139,7 +139,7 @@ class newVersionBot(BotSetting):
 	@log_error
 	def cancel_handler(self, update: Update, context: CallbackContext):
 		""" Отменить весь процесс диалога. Данные будут утеряны
-		"""
+        """
 		update.message.reply_text('Отмена.\nЧтобы начать сначала введите: /add')
 		return ConversationHandler.END
 
@@ -147,39 +147,49 @@ class newVersionBot(BotSetting):
 	@log_error
 	def viewlist_handler(self, update: Update, context: CallbackContext):
 		self.dict_list_movie = self.cinema.view_list()
-		count_view = 2  # 11
+		count_view = 5  # 11
+
+		buttons_view = [
+			[InlineKeyboardButton(text=f"{x['title']} ({x['movie_year']})", callback_data=f"d;{x['id']}")] for x
+			in self.dict_list_movie[:count_view]
+		]
+
+		buttons_view.append([InlineKeyboardButton(text='->', callback_data=count_view)])
 
 		inline_buttons = InlineKeyboardMarkup(
-				inline_keyboard=[
-					[
-						InlineKeyboardButton(text='Вывести весь список', callback_data='all'),
-						InlineKeyboardButton(text='->', callback_data=count_view)
-					],
-				],
+				inline_keyboard=buttons_view
 		)
-
-		preint_text = [f">>\nНазвание Фильма: {x['title']}\nГод: {x['movie_year']}\nРейтинг: {x['rating']}" for x in
-					   self.dict_list_movie[:count_view]]
 
 		update.message.reply_text(
-				text='\n'.join(preint_text),
+				text='Список фильмов:',
 				reply_markup=inline_buttons,
 		)
+
 		return NEXT
 
 	@log_error
 	def viewlist_next_handler(self, update: Update, context: CallbackContext):
-		if update.callback_query.data == 'all':
+		callback_view = update.callback_query
+		callback_view.answer()
+		if callback_view.data == 'all':
 			return VIEW_ALL
+
+		if 'd;' in callback_view.data:
+			context.user_data[DETAIL_VIEW] = int(callback_view.data.split(';')[1])
+			return DETAIL_VIEW
+
 		count_view = int(update.callback_query.data)
-		count_view_next = count_view + 2  # 10
+		count_view_next = count_view + 5  # 10
+
+		buttons_view = [
+			[InlineKeyboardButton(text=f"{x['title']} ({x['movie_year']})", callback_data=f"d;{x['id']}")] for x
+			in self.dict_list_movie[count_view:count_view_next]
+		]
+
+		buttons_view.append([InlineKeyboardButton(text='->', callback_data=count_view_next)])
 
 		inline_buttons = InlineKeyboardMarkup(
-				inline_keyboard=[
-					[
-						InlineKeyboardButton(text='->', callback_data=count_view_next),
-					],
-				],
+				inline_keyboard=buttons_view
 		)
 
 		if not self.dict_list_movie[count_view:count_view_next]:
@@ -189,15 +199,55 @@ class newVersionBot(BotSetting):
 			)
 			return ConversationHandler.END
 
-		preint_text = [f">>\nНазвание Фильма: {x['title']}\nГод: {x['movie_year']}\n Рейтинг: {x['rating']}" for x in
-					   self.dict_list_movie[count_view:count_view_next]]
-
 		context.bot.send_message(
-				text='\n'.join(preint_text),
+				text='Вот тебе еще пачка фильмов',
 				chat_id=update.effective_chat.id,
 				reply_markup=inline_buttons,
 		)
+
 		return NEXT
+
+	@log_error
+	def viewlist_detail_handler(self, update: Update, context: CallbackContext):
+
+		movie_id = context.user_data[DETAIL_VIEW]
+		text_detail_movie = self.cinema.movie_detail(movie_id)
+		buttons = [('Добавить в опрос', 'add'),
+				   ('Посмотрели', 'watched'),
+				   ('Заебись инфа', 'close')]
+
+		inline_buttons = InlineKeyboardMarkup(
+				inline_keyboard=[
+
+					[InlineKeyboardButton(text=f"{x[0]}", callback_data=x[1])] for x in
+					buttons
+
+				],
+		)
+
+		context.bot.send_message(
+				text=text_detail_movie,
+				chat_id=update.effective_chat.id,
+				reply_markup=inline_buttons,
+		)
+		return FINAL_VIEW
+
+	def viewlist_filnal_handler(self, update: Update, context: CallbackContext):
+		col_detail = update.callback_query.data
+		movie_id = context.user_data[DETAIL_VIEW]
+		if col_detail == 'close':
+			return ConversationHandler.END
+		elif col_detail == 'add':
+			message = self.cinema.to_poll(movie_id)
+		elif col_detail == 'watched':
+			message = self.cinema.mark_viewed(movie_id)
+
+		context.bot.send_message(
+				text=message,
+				chat_id=update.effective_chat.id,
+		)
+
+		return ConversationHandler.END
 
 	@log_error
 	def viewlist_all_handler(self, update: Update, context: CallbackContext):
@@ -260,6 +310,12 @@ class newVersionBot(BotSetting):
 					],
 					VIEW_ALL: [
 						CallbackQueryHandler(self.viewlist_all_handler, pass_user_data=True),
+					],
+					DETAIL_VIEW: [
+						CallbackQueryHandler(self.viewlist_detail_handler, pass_user_data=True),
+					],
+					FINAL_VIEW: [
+						CallbackQueryHandler(self.viewlist_filnal_handler, pass_user_data=True),
 					],
 
 				},
