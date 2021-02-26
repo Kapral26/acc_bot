@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+from datetime import date, timedelta
+
 from .config import *
 import psycopg2
 
@@ -44,6 +46,12 @@ class BotSetting:
 								 password=pg_connect['password'], host=pg_connect['host'])
 		self.cursor = self.conn.cursor()
 
+	def nextWednesday(self):
+		tdelta = timedelta(7)
+		td = date.today()
+		beforeStr = (td+timedelta(3-td.isoweekday()) + tdelta)
+		return date.strftime(beforeStr, '%d.%m.%Y')
+
 class workWithUser(BotSetting):
 	def __init__(self):
 		BotSetting.__init__(self)
@@ -63,6 +71,12 @@ class workWithUser(BotSetting):
 		self.conn.commit()
 		logging.info(f'В БД добавлен пользователь под ником "{user}"')
 		return self.cursor.fetchone()
+
+	def its_user(self, user):
+		sql = f"select u.username, r.role_name from users u join roles r on r.id = u.role where u.username = '{user}' and r.role_name = 'user'"
+		self.cursor.execute(sql)
+		result = self.cursor.fetchone()
+		return True if result else False
 
 
 

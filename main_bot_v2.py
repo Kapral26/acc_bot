@@ -4,7 +4,7 @@ from setting.bot_setting import BotSetting, workWithUser, log_error, logging, ch
 from setting.cinema import Cinema
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
-	ConversationHandler, Filters
+	ConversationHandler, Filters, PollAnswerHandler, PollHandler
 from telegram.utils.request import Request
 
 FIND_MOVIE, FIND_DONE = range(2)
@@ -262,6 +262,73 @@ class newVersionBot(BotSetting):
 
 		return ConversationHandler.END
 
+	@chk_user
+	@log_error
+	def create_poll_handler(self, update: Update, context: CallbackContext):
+		user_role = self.users.its_user(update.effective_user.username)
+		if user_role:
+			context.bot.send_message(
+					text=f'{update.effective_user.mention_html()}, ты челядь, негоже тебе опросы создавать',
+					chat_id=update.effective_chat.id,
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
+
+		questions = self.cinema.for_create_poll()
+		message = context.bot.send_poll(
+				update.effective_chat.id,
+				f"Псс, ребзи в среду({self.nextWednesday()}) собираемся,\nЧто будем смотреть?",
+				questions,
+				is_anonymous=False,
+				allows_multiple_answers=True,
+		)
+		# Save some info about the poll the bot_data for later use in receive_poll_answer
+		payload = {
+			message.poll.id: {
+				"questions": questions,
+				"message_id": message.message_id,
+				"chat_id": update.effective_chat.id,
+				"answers": 0,
+			}
+		}
+		context.bot.pin_chat_message(
+				chat_id = update.effective_chat.id,
+				message_id = message.message_id,
+				timeout = 7,
+		)
+		context.bot_data.update(payload)
+
+	def receive_poll_answer(self, update: Update, context: CallbackContext) -> None:
+		"""Summarize a users poll vote"""
+		answer = update.poll_answer
+		poll_id = answer.poll_id
+		try:
+			questions = context.bot_data[poll_id]["questions"]
+		# this means this poll answer update is from an old poll, we can't do our answering then
+		except KeyError:
+			return
+		selected_options = answer.option_ids
+		answer_string = ""
+		for question_id in selected_options:
+			if question_id != selected_options[-1]:
+				answer_string += questions[question_id] + " and "
+			else:
+				answer_string += questions[question_id]
+		context.bot.send_message(
+				context.bot_data[poll_id]["chat_id"],
+				f"{update.effective_user.mention_html()} выбрал {answer_string}!",
+				parse_mode=ParseMode.HTML,
+		)
+		context.bot_data[poll_id]["answers"] += 1
+		# Close poll after three participants voted
+		if context.bot_data[poll_id]["answers"] == 3:
+			context.bot.stop_poll(
+					context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
+			)
+
+	def pin_poll(self, update: Update, context: CallbackContext) -> None:
+		a = 1
+
 	@log_error
 	def main(self):
 		req = Request(
@@ -324,15 +391,46 @@ class newVersionBot(BotSetting):
 				],
 		)
 
+		create_poll_handler = ConversationHandler(
+				entry_points=[
+					# CallbackQueryHandler(self.start_handler, pass_user_data=True),
+					CommandHandler('create_poll', self.create_poll_handler, pass_user_data=True),
+				],
+				states={
+					NEXT: [
+						CallbackQueryHandler(self.viewlist_next_handler, pass_user_data=True),
+					],
+					# VIEW_ALL: [
+					# 	CallbackQueryHandler(self.viewlist_all_handler, pass_user_data=True),
+					# ],
+					# DETAIL_VIEW: [
+					# 	CallbackQueryHandler(self.viewlist_detail_handler, pass_user_data=True),
+					# ],
+					# FINAL_VIEW: [
+					# 	CallbackQueryHandler(self.viewlist_filnal_handler, pass_user_data=True),
+					# ],
+
+				},
+				fallbacks=[
+					CommandHandler('cancel', self.cancel_handler),
+				],
+		)
+
 		updater.dispatcher.add_handler(add_movie_handler)
 		updater.dispatcher.add_handler(viewlist_movie_handler)
+		updater.dispatcher.add_handler(create_poll_handler)
+		updater.dispatcher.add_handler(PollAnswerHandler(self.receive_poll_answer))
+		updater.dispatcher.add_handler(PollHandler(self.pin_poll))
 		updater.dispatcher.add_handler(CommandHandler('start', self.start_handler))
 		updater.dispatcher.add_handler(CommandHandler('help', self.help_handler))
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
 
 		# Начать бесконечную обработку входящих сообщений
-		updater.start_polling()
-		updater.idle()
+		try:
+			updater.start_polling()
+			updater.idle()
+		except:
+			pass
 
 
 if __name__ == '__main__':

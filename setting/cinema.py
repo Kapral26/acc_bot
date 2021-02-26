@@ -79,6 +79,10 @@ class Cinema(BotSetting):
         self.conn.commit()
         return "Фильм будет в след. опросе"
 
+    def for_create_poll(self):
+        sql = 'select c.title, c.movie_year from cinema c where c.poll is true '
+        self.cursor.execute(sql)
+        return [f'{x} ({y})' for x, y in self.cursor.fetchall()]
 
 
 if __name__ == '__main__':
