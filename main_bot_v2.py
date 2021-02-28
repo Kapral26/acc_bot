@@ -55,10 +55,11 @@ class newVersionBot(BotSetting):
 	@log_error
 	def normalno_handler(self, update: Update, context: CallbackContext):
 		update.message.reply_text(
-				'Пошел на хуй!\n'
+				f'{update.effective_user.mention_html()}, Пошел на хуй!\n'
 				'https://www.google.ru/maps/place/Nahui,+08270,+%D0%9F%D0%B5%D1%80%D1%83/@-14.4098416,-71.3077453,15z/data=!3m1!4b1!4m5!3m4!1s0x91692f289ed899f9:0x478a165988814b94!8m2!3d-14.4098412!4d-71.2989897',
-				parse_mode=ParseMode.MARKDOWN,
+				# parse_mode=ParseMode.MARKDOWN,
 				disable_web_page_preview=False,
+				parse_mode=ParseMode.HTML,
 		)
 
 	@chk_user
@@ -326,8 +327,6 @@ class newVersionBot(BotSetting):
 					context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
 			)
 
-	def pin_poll(self, update: Update, context: CallbackContext) -> None:
-		a = 1
 
 	@log_error
 	def main(self):
@@ -375,9 +374,6 @@ class newVersionBot(BotSetting):
 					NEXT: [
 						CallbackQueryHandler(self.viewlist_next_handler, pass_user_data=True),
 					],
-					VIEW_ALL: [
-						CallbackQueryHandler(self.viewlist_all_handler, pass_user_data=True),
-					],
 					DETAIL_VIEW: [
 						CallbackQueryHandler(self.viewlist_detail_handler, pass_user_data=True),
 					],
@@ -393,23 +389,12 @@ class newVersionBot(BotSetting):
 
 		create_poll_handler = ConversationHandler(
 				entry_points=[
-					# CallbackQueryHandler(self.start_handler, pass_user_data=True),
 					CommandHandler('create_poll', self.create_poll_handler, pass_user_data=True),
 				],
 				states={
 					NEXT: [
 						CallbackQueryHandler(self.viewlist_next_handler, pass_user_data=True),
 					],
-					# VIEW_ALL: [
-					# 	CallbackQueryHandler(self.viewlist_all_handler, pass_user_data=True),
-					# ],
-					# DETAIL_VIEW: [
-					# 	CallbackQueryHandler(self.viewlist_detail_handler, pass_user_data=True),
-					# ],
-					# FINAL_VIEW: [
-					# 	CallbackQueryHandler(self.viewlist_filnal_handler, pass_user_data=True),
-					# ],
-
 				},
 				fallbacks=[
 					CommandHandler('cancel', self.cancel_handler),
@@ -420,7 +405,6 @@ class newVersionBot(BotSetting):
 		updater.dispatcher.add_handler(viewlist_movie_handler)
 		updater.dispatcher.add_handler(create_poll_handler)
 		updater.dispatcher.add_handler(PollAnswerHandler(self.receive_poll_answer))
-		updater.dispatcher.add_handler(PollHandler(self.pin_poll))
 		updater.dispatcher.add_handler(CommandHandler('start', self.start_handler))
 		updater.dispatcher.add_handler(CommandHandler('help', self.help_handler))
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
