@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from collections import Counter, OrderedDict
+
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
+from telebot.apihelper import get_chat_members_count
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
-	ConversationHandler, Filters, PollAnswerHandler, PollHandler
+	ConversationHandler, Filters, PollAnswerHandler
 from telegram.utils.request import Request
 
 FIND_MOVIE, FIND_DONE = range(2)
@@ -41,14 +44,17 @@ class newVersionBot(BotSetting):
 	def start_handler(self, update: Update, context: CallbackContext):
 		""" Не относится к сценарию диалога, но создаёт начальные inline-кнопки
         """
+		self.count_users = get_chat_members_count(
+				token=self.tg_token,
+				chat_id=update.message.chat_id,
+		)
 
 		update.message.reply_text(
-				'Бот АлкоКиноКлуба\n'
+				f'Бот АлкоКиноКлуба\nКоличество участников: {self.count_users}\n'
 				'Не забудь пройти по направлению\n'
 				'Чтобы посмотреть список команд:\n'
 				'/help',
 				parse_mode=ParseMode.HTML,
-				# reply_markup=inline_buttons,
 		)
 
 	@chk_user
@@ -87,18 +93,15 @@ class newVersionBot(BotSetting):
 
 		self.movies = self.cinema.find_cinema(context.user_data[FIND_MOVIE])
 
-		list_text = u'{0}. Название: "{1}"\nГод выхода фильма: {2}\nНазвание в оригинале: {3}\n\n'
+		find_keyboard = [
+			[InlineKeyboardButton(text=f"{x['title']}({x['year']})", callback_data=x['id'])] for x in
+			self.movies
+		]
 
-		# Список найденыйх фильмов для вывода в бот
-		text = ''.join([list_text.format(x[u'id'], x['title'], x['year'], x['title_en']) for x in self.movies])
+		find_keyboard.append([InlineKeyboardButton(text='Отмена', callback_data='cancel')])
 
 		inline_buttons = InlineKeyboardMarkup(
-				inline_keyboard=[
-
-					[InlineKeyboardButton(text=f"{x['title']}({x['year']})", callback_data=x['id'])] for x in
-					self.movies
-
-				],
+				inline_keyboard=find_keyboard,
 		)
 
 		update.message.reply_text(
@@ -282,6 +285,8 @@ class newVersionBot(BotSetting):
 				questions,
 				is_anonymous=False,
 				allows_multiple_answers=True,
+				# open_period=30,
+				close_date=self.nextMonday(),
 		)
 		# Save some info about the poll the bot_data for later use in receive_poll_answer
 		payload = {
@@ -293,16 +298,22 @@ class newVersionBot(BotSetting):
 			}
 		}
 		context.bot.pin_chat_message(
-				chat_id = update.effective_chat.id,
-				message_id = message.message_id,
-				timeout = 7,
+				chat_id=update.effective_chat.id,
+				message_id=message.message_id,
 		)
 		context.bot_data.update(payload)
 
 	def receive_poll_answer(self, update: Update, context: CallbackContext) -> None:
 		"""Summarize a users poll vote"""
+
+		def cinema4watch(list):
+			dict_answerrs = Counter(list)
+			ord_dict_answerrs = OrderedDict(dict_answerrs)
+			return ([x for x in ord_dict_answerrs][:2])
+
 		answer = update.poll_answer
 		poll_id = answer.poll_id
+		list_answer = list()
 		try:
 			questions = context.bot_data[poll_id]["questions"]
 		# this means this poll answer update is from an old poll, we can't do our answering then
@@ -311,10 +322,12 @@ class newVersionBot(BotSetting):
 		selected_options = answer.option_ids
 		answer_string = ""
 		for question_id in selected_options:
+			list_answer.append(questions[question_id])
 			if question_id != selected_options[-1]:
 				answer_string += questions[question_id] + " and "
 			else:
 				answer_string += questions[question_id]
+
 		context.bot.send_message(
 				context.bot_data[poll_id]["chat_id"],
 				f"{update.effective_user.mention_html()} выбрал {answer_string}!",
@@ -322,11 +335,20 @@ class newVersionBot(BotSetting):
 		)
 		context.bot_data[poll_id]["answers"] += 1
 		# Close poll after three participants voted
-		if context.bot_data[poll_id]["answers"] == 3:
+		if context.bot_data[poll_id]["answers"] == 5:
+			list_cinema = ''.join([f'{x}\n' for x in cinema4watch(list_answer)])
+			context.bot.send_message(
+					text=f'Опрос закрыт!, в след. среду({self.nextWednesday()}) смотрим:\n{list_cinema}',
+					chat_id=context.bot_data[poll_id]["chat_id"],
+			),
+
+			context.bot.unpin_all_chat_messages(
+					chat_id=context.bot_data[poll_id]["chat_id"]
+			)
+
 			context.bot.stop_poll(
 					context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
 			)
-
 
 	@log_error
 	def main(self):

@@ -52,6 +52,12 @@ class BotSetting:
 		beforeStr = (td+timedelta(3-td.isoweekday()) + tdelta)
 		return date.strftime(beforeStr, '%d.%m.%Y')
 
+	def nextMonday(self):
+		tdelta = timedelta(7)
+		td = date.today()
+		beforeStr = (td+timedelta(1-td.isoweekday()) + tdelta)
+		return date.strftime(beforeStr, '%d.%m.%Y')
+
 class workWithUser(BotSetting):
 	def __init__(self):
 		BotSetting.__init__(self)
