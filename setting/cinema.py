@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 
 from kinopoisk.movie import Movie
 
-from .bot_setting import BotSetting
-
+from .bot_setting import BotSetting, logging
 
 class Cinema(BotSetting):
 	def __init__(self):
@@ -44,12 +44,16 @@ class Cinema(BotSetting):
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
-							{is_watch}
+							{is_watch} if is  
                             )
                     """
+			try:
+				self.cursor.execute(sql)
+				self.conn.commit()
+			except Exception as e:
+				self.cursor.execute('END TRANSACTION;')
+				logging.error(f'{e}\n{sql}')
 
-			self.cursor.execute(sql)
-			self.conn.commit()
 		return True
 
 	def view_list(self):
