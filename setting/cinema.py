@@ -28,9 +28,12 @@ class Cinema(BotSetting):
                         where title = '{cinema_dict['title']}' and
                         title_en = '{cinema_dict['title_en']}' and
                         movie_year = '{cinema_dict['year']}'"""
-		self.cursor.execute(sql_chk)
-		if self.cursor.fetchone():
-			return False
+		try:
+			self.cursor.execute(sql_chk)
+			if self.cursor.fetchone():
+				return False
+		except:
+			self.cursor.execute('END TRANSACTION;')
 
 		if cinema_dict:
 			sql = f"""insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
