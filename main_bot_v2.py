@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import Counter, OrderedDict
+from datetime import datetime, timedelta
 
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
@@ -10,7 +11,7 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, Message
 	ConversationHandler, Filters, PollAnswerHandler
 from telegram.utils.request import Request
 
-FIND_MOVIE, FIND_DONE = range(2)
+FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
 
 CALLBACK_BEGIN = 'x1'
@@ -21,6 +22,7 @@ class newVersionBot(BotSetting):
 		BotSetting.__init__(self)
 		self.cinema = Cinema()
 		self.users = workWithUser()
+		self.chatID = None
 
 	@chk_user
 	@log_error
@@ -44,18 +46,22 @@ class newVersionBot(BotSetting):
 	def start_handler(self, update: Update, context: CallbackContext):
 		""" Не относится к сценарию диалога, но создаёт начальные inline-кнопки
         """
+		self.chatID = update.message.chat_id
 		self.count_users = get_chat_members_count(
 				token=self.tg_token,
 				chat_id=update.message.chat_id,
 		)
 
-		update.message.reply_text(
-				f'Бот АлкоКиноКлуба\nКоличество участников: {self.count_users}\n'
-				'Не забудь пройти по направлению\n'
-				'Чтобы посмотреть список команд:\n'
-				'/help',
+		context.bot.send_message(
+				text=f'Бот АлкоКиноКлуба\nКоличество участников: {self.count_users}\n'
+					 'Не забудь пройти по направлению\n'
+					 'Чтобы посмотреть список команд:\n'
+					 '/help',
 				parse_mode=ParseMode.HTML,
+				chat_id=self.chatID,
 		)
+
+		a = 1
 
 	@chk_user
 	@log_error
@@ -89,7 +95,6 @@ class newVersionBot(BotSetting):
 			return ConversationHandler.END
 
 		context.user_data[FIND_MOVIE] = update.message.text
-		# logger.info('user_data: %s', context.user_data)
 
 		self.movies = self.cinema.find_cinema(context.user_data[FIND_MOVIE])
 
@@ -106,7 +111,6 @@ class newVersionBot(BotSetting):
 
 		update.message.reply_text(
 				text=f'Выбери фильм, который необходимо добавить:',
-				# text=f'Выбери id фильма, которые необходимо добавить \n {text}',
 				reply_markup=inline_buttons,
 		)
 		return FIND_DONE
@@ -126,17 +130,45 @@ class newVersionBot(BotSetting):
 		movie_data['user_pk'] = self.users.chk_users(user=update.effective_chat.username)
 		context.user_data[FIND_DONE] = movie_data
 
-		save_result = self.cinema.insert_cinema(movie_data)
+		inline_buttons = InlineKeyboardMarkup(
+				inline_keyboard=[
+					[InlineKeyboardButton(text='Добавить в список на просмотр', callback_data='add_list_view')],
+					[InlineKeyboardButton(text='Посмотрели мы фильм сей', callback_data='was_viewed')]
+				],
+		)
 
-		if save_result:
-			text_done = f'''Все данные успешно сохранены!\nФильм: "{movie_data['title']}"\nдобавлен в список'''
-		else:
-			text_done = f'''Фильм: "{movie_data['title']}" ранее был добавлен'''
+		context.bot.send_message(
+				chat_id=update.effective_chat.id,
+				text=f"""Че по фильму "{movie_data['title']} ({movie_data['year']})" ?""",
+				reply_markup=inline_buttons,
+		)
 
+		return FINNALY_DONE
+
+	def finally_find_done(self, update: Update, context: CallbackContext):
+
+		movie_data = context.user_data[FIND_DONE]
+
+		if update.callback_query.data == 'add_list_view':
+
+			save_result = self.cinema.insert_cinema(movie_data)
+
+			if save_result:
+				text_done = f'''Все данные успешно сохранены!\nФильм: "{movie_data['title']}"\nдобавлен в список'''
+			else:
+				text_done = f'''Фильм: "{movie_data['title']}" ранее был добавлен'''
+
+		if update.callback_query.data == 'was_viewed':
+
+			save_result = self.cinema.insert_cinema(movie_data, is_watch=True)
+
+			if save_result:
+				text_done = f'''Пожайлуй да\nФильм: "{movie_data['title']}"\nмы уже смотрели'''
+			else:
+				text_done = f'''Фильм: "{movie_data['title']}" ранее был добавлен'''
 		# Завершить диалог
 		update.effective_message.reply_text(
 				text=text_done,
-
 		)
 		return ConversationHandler.END
 
@@ -303,17 +335,17 @@ class newVersionBot(BotSetting):
 		)
 		context.bot_data.update(payload)
 
+	def cinema4watch(self, list):
+		dict_answerrs = Counter(list)
+		ord_dict_answerrs = OrderedDict(dict_answerrs)
+		return ([x for x in ord_dict_answerrs][:2])
+
 	def receive_poll_answer(self, update: Update, context: CallbackContext) -> None:
 		"""Summarize a users poll vote"""
 
-		def cinema4watch(list):
-			dict_answerrs = Counter(list)
-			ord_dict_answerrs = OrderedDict(dict_answerrs)
-			return ([x for x in ord_dict_answerrs][:2])
-
 		answer = update.poll_answer
 		poll_id = answer.poll_id
-		list_answer = list()
+		self.list_answer = list()
 		try:
 			questions = context.bot_data[poll_id]["questions"]
 		# this means this poll answer update is from an old poll, we can't do our answering then
@@ -322,7 +354,7 @@ class newVersionBot(BotSetting):
 		selected_options = answer.option_ids
 		answer_string = ""
 		for question_id in selected_options:
-			list_answer.append(questions[question_id])
+			self.list_answer.append(questions[question_id])
 			if question_id != selected_options[-1]:
 				answer_string += questions[question_id] + " and "
 			else:
@@ -335,10 +367,10 @@ class newVersionBot(BotSetting):
 		)
 		context.bot_data[poll_id]["answers"] += 1
 		# Close poll after three participants voted
-		if context.bot_data[poll_id]["answers"] == 5:
-			list_cinema = ''.join([f'{x}\n' for x in cinema4watch(list_answer)])
+		if context.bot_data[poll_id]["answers"] == 20:
+			self.list_cinema = ''.join([f'{x}\n' for x in self.cinema4watch(self.list_answer)])
 			context.bot.send_message(
-					text=f'Опрос закрыт!, в след. среду({self.nextWednesday()}) смотрим:\n{list_cinema}',
+					text=f'Опрос закрыт!, в след. среду({self.nextWednesday()}) смотрим:\n{self.list_cinema}',
 					chat_id=context.bot_data[poll_id]["chat_id"],
 			),
 
@@ -348,6 +380,60 @@ class newVersionBot(BotSetting):
 
 			context.bot.stop_poll(
 					context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
+			)
+
+	@log_error
+	def create_poll_income(self, update: Update, context: CallbackContext):
+		questions = ["Да, я буду", "Да буду я скорее всего", "Нет, меня не будет"]
+		message = context.bot.send_poll(
+				update.effective_chat.id,
+				f"Кого ждать в среду({self.nextWednesday()})?",
+				questions,
+				is_anonymous=False,
+				allows_multiple_answers=False,
+				# open_period=30,
+				close_date=self.nextWednesday(),
+		)
+		payload = {
+			message.poll.id: {
+				"questions": questions,
+				"message_id": message.message_id,
+				"chat_id": update.effective_chat.id,
+				"answers": 0,
+			}
+		}
+		context.bot_data.update(payload)
+		# Save some info about the poll the bot_data for later use in receive_poll_answer
+		context.bot.pin_chat_message(
+				chat_id=update.effective_chat.id,
+				message_id=message.message_id,
+		)
+
+	@log_error
+	def check_date(self, update: Update, context: CallbackContext):
+
+		today = datetime.today() + timedelta(1)
+		tomorow = today.strftime('%d.%m.%Y')
+
+		if tomorow == self.nextTuesday() and context.bot_data:
+			last_poll_id = max(context.bot_data)
+			context.bot.unpin_all_chat_messages(
+					chat_id=update.message.chat_id
+			)
+
+			context.bot.stop_poll(
+					context.bot_data[last_poll_id]["chat_id"], context.bot_data[last_poll_id]["message_id"]
+			)
+
+			self.list_cinema = ''.join([f'{x}\n' for x in self.cinema4watch(self.list_answer)])
+			context.bot.send_message(
+					text=f'Опрос закрыт!\n В след. среду({self.nextWednesday()}) смотрим:\n{self.list_cinema}',
+					chat_id=context.bot_data[last_poll_id]["chat_id"],
+			)
+
+			context.bot.pin_chat_message(
+					chat_id=update.effective_chat.id,
+					message_id=update.message.message_id + 1,
 			)
 
 	@log_error
@@ -371,7 +457,6 @@ class newVersionBot(BotSetting):
 		# Навесить обработчики команд
 		add_movie_handler = ConversationHandler(
 				entry_points=[
-					# CallbackQueryHandler(self.start_handler, pass_user_data=True),
 					CommandHandler('add', self.add_handler, pass_user_data=True),
 				],
 				states={
@@ -380,7 +465,10 @@ class newVersionBot(BotSetting):
 					],
 					FIND_DONE: [
 						CallbackQueryHandler(self.find_done_handler, pass_user_data=True),
-					]
+					],
+					FINNALY_DONE: [
+						CallbackQueryHandler(self.finally_find_done, pass_user_data=True),
+					],
 				},
 				fallbacks=[
 					CommandHandler('cancel', self.cancel_handler),
@@ -402,21 +490,6 @@ class newVersionBot(BotSetting):
 					FINAL_VIEW: [
 						CallbackQueryHandler(self.viewlist_filnal_handler, pass_user_data=True),
 					],
-
-				},
-				fallbacks=[
-					CommandHandler('cancel', self.cancel_handler),
-				],
-		)
-
-		create_poll_handler = ConversationHandler(
-				entry_points=[
-					CommandHandler('create_poll', self.create_poll_handler, pass_user_data=True),
-				],
-				states={
-					NEXT: [
-						CallbackQueryHandler(self.viewlist_next_handler, pass_user_data=True),
-					],
 				},
 				fallbacks=[
 					CommandHandler('cancel', self.cancel_handler),
@@ -425,11 +498,13 @@ class newVersionBot(BotSetting):
 
 		updater.dispatcher.add_handler(add_movie_handler)
 		updater.dispatcher.add_handler(viewlist_movie_handler)
-		updater.dispatcher.add_handler(create_poll_handler)
+		updater.dispatcher.add_handler(CommandHandler('create_poll', self.create_poll_handler))
+		updater.dispatcher.add_handler(CommandHandler('who_income', self.create_poll_income))
 		updater.dispatcher.add_handler(PollAnswerHandler(self.receive_poll_answer))
 		updater.dispatcher.add_handler(CommandHandler('start', self.start_handler))
 		updater.dispatcher.add_handler(CommandHandler('help', self.help_handler))
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
+		updater.dispatcher.add_handler(MessageHandler(Filters.text, self.check_date))
 
 		# Начать бесконечную обработку входящих сообщений
 		try:

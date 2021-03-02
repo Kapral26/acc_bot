@@ -2,14 +2,16 @@
 import logging
 from datetime import date, timedelta
 
-from .config import *
 import psycopg2
 
+from .config import *
+
 # Логирование
-logging.basicConfig(filename="acc_bot.log", level=logging.INFO, format='%(levelname)s %(filename)s %(module)s.%(funcName)s | %(asctime)s: %(message)s', )
+logging.basicConfig(filename="acc_bot.log", level=logging.INFO,
+					format='%(levelname)s %(filename)s %(module)s.%(funcName)s | %(asctime)s: %(message)s', )
+
 
 def log_error(f):
-
 	def inner(*args, **kwargs):
 		try:
 			return f(*args, **kwargs)
@@ -18,6 +20,7 @@ def log_error(f):
 			logging.error(f'{f.__name__}: {e}'.encode('utf8'))
 
 	return inner
+
 
 @log_error
 def chk_user(f):
@@ -43,20 +46,33 @@ class BotSetting:
 
 	def pg_connect(self):
 		self.conn = psycopg2.connect(dbname=pg_connect['dbname'], user=pg_connect['user'],
-								 password=pg_connect['password'], host=pg_connect['host'])
+									 password=pg_connect['password'], host=pg_connect['host'])
 		self.cursor = self.conn.cursor()
 
-	def nextWednesday(self):
-		tdelta = timedelta(7)
+	def next_closest(self, search_day):
 		td = date.today()
-		beforeStr = (td+timedelta(3-td.isoweekday()) + tdelta)
-		return date.strftime(beforeStr, '%d.%m.%Y')
+		from_day = td.isoweekday()
+		different_days = search_day - from_day if from_day < search_day else 7 - from_day + search_day
+		return td + timedelta(days=different_days)
+
+
 
 	def nextMonday(self):
-		tdelta = timedelta(7)
-		td = date.today()
-		beforeStr = (td+timedelta(1-td.isoweekday()) + tdelta)
-		return date.strftime(beforeStr, '%d.%m.%Y')
+		return date.strftime(self.next_closest(1), '%d.%m.%Y')
+
+	def nextTuesday(self):
+		return date.strftime(self.next_closest(2), '%d.%m.%Y')
+
+	def nextWednesday(self):
+		return date.strftime(self.next_closest(3), '%d.%m.%Y')
+
+	def nextThursday(self):
+		return date.strftime(self.next_closest(4), '%d.%m.%Y')
+
+
+	def nextFriday(self):
+		return date.strftime(self.next_closest(5), '%d.%m.%Y')
+
 
 class workWithUser(BotSetting):
 	def __init__(self):
@@ -83,7 +99,6 @@ class workWithUser(BotSetting):
 		self.cursor.execute(sql)
 		result = self.cursor.fetchone()
 		return True if result else False
-
 
 
 if __name__ == '__main__':
