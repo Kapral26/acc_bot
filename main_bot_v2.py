@@ -31,7 +31,7 @@ class newVersionBot(BotSetting):
 
 		update.message.reply_text(
 				'Cписок команд:\n'
-				'/help выведет тебе все необходимые команды\n'
+				'/help - выведет тебе все необходимые команды\n'
 				'/add добавить фильм в лист ожидания\n'
 				'/viewlist - Вывести фильмы из листа ожидания\n'
 				'/normalno\n'
@@ -379,6 +379,15 @@ class newVersionBot(BotSetting):
 
 	@log_error
 	def create_poll_income(self, update: Update, context: CallbackContext):
+		user_role = self.users.its_user(update.effective_user.username)
+		if user_role:
+			context.bot.send_message(
+					text=f'{update.effective_user.mention_html()}, ты челядь, негоже тебе опросы создавать',
+					chat_id=update.effective_chat.id,
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
+
 		questions = ["Да, я буду", "Да буду я скорее всего", "Нет, меня не будет"]
 		message = context.bot.send_poll(
 				update.effective_chat.id,
