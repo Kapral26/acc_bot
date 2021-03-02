@@ -44,7 +44,7 @@ class Cinema(BotSetting):
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
-							{is_watch} if is  
+							'{is_watch}'
                             )
                     """
 			try:
