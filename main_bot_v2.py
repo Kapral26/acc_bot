@@ -22,6 +22,7 @@ class newVersionBot(BotSetting):
 		self.cinema = Cinema()
 		self.users = workWithUser()
 		self.chatID = None
+		self.movies = None
 
 	@chk_user
 	@log_error
@@ -165,6 +166,7 @@ class newVersionBot(BotSetting):
 		update.effective_message.reply_text(
 				text=text_done,
 		)
+		self.movies = None
 		return ConversationHandler.END
 
 	@log_error
