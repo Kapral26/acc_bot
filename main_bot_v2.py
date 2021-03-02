@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
-from telebot.apihelper import get_chat_members_count
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
 	ConversationHandler, Filters, PollAnswerHandler
@@ -47,13 +46,9 @@ class newVersionBot(BotSetting):
 		""" Не относится к сценарию диалога, но создаёт начальные inline-кнопки
         """
 		self.chatID = update.message.chat_id
-		self.count_users = get_chat_members_count(
-				token=self.tg_token,
-				chat_id=update.message.chat_id,
-		)
 
 		context.bot.send_message(
-				text=f'Бот АлкоКиноКлуба\nКоличество участников: {self.count_users}\n'
+				text=f'Бот АлкоКиноКлуба\n'
 					 'Не забудь пройти по направлению\n'
 					 'Чтобы посмотреть список команд:\n'
 					 '/help',
