@@ -35,8 +35,8 @@ class newVersionBot(BotSetting):
 				'/add добавить фильм в лист ожидания\n'
 				'/viewlist - Вывести фильмы из листа ожидания\n'
 				'/normalno\n'
-				'/dowatch - Вывести 2 фильма из списка\n'
-				'/iswatch - Отметить фильм, как просмотренный\n',
+				'/create_poll - Создать опрос, какой фильм будем смотреть\n'
+				'/who_income - Создать опрос, кто планирует прийти\n',
 				parse_mode=ParseMode.HTML,
 		)
 
