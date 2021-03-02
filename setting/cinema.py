@@ -16,10 +16,11 @@ class Cinema(BotSetting):
 		for id, movie in enumerate(movies):
 			tmp_dict = {u'id': id,
 						u'title': movie.title,
-						u'year': movie.year,
-						u'title_en': movie.title_en.replace("'", "`"),
-						u'runtime': movie.runtime,
-						u'rating': movie.rating}
+						u'year': movie.year if movie.year else 'null',
+						u'title_en': movie.title_en.replace("'", "`") if movie.title_en else 'null',
+						u'runtime': movie.runtime if movie.runtime else 'null',
+						u'rating': movie.rating if movie.rating else 'null'
+						}
 			self.list_movies.append(tmp_dict)
 		return self.list_movies
 
