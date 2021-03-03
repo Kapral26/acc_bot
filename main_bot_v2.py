@@ -90,9 +90,8 @@ class newVersionBot(BotSetting):
 		if update.message.text == '/cancel':
 			return ConversationHandler.END
 
-		context.user_data[FIND_MOVIE] = update.message.text
 
-		self.movies = self.cinema.find_cinema(context.user_data[FIND_MOVIE])
+		self.movies = self.cinema.find_cinema(update.message.text)
 
 		find_keyboard = [
 			[InlineKeyboardButton(text=f"{x['title']}({x['year']})", callback_data=x['id'])] for x in
@@ -166,7 +165,6 @@ class newVersionBot(BotSetting):
 		update.effective_message.reply_text(
 				text=text_done,
 		)
-		self.movies = None
 		return ConversationHandler.END
 
 	@log_error

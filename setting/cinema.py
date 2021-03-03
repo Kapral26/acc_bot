@@ -8,10 +8,11 @@ from .bot_setting import BotSetting, logging
 class Cinema(BotSetting):
 	def __init__(self):
 		BotSetting.__init__(self)
-		self.list_movies = list()
+
 
 	def find_cinema(self, cinema_title):
 		movies = Movie.objects.search(f'{cinema_title}')
+		list_movies = list()
 
 		for id, movie in enumerate(movies):
 			tmp_dict = {u'id': id,
@@ -21,8 +22,8 @@ class Cinema(BotSetting):
 						u'runtime': movie.runtime if movie.runtime else 'null',
 						u'rating': movie.rating if movie.rating else 'null'
 						}
-			self.list_movies.append(tmp_dict)
-		return self.list_movies
+			list_movies.append(tmp_dict)
+		return list_movies
 
 	def insert_cinema(self, cinema_dict: None, is_watch=False):
 		sql_chk = f"""SELECT * FROM cinema
