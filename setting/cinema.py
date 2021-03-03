@@ -38,7 +38,7 @@ class Cinema(BotSetting):
 			self.cursor.execute('END TRANSACTION;')
 
 		if cinema_dict:
-			sql = f"""insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
+			sql = f"""update or insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
                         values(
                             '{cinema_dict['title']}',
                             '{cinema_dict['year']}',
@@ -48,6 +48,7 @@ class Cinema(BotSetting):
                             {cinema_dict['user_pk']},
 							{is_watch}
                             )
+						ON CONFLICT (title, movie_year, title_en) DO UPDATE SET watch_status = {is_watch}
                     """
 			try:
 				self.cursor.execute(sql)
@@ -55,6 +56,7 @@ class Cinema(BotSetting):
 			except Exception as e:
 				self.cursor.execute('END TRANSACTION;')
 				logging.error(f'{e}\n{sql}')
+				return False
 
 		return True
 
