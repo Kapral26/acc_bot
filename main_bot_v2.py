@@ -147,19 +147,20 @@ class newVersionBot(BotSetting):
 
 			save_result = self.cinema.insert_cinema(movie_data)
 
-			if save_result:
-				text_done = f'''Все данные успешно сохранены!\nФильм: "{movie_data['title']}"\nдобавлен в список'''
+			if isinstance(save_result, str):
+				text_done = save_result
 			else:
-				text_done = f'''Фильм: "{movie_data['title']}" ранее был добавлен'''
+				text_done = f'''Все данные успешно сохранены!\nФильм: "{movie_data['title']}"\nдобавлен в список'''
 
 		if update.callback_query.data == 'was_viewed':
 
 			save_result = self.cinema.insert_cinema(movie_data, is_watch=True)
 
-			if save_result:
-				text_done = f'''Пожайлуй да\nФильм: "{movie_data['title']}"\nмы уже смотрели'''
+			if isinstance(save_result, str):
+				text_done = save_result
 			else:
-				text_done = f'''Фильм: "{movie_data['title']}" ранее был добавлен'''
+				text_done = f'''Пожайлуй да\nФильм: "{movie_data['title']}"\nмы уже смотрели'''
+
 		# Завершить диалог
 		update.effective_message.reply_text(
 				text=text_done,

@@ -34,9 +34,10 @@ class Cinema(BotSetting):
 		try:
 			self.cursor.execute(sql_chk)
 			if self.cursor.fetchone():
-				return False
+				return f'''Фильм: "{cinema_dict['title']}" ранее был добавлен'''
 		except:
 			self.cursor.execute('END TRANSACTION;')
+			return 'Произошла какая-то хуйня невообразимая\nПопробуй по новой'
 
 		if cinema_dict:
 			sql = f"""insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
@@ -57,7 +58,7 @@ class Cinema(BotSetting):
 			except Exception as e:
 				self.cursor.execute('END TRANSACTION;')
 				logging.error(f'{e}\n{sql}')
-				return False
+				return 'Произошла какая-то хуйня невообразимая\nПопробуй по новой'
 
 		return True
 
