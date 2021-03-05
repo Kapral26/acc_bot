@@ -29,15 +29,16 @@ class Cinema(BotSetting):
 	def insert_cinema(self, cinema_dict: None, is_watch=False):
 		sql_chk = f"""SELECT * FROM cinema
                         where title = '{cinema_dict['title']}' and
-                        title_en = '{cinema_dict['title_en']}' and
+                        title_en = {cinema_dict['title_en']} and
                         movie_year = '{cinema_dict['year']}'"""
 		try:
 			self.cursor.execute(sql_chk)
 			if self.cursor.fetchone():
 				return f'''Фильм: "{cinema_dict['title']}" ранее был добавлен'''
-		except:
+		except Exception as e:
+			logging.error(f'{e}\n{sql_chk}')
 			self.cursor.execute('END TRANSACTION;')
-			return 'Произошла какая-то хуйня невообразимая\nПопробуй по новой'
+			return 'Произошла при проверке какая-то хуйня невообразимая\nПопробуй по новой'
 
 		if cinema_dict:
 			sql = f"""insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
@@ -58,7 +59,7 @@ class Cinema(BotSetting):
 			except Exception as e:
 				self.cursor.execute('END TRANSACTION;')
 				logging.error(f'{e}\n{sql}')
-				return 'Произошла какая-то хуйня невообразимая\nПопробуй по новой'
+				return 'Произошла при добавлении какая-то хуйня невообразимая\nПопробуй по новой'
 
 		return True
 
