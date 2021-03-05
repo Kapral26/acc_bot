@@ -38,7 +38,7 @@ class Cinema(BotSetting):
 			self.cursor.execute('END TRANSACTION;')
 
 		if cinema_dict:
-			sql = f"""update or insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
+			sql = f"""insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
                         values(
                             '{cinema_dict['title']}',
                             '{cinema_dict['year']}',
