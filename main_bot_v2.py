@@ -480,8 +480,10 @@ class newVersionBot(BotSetting):
 			)
 		else:
 			text = self.prepare_stat_text(text_to_message)
-			update.message.reply_text(
+
+			context.bot.send_message(
 					text=text,
+					chat_id=update.effective_chat.id,
 					parse_mode=ParseMode.HTML,
 			)
 

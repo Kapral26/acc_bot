@@ -88,7 +88,7 @@ class BotSetting:
 		elif commands.get('-y'):
 			m = commands.get('-m') if commands.get('-m') else False
 			y = commands.get('-y')
-			if m not in [f'{x}' for x in range(1,13)]:
+			if m and m not in [f'{x}' for x in range(1,13)]:
 				return 'Error', 'Нет блять такого месяца, говно'
 			elif y not in [f'{x}' for x in range(2018, 2033)]:
 				return 'Error', 'Ну и что ты ввел? ишак'
@@ -113,7 +113,7 @@ class BotSetting:
 
 	def prepare_stat_text(self, dict_movies):
 		cinema_list = '\n'.join([x['title'] for x in dict_movies])
-		count_movies = len(cinema_list)
+		count_movies = len(dict_movies)
 		count_min = sum([x['runtime'] for x in dict_movies])
 		count_hours = f"{count_min // 60} час(а\ов) {count_min % 60} мин."
 		text = f"""
