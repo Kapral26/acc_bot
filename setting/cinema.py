@@ -15,10 +15,11 @@ class Cinema(BotSetting):
 		list_movies = list()
 
 		for id, movie in enumerate(movies):
+			movie.title_en = movie.title_en.replace("'", "`")
 			tmp_dict = {u'id': id,
 						u'title': movie.title,
 						u'year': movie.year if movie.year else 'null',
-						u'title_en': movie.title_en.replace("'", "`") if movie.title_en else 'null',
+						u'title_en': f"'{movie.title_en}'" if movie.title_en else 'null',
 						u'runtime': movie.runtime if movie.runtime else 'null',
 						u'rating': movie.rating if movie.rating else 'null'
 						}
@@ -41,8 +42,8 @@ class Cinema(BotSetting):
 			sql = f"""insert into cinema(title, movie_year, title_en, runtime, rating, added, watch_status)
                         values(
                             '{cinema_dict['title']}',
-                            '{cinema_dict['year']}',
-                            '{cinema_dict['title_en']}',
+                            {cinema_dict['year']},
+                            {cinema_dict['title_en']},
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
