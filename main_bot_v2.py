@@ -305,6 +305,13 @@ class newVersionBot(BotSetting):
 			return ConversationHandler.END
 
 		questions = self.cinema.for_create_poll()
+		if len(questions) < 2:
+			context.bot.send_message(
+					text="Нехуй Вам любезный, предложить.\n воспользуйтесь командой \\add",
+					chat_id=update.effective_chat.id,
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
 		message = context.bot.send_poll(
 				update.effective_chat.id,
 				f"Псс, ребзи в среду({self.nextWednesday()}) собираемся,\nЧто будем смотреть?",
@@ -375,6 +382,7 @@ class newVersionBot(BotSetting):
 			context.bot.stop_poll(
 					context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
 			)
+			self.cinema.next_view(self.nextWednesday(), self.list_answer)
 
 	@log_error
 	def create_poll_income(self, update: Update, context: CallbackContext):

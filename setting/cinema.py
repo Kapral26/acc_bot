@@ -111,6 +111,13 @@ class Cinema(BotSetting):
 			statis_dict = f'Бля, кажись нет данных за {month} месяц {year} года'
 		return statis_dict
 
+	def next_view(self, day, list_movie):
+		for movie in list_movie:
+			movie = movie.split("(")[0].strip()
+			sql = f"UPDATE cinema SET watch_date = '{day}' where title = '{movie}'"
+			self.cursor.execute(sql.format(movie))
+		self.conn.commit()
+
 
 if __name__ == '__main__':
 	Cinema()
