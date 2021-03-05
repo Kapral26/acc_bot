@@ -97,6 +97,19 @@ class Cinema(BotSetting):
 		self.cursor.execute(sql)
 		return [f'{x} ({y})' for x, y in self.cursor.fetchall()]
 
+	def for_statistic(self, month, year):
+		param_month = f"and EXTRACT(month FROM c.watch_date) = {month}" if month else ""
+		param_year = f"and EXTRACT(year FROM c.watch_date) = {year}" if year else ""
+		sql = f"""SELECT * FROM public.cinema c WHERE watch_status = true
+				 {param_year} {param_month}"""
+		self.cursor.execute(sql)
+		keys = [x.name for x in self.cursor.description]
+		if self.cursor:
+			statis_dict = [dict(zip(keys, x)) for x in self.cursor.fetchall()]
+		else:
+			statis_dict = f'Бля, кажись нет данных за {month} месяц {year} года'
+		return statis_dict
+
 
 if __name__ == '__main__':
 	Cinema()

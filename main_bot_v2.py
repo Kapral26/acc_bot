@@ -37,7 +37,7 @@ class newVersionBot(BotSetting):
 				'/viewlist - Вывести фильмы из листа ожидания\n'
 				'/normalno\n'
 				'/create_poll - Создать опрос, какой фильм будем смотреть\n'
-				'/who_income - Создать опрос, кто планирует прийти\n',
+				'/who_income - Создать опрос, кто планирует прийти\n/statistic (-m) (-y) - Вывести статистику',
 				parse_mode=ParseMode.HTML,
 		)
 
@@ -89,7 +89,6 @@ class newVersionBot(BotSetting):
 
 		if update.message.text == '/cancel':
 			return ConversationHandler.END
-
 
 		self.movies = self.cinema.find_cinema(update.message.text)
 
@@ -440,6 +439,44 @@ class newVersionBot(BotSetting):
 					message_id=update.message.message_id + 1,
 			)
 
+	@chk_user
+	@log_error
+	def view_statistics(self, update: Update, context: CallbackContext):
+		"""
+		/statistic (m) (y)
+		m - номер месяца(по умолчанию текущий)
+		y - год(по умолчанию текущий)
+
+		-all год(по умолчанию текущий)
+
+		Примеры:
+			/statistic -all: -> month:False, year:False
+			/statistic -m 7: -> month:Error, year:Хуйня, какая-то
+			/statistic -y 2020: -> month:Error, year:Нет блять такого месяца, говно
+			/statistic -m 4 -y 2020: -> month:4, year:2020
+			/statistic -m 4 -y л: -> month:Error, year:Хуйня, какая-то
+		"""
+
+		month, year = self.prepare_params(update.message.text)
+
+		if month == 'Error':
+			update.message.reply_text(
+					text=year
+			)
+
+		text_to_message = self.cinema.for_statistic(month, year)
+
+		if isinstance(text_to_message, str):
+			update.message.reply_text(
+					text=text_to_message
+			)
+		else:
+			text = self.prepare_stat_text(text_to_message)
+			update.message.reply_text(
+					text=text,
+					parse_mode=ParseMode.HTML,
+			)
+
 	@log_error
 	def main(self):
 		req = Request(
@@ -507,6 +544,7 @@ class newVersionBot(BotSetting):
 		updater.dispatcher.add_handler(PollAnswerHandler(self.receive_poll_answer))
 		updater.dispatcher.add_handler(CommandHandler('start', self.start_handler))
 		updater.dispatcher.add_handler(CommandHandler('help', self.help_handler))
+		updater.dispatcher.add_handler(CommandHandler('statistic', self.view_statistics))
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
 		updater.dispatcher.add_handler(MessageHandler(Filters.text, self.check_date))
 

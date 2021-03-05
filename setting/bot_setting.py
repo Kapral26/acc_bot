@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 import psycopg2
 
@@ -73,6 +73,56 @@ class BotSetting:
 	def nextFriday(self):
 		return date.strftime(self.next_closest(5), '%d.%m.%Y')
 
+	def prepare_params(self, command_text):
+		if '@' in command_text:
+			command_text = command_text.split('@')[0]
+
+		if '/statistic' == command_text:
+			return date.today().month, date.today().year
+
+		command_text = command_text.split(" ")[1:]
+		commands = dict(zip(command_text[::2], command_text[1::2]))
+
+		if '-all' in command_text:
+			return False, False
+		elif commands.get('-y'):
+			m = commands.get('-m') if commands.get('-m') else False
+			y = commands.get('-y')
+			if m not in [f'{x}' for x in range(1,13)]:
+				return 'Error', 'Нет блять такого месяца, говно'
+			elif y not in [f'{x}' for x in range(2018, 2033)]:
+				return 'Error', 'Ну и что ты ввел? ишак'
+			return m, y
+		elif commands.get('-m'):
+			y = commands.get('-y') if commands.get('-y') else datetime.today().year
+			m = commands.get('-m')
+			if m not in [f'{x}' for x in range(1,13)]:
+				return 'Error', 'Нет блять такого месяца, говно'
+			elif y not in [x for x in range(1970, 2033)]:
+				return 'Error', 'Ну и что ты ввел? ишак'
+			return m, y
+		else:
+			text_help = """
+				Примеры:
+				/statistic -all: за все время
+				/statistic -m 7: 7 месяц этого года
+				/statistic -y 2020: За весь 2020 год
+				/statistic -m 4 -y 2020: за 4 месяц 2020 года
+				/statistic -m 4 -y л: ошибка"""
+			return 'Error', f'Хуйня ты ебаная, не правильно кулючи заюзал, {text_help}'
+
+	def prepare_stat_text(self, dict_movies):
+		cinema_list = '\n'.join([x['title'] for x in dict_movies])
+		count_movies = len(cinema_list)
+		count_min = sum([x['runtime'] for x in dict_movies])
+		count_hours = f"{count_min // 60} час(а\ов) {count_min % 60} мин."
+		text = f"""
+				Ну`с итого:\n{cinema_list}
+				-------------
+				В сумме на просмотр мы потратили: {count_hours}
+				и посмотрели: {count_movies} фильма
+				"""
+		return text
 
 class workWithUser(BotSetting):
 	def __init__(self):
