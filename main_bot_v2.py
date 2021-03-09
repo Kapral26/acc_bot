@@ -385,6 +385,8 @@ class newVersionBot(BotSetting):
 			)
 			self.cinema.next_view(self.nextWednesday(), self.list_answer)
 
+
+	@chk_user
 	@log_error
 	def create_poll_income(self, update: Update, context: CallbackContext):
 		user_role = self.users.its_user(update.effective_user.username)
