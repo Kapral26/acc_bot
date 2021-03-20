@@ -498,7 +498,6 @@ class newVersionBot(BotSetting):
 		)
 		bot = Bot(
 				token=self.tg_token,
-				base_url='https://telegg.ru/orig/bot'
 		)
 		updater = Updater(
 				bot=bot,
