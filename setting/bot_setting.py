@@ -150,6 +150,12 @@ class workWithUser(BotSetting):
 		result = self.cursor.fetchone()
 		return True if result else False
 
+	def get_all_users(self):
+		sql = "select u.username from users u"
+		self.cursor.execute(sql)
+		result = self.cursor.fetchall()
+		return result
+
 
 if __name__ == '__main__':
 	BotSetting().pg_connect()

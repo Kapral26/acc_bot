@@ -2,6 +2,7 @@
 
 from collections import Counter, OrderedDict
 from datetime import datetime, timedelta
+from random import randint
 
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
@@ -57,17 +58,27 @@ class newVersionBot(BotSetting):
 				chat_id=self.chatID,
 		)
 
-		a = 1
-
 	@chk_user
 	@log_error
 	def normalno_handler(self, update: Update, context: CallbackContext):
 		update.message.reply_text(
 				f'{update.effective_user.mention_html()}, Пошел на хуй!\n'
-				'https://www.google.ru/maps/place/Nahui,+08270,+%D0%9F%D0%B5%D1%80%D1%83/@-14.4098416,-71.3077453,15z/data=!3m1!4b1!4m5!3m4!1s0x91692f289ed899f9:0x478a165988814b94!8m2!3d-14.4098412!4d-71.2989897',
-				# parse_mode=ParseMode.MARKDOWN,
+				'https://natribu.org/',
 				disable_web_page_preview=False,
 				parse_mode=ParseMode.HTML,
+		)
+
+	@chk_user
+	@log_error
+	def rus_rulet_handler(self, update: Update, context: CallbackContext):
+		users = self.users.get_all_users()
+		index_random_user = randint(0, len(users))
+		random_user = users[index_random_user][0]
+		chat_id = update.message.chat_id
+
+		update.message.bot.send_message(
+				chat_id=chat_id,
+				text=f'@{random_user}! Вселеная решила, что ты идешь на хуй!\n',
 		)
 
 	@chk_user
@@ -385,7 +396,6 @@ class newVersionBot(BotSetting):
 			)
 			self.cinema.next_view(self.nextWednesday(), self.list_answer)
 
-
 	@chk_user
 	@log_error
 	def create_poll_income(self, update: Update, context: CallbackContext):
@@ -558,6 +568,7 @@ class newVersionBot(BotSetting):
 		updater.dispatcher.add_handler(CommandHandler('help', self.help_handler))
 		updater.dispatcher.add_handler(CommandHandler('statistic', self.view_statistics))
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
+		updater.dispatcher.add_handler(CommandHandler('rus_rulet', self.rus_rulet_handler))
 		updater.dispatcher.add_handler(MessageHandler(Filters.text, self.check_date))
 
 		# Начать бесконечную обработку входящих сообщений
