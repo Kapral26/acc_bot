@@ -3,6 +3,7 @@ import logging
 from datetime import date, timedelta, datetime
 
 import psycopg2
+from prettytable import PrettyTable, from_db_cursor
 
 from .config import *
 
@@ -151,10 +152,26 @@ class workWithUser(BotSetting):
 		return True if result else False
 
 	def get_all_users(self):
-		sql = "select u.username from users u"
+		sql = "SELECT id, username FROM public.users"
 		self.cursor.execute(sql)
 		result = self.cursor.fetchall()
 		return result
+
+	def calc_goes_fuck_to_self(self, user_id):
+		sql = f"INSERT INTO public.fuck_your_selfs (user_id) VALUES({user_id})"
+		self.cursor.execute(sql)
+		self.conn.commit()
+
+	def get_report_fys(self):
+
+		sql = u"""SELECT u.username, count(fys.id) FROM public.users u
+					left join public.fuck_your_selfs fys on fys.user_id = u.id
+					group by u.username 
+					order by count(fys.id) desc;"""
+		self.cursor.execute(sql)
+		mytable = from_db_cursor(self.cursor)
+		text = f"<code>Количество посыланий нахуй:\n{mytable}</code>"
+		return text
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import Counter, OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from random import randint
 
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
@@ -24,6 +24,7 @@ class newVersionBot(BotSetting):
 		self.users = workWithUser()
 		self.chatID = None
 		self.movies = None
+		self.report_go_f_self = None
 
 	@chk_user
 	@log_error
@@ -73,12 +74,34 @@ class newVersionBot(BotSetting):
 	def rus_rulet_handler(self, update: Update, context: CallbackContext):
 		users = self.users.get_all_users()
 		index_random_user = randint(0, len(users))
-		random_user = users[index_random_user][0]
+		user = users[index_random_user]
+		self.users.calc_goes_fuck_to_self(user[0])
 		chat_id = update.message.chat_id
 
 		update.message.bot.send_message(
 				chat_id=chat_id,
-				text=f'@{random_user}! Вселеная решила, что ты идешь на хуй!\n',
+				text=f'@{user[1]}! Вселеная решила, что ты идешь на хуй!\n',
+		)
+
+	@chk_user
+	@log_error
+	def get_rep_fys_handler(self, update: Update, context: CallbackContext):
+		user_role = self.users.its_user(update.effective_user.username)
+		if user_role:
+			context.bot.send_message(
+					text=f'{update.effective_user.mention_html()}, это сделано не для тебя и не для таких как ты!',
+					chat_id=update.effective_chat.id,
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
+
+		report_text = self.users.get_report_fys()
+		chat_id = update.message.chat_id
+
+		update.message.bot.send_message(
+				chat_id=chat_id,
+				text=report_text,
+				parse_mode=ParseMode.HTML,
 		)
 
 	@chk_user
@@ -436,8 +459,9 @@ class newVersionBot(BotSetting):
 	@log_error
 	def check_date(self, update: Update, context: CallbackContext):
 
-		today = datetime.today() + timedelta(1)
-		tomorow = today.strftime('%d.%m.%Y')
+		today = date.today()
+		tomorow = today + timedelta(1)
+		tomorow = tomorow.strftime('%d.%m.%Y')
 
 		if tomorow == self.nextTuesday() and context.bot_data:
 			last_poll_id = max(context.bot_data)
@@ -458,6 +482,21 @@ class newVersionBot(BotSetting):
 			context.bot.pin_chat_message(
 					chat_id=update.effective_chat.id,
 					message_id=update.message.message_id + 1,
+			)
+		if today.day == 1:
+			month_today = today.month + 1
+			last_month_day = datetime.date(today.year, month_today, 1) - datetime.timedelta(1)
+			last_month_day = last_month_day.day
+			random_day_in_month = randint(1, last_month_day)
+			self.report_go_f_self = date(today.year, today.month, random_day_in_month)
+
+		if self.report_go_f_self and self.report_go_f_self == today:
+			report_text = self.users.get_report_fys()
+			chat_id = update.message.chat_id
+
+			update.message.bot.send_message(
+					chat_id=chat_id,
+					text=report_text,
 			)
 
 	@chk_user
@@ -569,6 +608,7 @@ class newVersionBot(BotSetting):
 		updater.dispatcher.add_handler(CommandHandler('statistic', self.view_statistics))
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
 		updater.dispatcher.add_handler(CommandHandler('rus_rulet', self.rus_rulet_handler))
+		updater.dispatcher.add_handler(CommandHandler('get_rep_fys', self.get_rep_fys_handler))
 		updater.dispatcher.add_handler(MessageHandler(Filters.text, self.check_date))
 
 		# Начать бесконечную обработку входящих сообщений
