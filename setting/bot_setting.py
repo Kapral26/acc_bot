@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import date, timedelta, datetime
+from random import randint
 
 import psycopg2
 from prettytable import PrettyTable, from_db_cursor
@@ -172,6 +173,20 @@ class workWithUser(BotSetting):
 		mytable = from_db_cursor(self.cursor)
 		text = f"<code>Количество посыланий нахуй:\n{mytable}</code>"
 		return text
+
+	def get_user_for_rulet(self):
+		users = self.get_all_users()
+		index_random_user = randint(0, len(users)-1)
+		user = users[index_random_user]
+		return user
+
+	def get_main_word(self):
+		sql = u"""SELECT words from public.main_words"""
+		self.cursor.execute(sql)
+		main_words = self.cursor.fetchall()
+		index_main_words = randint(0, len(main_words)-1)
+		main_word = main_words[index_main_words]
+		return f'{main_word[0]}\n'
 
 
 if __name__ == '__main__':

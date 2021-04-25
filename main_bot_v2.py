@@ -72,15 +72,16 @@ class newVersionBot(BotSetting):
 	@chk_user
 	@log_error
 	def rus_rulet_handler(self, update: Update, context: CallbackContext):
-		users = self.users.get_all_users()
-		index_random_user = randint(0, len(users))
-		user = users[index_random_user]
+		user = self.users.get_user_for_rulet()
+		logging.info(f'{user[1]}')
 		self.users.calc_goes_fuck_to_self(user[0])
+		main_word = self.users.get_main_word().format(user=user[1])
 		chat_id = update.message.chat_id
+		logging.info(f'{user[1]}, {main_word}')
 
 		update.message.bot.send_message(
 				chat_id=chat_id,
-				text=f'@{user[1]}! Вселеная решила, что ты идешь на хуй!\n',
+				text=main_word,
 		)
 
 	@chk_user
