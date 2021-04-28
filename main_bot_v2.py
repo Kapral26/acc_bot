@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import Counter, OrderedDict
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, time
 from random import randint
 
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
@@ -72,11 +72,24 @@ class newVersionBot(BotSetting):
 	@chk_user
 	@log_error
 	def rus_rulet_handler(self, update: Update, context: CallbackContext):
+		chat_id = update.message.chat_id
+
+		start_period = time(8, 0, 0)
+		end_period = time(23, 59, 0)
+		ntime = datetime.now().time()
+
+		if ntime <= start_period or ntime > end_period:
+			update.message.bot.send_message(
+					chat_id=chat_id,
+					text=f'{update.effective_user.mention_html()}, К вам выехали чеченцы, ибо нехуй!\n Рулетка работает 8:00-23:59',
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
+
 		user = self.users.get_user_for_rulet()
 		logging.info(f'{user[1]}')
 		self.users.calc_goes_fuck_to_self(user[0])
 		main_word = self.users.get_main_word().format(user=user[1])
-		chat_id = update.message.chat_id
 		logging.info(f'{user[1]}, {main_word}')
 
 		update.message.bot.send_message(
