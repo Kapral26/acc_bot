@@ -78,8 +78,15 @@ class newVersionBot(BotSetting):
 	@log_error
 	def insert_main_phrase_handler(self, update: Update, context: CallbackContext):
 		chat_id = update.message.chat_id
-
-		msg_text = update.message.text.replace('/insert_phrase ', '')
+		msg_text = update.message.text
+		if '/insert_phrase' == msg_text or '/insert_phrase@alco_cinema_club_bot' == msg_text:
+			update.message.bot.send_message(
+					chat_id=chat_id,
+					text=f'Пишите фразу после команды, место где надо вставить логин пользователя пишите @',
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
+		msg_text =msg_text.replace('/insert_phrase ', '').replace('@alco_cinema_club_bot', '')
 		if '@' not in msg_text:
 			update.message.bot.send_message(
 					chat_id=chat_id,
