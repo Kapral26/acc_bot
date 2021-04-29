@@ -71,6 +71,33 @@ class newVersionBot(BotSetting):
 
 	@chk_user
 	@log_error
+	def insert_main_phrase_handler(self, update: Update, context: CallbackContext):
+		chat_id = update.message.chat_id
+
+		msg_text = update.message.text.replace('/insert_phrase ', '')
+		if '@' not in msg_text:
+			update.message.bot.send_message(
+					chat_id=chat_id,
+					text=f'Пишите фразу, место где надо вставить логин пользователя пишите @',
+					parse_mode=ParseMode.HTML,
+			)
+			return ConversationHandler.END
+
+		result_insert = self.insert_main_phrase(msg_text)
+		if result_insert:
+			text = 'well done, фраза в обойме'
+		else:
+			text = 'Не, все хуйня, давай по новой'
+
+		update.message.bot.send_message(
+				chat_id=chat_id,
+				text=text,
+				parse_mode=ParseMode.HTML,
+		)
+		return ConversationHandler.END
+
+	@chk_user
+	@log_error
 	def rus_rulet_handler(self, update: Update, context: CallbackContext):
 		chat_id = update.message.chat_id
 
@@ -623,6 +650,7 @@ class newVersionBot(BotSetting):
 		updater.dispatcher.add_handler(CommandHandler('normalno', self.normalno_handler))
 		updater.dispatcher.add_handler(CommandHandler('rus_rulet', self.rus_rulet_handler))
 		updater.dispatcher.add_handler(CommandHandler('get_rep_fys', self.get_rep_fys_handler))
+		updater.dispatcher.add_handler(CommandHandler('insert_phrase', self.insert_main_phrase_handler))
 		updater.dispatcher.add_handler(MessageHandler(Filters.text, self.check_date))
 
 		# Начать бесконечную обработку входящих сообщений

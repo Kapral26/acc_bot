@@ -126,6 +126,19 @@ class BotSetting:
 				"""
 		return text
 
+	def insert_main_phrase(self, text):
+		text = text.replace('@', '@{user}')
+		query_insert = f"""INSERT INTO public.main_words
+						(words)
+						VALUES('{text}')"""
+		try:
+			self.cursor.execute(query_insert)
+			self.conn.commit()
+			return True
+		except:
+			return False
+
+
 class workWithUser(BotSetting):
 	def __init__(self):
 		BotSetting.__init__(self)
