@@ -265,7 +265,7 @@ class newVersionBot(BotSetting):
 	@log_error
 	def viewlist_handler(self, update: Update, context: CallbackContext):
 		self.dict_list_movie = self.cinema.view_list()
-		count_view = 5  # 11
+		count_view = 10  # 11
 
 		buttons_view = [
 			[InlineKeyboardButton(text=f"{x['title']} ({x['movie_year']})", callback_data=f"d;{x['id']}")] for x
@@ -463,8 +463,9 @@ class newVersionBot(BotSetting):
 					chat_id=context.bot_data[poll_id]["chat_id"],
 			),
 
-			context.bot.unpin_all_chat_messages(
-					chat_id=context.bot_data[poll_id]["chat_id"]
+			context.bot.unpin_chat_message(
+					chat_id=context.bot_data[poll_id]["chat_id"],
+					message_id=context.bot_data[poll_id]["message_id"]
 			)
 
 			context.bot.stop_poll(
@@ -515,6 +516,12 @@ class newVersionBot(BotSetting):
 		today = date.today()
 		tomorow = today + timedelta(1)
 		tomorow = tomorow.strftime('%d.%m.%Y')
+
+		if update.message.reply_to_message:
+			context.bot.send_message(
+					text=f'Шо ты тут на сообщения отвечаешь?!\n {update.message.from_user.name} Пошел ка ты нахуй!',
+					chat_id=update.effective_chat.id
+			)
 
 		if tomorow == self.nextTuesday() and context.bot_data:
 			last_poll_id = max(context.bot_data)
