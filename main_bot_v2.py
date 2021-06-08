@@ -518,10 +518,13 @@ class newVersionBot(BotSetting):
 		tomorow = tomorow.strftime('%d.%m.%Y')
 
 		if update.message.reply_to_message:
-			context.bot.send_message(
-					text=f'Шо ты тут на сообщения отвечаешь?!\n {update.message.from_user.name} Пошел ка ты нахуй!',
-					chat_id=update.effective_chat.id
-			)
+			if "послать" in update.message.text.lower():
+				from_user = update.message.from_user.name
+				to_user = update.message.reply_to_message.from_user.name
+				context.bot.send_message(
+						text=f'Вы не поверите!! Но {from_user} послал нахуй {to_user}',
+						chat_id=update.effective_chat.id
+				)
 
 		if tomorow == self.nextTuesday() and context.bot_data:
 			last_poll_id = max(context.bot_data)
