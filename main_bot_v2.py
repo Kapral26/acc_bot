@@ -521,8 +521,12 @@ class newVersionBot(BotSetting):
 			if "послать" in update.message.text.lower():
 				from_user = update.message.from_user.name
 				to_user = update.message.reply_to_message.from_user.name
+				if to_user == '@alco_cinema_club_bot':
+					msg_text = f'{from_user} - ты че собака сутулая? Тикай с городу'
+				else:
+					msg_text = f'Вы не поверите!! Но {from_user} послал нахуй {to_user}'
 				context.bot.send_message(
-						text=f'Вы не поверите!! Но {from_user} послал нахуй {to_user}',
+						text=msg_text,
 						chat_id=update.effective_chat.id
 				)
 
