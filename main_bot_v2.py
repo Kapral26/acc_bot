@@ -2,7 +2,7 @@
 
 from collections import Counter, OrderedDict
 from datetime import datetime, timedelta, date, time
-from random import randint
+from random import randint, choice
 
 from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
@@ -529,6 +529,29 @@ class newVersionBot(BotSetting):
 						text=msg_text,
 						chat_id=update.effective_chat.id
 				)
+				context.bot.send_sticker(
+						chat_id=update.effective_chat.id,
+						sticker="CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"
+				)
+
+		if 'ахмат сила' in update.message.text.lower():
+			SUCCESS_STICKER_LIST = [
+				"CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
+				"CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA",
+			]
+
+			context.bot.send_sticker(
+					chat_id=update.effective_chat.id,
+					sticker=choice(SUCCESS_STICKER_LIST)
+			)
+
+		elif 'путин' in update.message.text.lower():
+			context.bot.send_sticker(
+					chat_id=update.effective_chat.id,
+					sticker='CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E'
+			)
+
+
 
 		if tomorow == self.nextTuesday() and context.bot_data:
 			last_poll_id = max(context.bot_data)
