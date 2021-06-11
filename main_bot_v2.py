@@ -545,6 +545,12 @@ class newVersionBot(BotSetting):
 					sticker=choice(SUCCESS_STICKER_LIST)
 			)
 
+		elif 'шайтан' in update.message.text.lower():
+			context.bot.send_sticker(
+					chat_id=update.effective_chat.id,
+					sticker="CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"
+			)
+
 		elif 'путин' in update.message.text.lower():
 			context.bot.send_sticker(
 					chat_id=update.effective_chat.id,

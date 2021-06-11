@@ -116,7 +116,7 @@ class BotSetting:
 	def prepare_stat_text(self, dict_movies):
 		cinema_list = '\n'.join([x['title'] for x in dict_movies])
 		count_movies = len(dict_movies)
-		count_min = sum([x['runtime'] for x in dict_movies])
+		count_min = sum([x['runtime'] if x['runtime'] else 0 for x in dict_movies])
 		count_hours = f"{count_min // 60} час(а\ов) {count_min % 60} мин."
 		text = f"""
 				Ну`с итого:\n{cinema_list}
