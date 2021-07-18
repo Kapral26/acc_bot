@@ -9,12 +9,13 @@ from collections import Counter, OrderedDict
 from datetime import datetime, timedelta, date, time
 from random import randint, choice
 
-from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
-from setting.cinema import Cinema
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
     ConversationHandler, Filters, PollAnswerHandler
 from telegram.utils.request import Request
+
+from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
+from setting.cinema import Cinema
 
 FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
@@ -34,10 +35,13 @@ class AlcoCinemaBot(BotSetting):
         self.chat_id = None
         self.movies = None
         self.report_go_f_self = None
+        self.dict_list_movie = None
+        self.list_answer = None
+        self.list_cinema = None
 
     @chk_user
     @log_error
-    def help_handler(self, update: Update):
+    def help_handler(self, update: Update, context: CallbackContext):
         """
         Обработчик команды /help
         """
@@ -144,7 +148,7 @@ class AlcoCinemaBot(BotSetting):
         ntime = datetime.now().time()
 
         if ntime <= start_period or ntime > end_period:
-
+            user_link = update.effective_user.mention_html()
             update.message.bot.send_message(
                     chat_id=chat_id,
                     text=f'{user_link},/ К вам выехали чеченцы, ибо нехуй!\n Рулетка работает 8:00-23:59',
@@ -269,6 +273,7 @@ class AlcoCinemaBot(BotSetting):
         Обраотчик кнопок при итоговом выборе фильма
         """
         movie_data = context.user_data[FIND_DONE]
+        text_done = None
 
         if update.callback_query.data == 'add_list_view':
 
@@ -399,6 +404,8 @@ class AlcoCinemaBot(BotSetting):
         return FINAL_VIEW
 
     def viewlist_filnal_handler(self, update: Update, context: CallbackContext):
+
+        message = None
         col_detail = update.callback_query.data
         movie_id = context.user_data[DETAIL_VIEW]
         if col_detail == 'close':
@@ -450,12 +457,12 @@ class AlcoCinemaBot(BotSetting):
             return ConversationHandler.END
         message = context.bot.send_poll(
                 update.effective_chat.id,
-                f"Псс, ребзи в среду({self.nextWednesday()}) собираемся,\nЧто будем смотреть?",
+                f"Псс, ребзи в среду({self.next_wednesday()}) собираемся,\nЧто будем смотреть?",
                 questions,
                 is_anonymous=False,
                 allows_multiple_answers=True,
                 # open_period=30,
-                close_date=self.nextMonday(),
+                close_date=self.next_monday(),
         )
         # Save some info about the poll the bot_data for later use in receive_poll_answer
         payload = {
@@ -472,8 +479,9 @@ class AlcoCinemaBot(BotSetting):
         )
         context.bot_data.update(payload)
 
-    def cinema4watch(self, list):
-        dict_answerrs = Counter(list)
+    @staticmethod
+    def cinema4watch(self, list_watch):
+        dict_answerrs = Counter(list_watch)
         ord_dict_answerrs = OrderedDict(dict_answerrs)
         return ([x for x in ord_dict_answerrs][:2])
 
@@ -507,7 +515,7 @@ class AlcoCinemaBot(BotSetting):
         if context.bot_data[poll_id]["answers"] == 20:
             self.list_cinema = ''.join([f'{x}\n' for x in self.cinema4watch(self.list_answer)])
             context.bot.send_message(
-                    text=f'Опрос закрыт!, в след. среду({self.nextWednesday()}) смотрим:\n{self.list_cinema}',
+                    text=f'Опрос закрыт!, в след. среду({self.next_wednesday()}) смотрим:\n{self.list_cinema}',
                     chat_id=context.bot_data[poll_id]["chat_id"],
             )
 
@@ -519,7 +527,7 @@ class AlcoCinemaBot(BotSetting):
             context.bot.stop_poll(
                     context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
             )
-            self.cinema.next_view(self.nextWednesday(), self.list_answer)
+            self.cinema.next_view(self.next_wednesday(), self.list_answer)
 
     @chk_user
     @log_error
@@ -536,12 +544,12 @@ class AlcoCinemaBot(BotSetting):
         questions = ["Да, я буду", "Да буду я скорее всего", "Нет, меня не будет"]
         message = context.bot.send_poll(
                 update.effective_chat.id,
-                f"Кого ждать в среду({self.nextWednesday()})?",
+                f"Кого ждать в среду({self.next_wednesday()})?",
                 questions,
                 is_anonymous=False,
                 allows_multiple_answers=False,
                 # open_period=30,
-                close_date=self.nextWednesday(),
+                close_date=self.next_wednesday(),
         )
         payload = {
             message.poll.id: {
@@ -581,7 +589,6 @@ class AlcoCinemaBot(BotSetting):
                         text=msg_text,
                         chat_id=update.effective_chat.id
                 )
-
 
         if 'ахмат сила' in update.message.text.lower():
             SUCCESS_STICKER_LIST = [
@@ -689,7 +696,7 @@ class AlcoCinemaBot(BotSetting):
                 read_timeout=1.0,
         )
         bot = Bot(
-                token=self.tg_token,
+                token=self.tg_token, request=req
         )
         updater = Updater(
                 bot=bot,
