@@ -564,7 +564,6 @@ class AlcoCinemaBot(BotSetting):
         today = date.today()
         tomorow = today + timedelta(1)
         tomorow = tomorow.strftime('%d.%m.%Y')
-        marker_psiny = None
 
         if update.message.reply_to_message:
             if "послать" in update.message.text.lower():
@@ -572,18 +571,17 @@ class AlcoCinemaBot(BotSetting):
                 to_user = update.message.reply_to_message.from_user.name
                 if to_user == '@alco_cinema_club_bot':
                     msg_text = f'{from_user} - ты че собака сутулая? Тикай с городу'
-                    marker_psiny = True
+                    context.bot.send_sticker(
+                            chat_id=update.effective_chat.id,
+                            sticker="CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"
+                    )
                 else:
                     msg_text = f'Вы не поверите!! Но {from_user} послал нахуй {to_user}'
                 context.bot.send_message(
                         text=msg_text,
                         chat_id=update.effective_chat.id
                 )
-                if marker_psiny:
-                    context.bot.send_sticker(
-                            chat_id=update.effective_chat.id,
-                            sticker="CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"
-                    )
+
 
         if 'ахмат сила' in update.message.text.lower():
             SUCCESS_STICKER_LIST = [
