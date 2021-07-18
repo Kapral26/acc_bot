@@ -1,0 +1,7 @@
+[flake8]
+max-line-len=120
+inline-quotes= "
+docstring-qoutes = """
+multiline-qoutes = """
+import-order = google
+ignore = D101, D107, D302, D205, D102

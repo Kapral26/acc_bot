@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
+"""
+Бот для моего локального чата имеет множество функций
+основные: Послать друга нахуй и менджемнта нашего алкокиноклуба
+"""
+
 from collections import Counter, OrderedDict
 from datetime import datetime, timedelta, date, time
 from random import randint, choice
 
-from setting.bot_setting import BotSetting, workWithUser, log_error, logging, chk_user
-from setting.cinema import Cinema
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
     ConversationHandler, Filters, PollAnswerHandler
 from telegram.utils.request import Request
+
+from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
+from setting.cinema import Cinema
 
 FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
@@ -17,19 +23,27 @@ NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
 CALLBACK_BEGIN = 'x1'
 
 
-class newVersionBot(BotSetting):
+class AlcoCinemaBot(BotSetting):
+    """
+    Основной класс для работы бота
+    """
+
     def __init__(self):
         BotSetting.__init__(self)
         self.cinema = Cinema()
-        self.users = workWithUser()
-        self.chatID = None
+        self.users = WorkWithUser()
+        self.chat_id = None
         self.movies = None
         self.report_go_f_self = None
+        self.dict_list_movie = None
+        self.list_answer = None
+        self.list_cinema = None
 
     @chk_user
     @log_error
     def help_handler(self, update: Update, context: CallbackContext):
-        """ Не относится к сценарию диалога, но создаёт начальные inline-кнопки
+        """
+        Обработчик команды /help
         """
 
         update.message.reply_text(
@@ -51,9 +65,10 @@ class newVersionBot(BotSetting):
     @chk_user
     @log_error
     def start_handler(self, update: Update, context: CallbackContext):
-        """ Не относится к сценарию диалога, но создаёт начальные inline-кнопки
         """
-        self.chatID = update.message.chat_id
+        Обработчик команды /start
+        """
+        self.chat_id = update.message.chat_id
 
         context.bot.send_message(
                 text=f'Бот АлкоКиноКлуба\n'
@@ -61,12 +76,16 @@ class newVersionBot(BotSetting):
                      'Чтобы посмотреть список команд:\n'
                      '/help',
                 parse_mode=ParseMode.HTML,
-                chat_id=self.chatID,
+                chat_id=self.chat_id,
         )
 
     @chk_user
     @log_error
     def normalno_handler(self, update: Update, context: CallbackContext):
+        """
+        Обработчик команды /normalno
+        Команда посылает отправителя команды на всем известный сайт
+        """
         update.message.reply_text(
                 f'{update.effective_user.mention_html()}, Пошел на хуй!\n'
                 'https://natribu.org/',
@@ -77,6 +96,11 @@ class newVersionBot(BotSetting):
     @chk_user
     @log_error
     def insert_main_phrase_handler(self, update: Update, context: CallbackContext):
+        """
+        Обработчик команды /insert_main_phrase
+        Добавить фразу с помощью которой можно будет в русской
+        рулетке послать случайного участника чата
+        """
         chat_id = update.message.chat_id
         msg_text = update.message.text
         if '/insert_phrase' == msg_text or '/insert_phrase@alco_cinema_club_bot' == msg_text:
@@ -86,7 +110,7 @@ class newVersionBot(BotSetting):
                     parse_mode=ParseMode.HTML,
             )
             return ConversationHandler.END
-        msg_text =msg_text.replace('/insert_phrase ', '').replace('@alco_cinema_club_bot', '')
+        msg_text = msg_text.replace('/insert_phrase ', '').replace('@alco_cinema_club_bot', '')
         if '@' not in msg_text:
             update.message.bot.send_message(
                     chat_id=chat_id,
@@ -111,6 +135,12 @@ class newVersionBot(BotSetting):
     @chk_user
     @log_error
     def rus_rulet_handler(self, update: Update, context: CallbackContext):
+        """
+        Обработчик команды /rus_rulet
+        Команда работает только в период 8:00-23:59
+        Команда случайным образом выбирает человека и фразу из БД
+        для того чтобы этот человек был послан нахуй
+        """
         chat_id = update.message.chat_id
 
         start_period = time(8, 0, 0)
@@ -118,18 +148,19 @@ class newVersionBot(BotSetting):
         ntime = datetime.now().time()
 
         if ntime <= start_period or ntime > end_period:
+            user_link = update.effective_user.mention_html()
             update.message.bot.send_message(
                     chat_id=chat_id,
-                    text=f'{update.effective_user.mention_html()}, К вам выехали чеченцы, ибо нехуй!\n Рулетка работает 8:00-23:59',
+                    text=f'{user_link},/ К вам выехали чеченцы, ибо нехуй!\n Рулетка работает 8:00-23:59',
                     parse_mode=ParseMode.HTML,
             )
             return ConversationHandler.END
 
-        user = self.users.get_user_for_rulet()
-        logging.info(f'{user[1]}')
-        self.users.calc_goes_fuck_to_self(user[0])
-        main_word = self.users.get_main_word().format(user=user[1])
-        logging.info(f'{user[1]}, {main_word}')
+        user_goes = self.users.get_user_for_rulet()
+        logging.info(f'{user_goes[1]}')
+        self.users.calc_goes_fuck_to_self(user_goes[0])
+        main_word = self.users.get_main_word().format(user=user_goes[1])
+        logging.info(f'{user_goes[1]}, {main_word}')
 
         update.message.bot.send_message(
                 chat_id=chat_id,
@@ -139,10 +170,15 @@ class newVersionBot(BotSetting):
     @chk_user
     @log_error
     def get_rep_fys_handler(self, update: Update, context: CallbackContext):
-        user_role = self.users.its_user(update.effective_user.username)
+        """
+        Обработчик команды /get_rep_fys
+        Вывести статистику кто сколько раз был послан нахуй
+        """
+        user_role = self.users.chk_role_user(update.effective_user.username)
+        user_link = update.effective_user.mention_html()
         if user_role:
             context.bot.send_message(
-                    text=f'{update.effective_user.mention_html()}, это сделано не для тебя и не для таких как ты!',
+                    text=f'{user_link}, это сделано не для тебя и не для таких как ты!',
                     chat_id=update.effective_chat.id,
                     parse_mode=ParseMode.HTML,
             )
@@ -159,9 +195,9 @@ class newVersionBot(BotSetting):
 
     @chk_user
     @log_error
-    # /add команда для добавления фильма в список
     def add_handler(self, update: Update, context: CallbackContext):
-        """ Начало взаимодействия по клику на inline-кнопку
+        """
+        обработчик команды /add
         """
         chat_id = update.message.chat_id
 
@@ -173,7 +209,10 @@ class newVersionBot(BotSetting):
 
     @log_error
     def find_movie_handler(self, update: Update, context: CallbackContext):
+        """
+        Поиск фильма по введенному названию
 
+        """
         if update.message.text == '/cancel':
             return ConversationHandler.END
 
@@ -198,6 +237,9 @@ class newVersionBot(BotSetting):
 
     @log_error
     def find_done_handler(self, update: Update, context: CallbackContext):
+        """
+        Обраобтчик действий выбранного фильма
+        """
 
         if update.callback_query.data == 'cancel':
             context.bot.send_message(
@@ -208,7 +250,7 @@ class newVersionBot(BotSetting):
 
         movie_id = int(update.callback_query.data)
         movie_data = [x for x in self.movies if x['id'] == movie_id][0]
-        movie_data['user_pk'] = self.users.chk_users(user=update.effective_chat.username)
+        movie_data['user_pk'] = self.users.chk_users(username=update.effective_chat.username)
         context.user_data[FIND_DONE] = movie_data
 
         inline_buttons = InlineKeyboardMarkup(
@@ -227,8 +269,11 @@ class newVersionBot(BotSetting):
         return FINNALY_DONE
 
     def finally_find_done(self, update: Update, context: CallbackContext):
-
+        """
+        Обраотчик кнопок при итоговом выборе фильма
+        """
         movie_data = context.user_data[FIND_DONE]
+        text_done = None
 
         if update.callback_query.data == 'add_list_view':
 
@@ -256,7 +301,8 @@ class newVersionBot(BotSetting):
 
     @log_error
     def cancel_handler(self, update: Update, context: CallbackContext):
-        """ Отменить весь процесс диалога. Данные будут утеряны
+        """
+        Отменить весь процесс диалога. Данные будут утеряны
         """
         update.message.reply_text('Отмена.\nЧтобы начать сначала введите: /add')
         return ConversationHandler.END
@@ -264,8 +310,12 @@ class newVersionBot(BotSetting):
     @chk_user
     @log_error
     def viewlist_handler(self, update: Update, context: CallbackContext):
+        """
+        Обработчик команды /viewlist
+        Вывести список фильмав, которые в очереди на просмотр
+        """
         self.dict_list_movie = self.cinema.view_list()
-        count_view = 10  # 11
+        count_view = 10
 
         buttons_view = [
             [InlineKeyboardButton(text=f"{x['title']} ({x['movie_year']})", callback_data=f"d;{x['id']}")] for x
@@ -287,6 +337,9 @@ class newVersionBot(BotSetting):
 
     @log_error
     def viewlist_next_handler(self, update: Update, context: CallbackContext):
+        """
+        Обработчик кнопки -> в команде /viewlist
+        """
         callback_view = update.callback_query
         callback_view.answer()
         if callback_view.data == 'all':
@@ -297,7 +350,7 @@ class newVersionBot(BotSetting):
             return DETAIL_VIEW
 
         count_view = int(update.callback_query.data)
-        count_view_next = count_view + 5  # 10
+        count_view_next = count_view + 10  # 10
 
         buttons_view = [
             [InlineKeyboardButton(text=f"{x['title']} ({x['movie_year']})", callback_data=f"d;{x['id']}")] for x
@@ -351,6 +404,8 @@ class newVersionBot(BotSetting):
         return FINAL_VIEW
 
     def viewlist_filnal_handler(self, update: Update, context: CallbackContext):
+
+        message = None
         col_detail = update.callback_query.data
         movie_id = context.user_data[DETAIL_VIEW]
         if col_detail == 'close':
@@ -383,7 +438,7 @@ class newVersionBot(BotSetting):
     @chk_user
     @log_error
     def create_poll_handler(self, update: Update, context: CallbackContext):
-        user_role = self.users.its_user(update.effective_user.username)
+        user_role = self.users.chk_role_user(update.effective_user.username)
         if user_role:
             context.bot.send_message(
                     text=f'{update.effective_user.mention_html()}, ты челядь, негоже тебе опросы создавать',
@@ -402,12 +457,12 @@ class newVersionBot(BotSetting):
             return ConversationHandler.END
         message = context.bot.send_poll(
                 update.effective_chat.id,
-                f"Псс, ребзи в среду({self.nextWednesday()}) собираемся,\nЧто будем смотреть?",
+                f"Псс, ребзи в среду({self.next_wednesday()}) собираемся,\nЧто будем смотреть?",
                 questions,
                 is_anonymous=False,
                 allows_multiple_answers=True,
                 # open_period=30,
-                close_date=self.nextMonday(),
+                close_date=self.next_monday(),
         )
         # Save some info about the poll the bot_data for later use in receive_poll_answer
         payload = {
@@ -424,8 +479,9 @@ class newVersionBot(BotSetting):
         )
         context.bot_data.update(payload)
 
-    def cinema4watch(self, list):
-        dict_answerrs = Counter(list)
+    @staticmethod
+    def cinema4watch(self, list_watch):
+        dict_answerrs = Counter(list_watch)
         ord_dict_answerrs = OrderedDict(dict_answerrs)
         return ([x for x in ord_dict_answerrs][:2])
 
@@ -459,9 +515,9 @@ class newVersionBot(BotSetting):
         if context.bot_data[poll_id]["answers"] == 20:
             self.list_cinema = ''.join([f'{x}\n' for x in self.cinema4watch(self.list_answer)])
             context.bot.send_message(
-                    text=f'Опрос закрыт!, в след. среду({self.nextWednesday()}) смотрим:\n{self.list_cinema}',
+                    text=f'Опрос закрыт!, в след. среду({self.next_wednesday()}) смотрим:\n{self.list_cinema}',
                     chat_id=context.bot_data[poll_id]["chat_id"],
-            ),
+            )
 
             context.bot.unpin_chat_message(
                     chat_id=context.bot_data[poll_id]["chat_id"],
@@ -471,12 +527,12 @@ class newVersionBot(BotSetting):
             context.bot.stop_poll(
                     context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
             )
-            self.cinema.next_view(self.nextWednesday(), self.list_answer)
+            self.cinema.next_view(self.next_wednesday(), self.list_answer)
 
     @chk_user
     @log_error
     def create_poll_income(self, update: Update, context: CallbackContext):
-        user_role = self.users.its_user(update.effective_user.username)
+        user_role = self.users.chk_role_user(update.effective_user.username)
         if user_role:
             context.bot.send_message(
                     text=f'{update.effective_user.mention_html()}, ты челядь, негоже тебе опросы создавать',
@@ -488,12 +544,12 @@ class newVersionBot(BotSetting):
         questions = ["Да, я буду", "Да буду я скорее всего", "Нет, меня не будет"]
         message = context.bot.send_poll(
                 update.effective_chat.id,
-                f"Кого ждать в среду({self.nextWednesday()})?",
+                f"Кого ждать в среду({self.next_wednesday()})?",
                 questions,
                 is_anonymous=False,
                 allows_multiple_answers=False,
                 # open_period=30,
-                close_date=self.nextWednesday(),
+                close_date=self.next_wednesday(),
         )
         payload = {
             message.poll.id: {
@@ -523,8 +579,6 @@ class newVersionBot(BotSetting):
                 to_user = update.message.reply_to_message.from_user.name
                 if to_user == '@alco_cinema_club_bot':
                     msg_text = f'{from_user} - ты че собака сутулая? Тикай с городу'
-
-                    # Стикер извинись
                     context.bot.send_sticker(
                             chat_id=update.effective_chat.id,
                             sticker="CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"
@@ -535,7 +589,6 @@ class newVersionBot(BotSetting):
                         text=msg_text,
                         chat_id=update.effective_chat.id
                 )
-
 
         if 'ахмат сила' in update.message.text.lower():
             SUCCESS_STICKER_LIST = [
@@ -560,9 +613,7 @@ class newVersionBot(BotSetting):
                     sticker='CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E'
             )
 
-
-
-        if tomorow == self.nextTuesday() and context.bot_data:
+        if tomorow == self.next_tuesday() and context.bot_data:
             last_poll_id = max(context.bot_data)
             context.bot.unpin_all_chat_messages(
                     chat_id=update.message.chat_id
@@ -574,7 +625,7 @@ class newVersionBot(BotSetting):
 
             self.list_cinema = ''.join([f'{x}\n' for x in self.cinema4watch(self.list_answer)])
             context.bot.send_message(
-                    text=f'Опрос закрыт!\n В след. среду({self.nextWednesday()}) смотрим:\n{self.list_cinema}',
+                    text=f'Опрос закрыт!\n В след. среду({self.next_wednesday()}) смотрим:\n{self.list_cinema}',
                     chat_id=context.bot_data[last_poll_id]["chat_id"],
             )
 
@@ -616,7 +667,7 @@ class newVersionBot(BotSetting):
             /statistic -m 4 -y л: -> month:Error, year:Хуйня, какая-то
         """
 
-        month, year = self.prepare_params(update.message.text)
+        month, year = self.stat_com_prepare_params(update.message.text)
 
         if month == 'Error':
             update.message.reply_text(
@@ -645,7 +696,7 @@ class newVersionBot(BotSetting):
                 read_timeout=1.0,
         )
         bot = Bot(
-                token=self.tg_token,
+                token=self.tg_token, request=req
         )
         updater = Updater(
                 bot=bot,
@@ -721,4 +772,4 @@ class newVersionBot(BotSetting):
 
 if __name__ == '__main__':
     logging.info('Start bot')
-    newVersionBot().main()
+    AlcoCinemaBot().main()
