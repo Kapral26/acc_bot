@@ -6,8 +6,8 @@
 """
 
 from collections import Counter, OrderedDict
-from datetime import datetime, timedelta, date, time
-from random import randint, choice
+from datetime import datetime, time
+from random import choice
 
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
@@ -567,17 +567,28 @@ class AlcoCinemaBot(BotSetting):
         )
 
     @log_error
-    def check_date(self, update: Update, context: CallbackContext):
+    def all_message(self, update: Update, context: CallbackContext):
+        """Обработка всех входящих сообщений."""
 
-        today = date.today()
-        tomorow = today + timedelta(1)
-        tomorow = tomorow.strftime('%d.%m.%Y')
+        messages_text = {
+            "ахмат сила": {"sticker": ["CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
+                                       "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA"]},
+            "шайтан": {"sticker": "CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"},
+            "путин": {"sticker": 'CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E'}
+        }
+
+        for msg in messages_text.keys():
+            if msg in update.message.text.lower():
+                context.bot.send_sticker(
+                        chat_id=update.effective_chat.id,
+                        sticker=choice(messages_text[msg]["sticker"])
+                )
 
         if update.message.reply_to_message:
             if "послать" in update.message.text.lower():
                 from_user = update.message.from_user.name
                 to_user = update.message.reply_to_message.from_user.name
-                if to_user == '@alco_cinema_club_bot':
+                if to_user == "@alco_cinema_club_bot":
                     msg_text = f'{from_user} - ты че собака сутулая? Тикай с городу'
                     context.bot.send_sticker(
                             chat_id=update.effective_chat.id,
@@ -589,65 +600,6 @@ class AlcoCinemaBot(BotSetting):
                         text=msg_text,
                         chat_id=update.effective_chat.id
                 )
-
-        if 'ахмат сила' in update.message.text.lower():
-            SUCCESS_STICKER_LIST = [
-                "CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
-                "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA",
-            ]
-
-            context.bot.send_sticker(
-                    chat_id=update.effective_chat.id,
-                    sticker=choice(SUCCESS_STICKER_LIST)
-            )
-
-        elif 'шайтан' in update.message.text.lower():
-            context.bot.send_sticker(
-                    chat_id=update.effective_chat.id,
-                    sticker="CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"
-            )
-
-        elif 'путин' in update.message.text.lower():
-            context.bot.send_sticker(
-                    chat_id=update.effective_chat.id,
-                    sticker='CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E'
-            )
-
-        if tomorow == self.next_tuesday() and context.bot_data:
-            last_poll_id = max(context.bot_data)
-            context.bot.unpin_all_chat_messages(
-                    chat_id=update.message.chat_id
-            )
-
-            context.bot.stop_poll(
-                    context.bot_data[last_poll_id]["chat_id"], context.bot_data[last_poll_id]["message_id"]
-            )
-
-            self.list_cinema = ''.join([f'{x}\n' for x in self.cinema4watch(self.list_answer)])
-            context.bot.send_message(
-                    text=f'Опрос закрыт!\n В след. среду({self.next_wednesday()}) смотрим:\n{self.list_cinema}',
-                    chat_id=context.bot_data[last_poll_id]["chat_id"],
-            )
-
-            context.bot.pin_chat_message(
-                    chat_id=update.effective_chat.id,
-                    message_id=update.message.message_id + 1,
-            )
-        if today.day == 1:
-            month_today = today.month + 1
-            last_month_day = datetime.date(today.year, month_today, 1) - datetime.timedelta(1)
-            last_month_day = last_month_day.day
-            random_day_in_month = randint(1, last_month_day)
-            self.report_go_f_self = date(today.year, today.month, random_day_in_month)
-
-        if self.report_go_f_self and self.report_go_f_self == today:
-            report_text = self.users.get_report_fys()
-            chat_id = update.message.chat_id
-
-            update.message.bot.send_message(
-                    chat_id=chat_id,
-                    text=report_text,
-            )
 
     @chk_user
     @log_error
@@ -760,7 +712,7 @@ class AlcoCinemaBot(BotSetting):
         updater.dispatcher.add_handler(CommandHandler('rus_rulet', self.rus_rulet_handler))
         updater.dispatcher.add_handler(CommandHandler('get_rep_fys', self.get_rep_fys_handler))
         updater.dispatcher.add_handler(CommandHandler('insert_phrase', self.insert_main_phrase_handler))
-        updater.dispatcher.add_handler(MessageHandler(Filters.text, self.check_date))
+        updater.dispatcher.add_handler(MessageHandler(Filters.text, self.all_message))
 
         # Начать бесконечную обработку входящих сообщений
         try:
