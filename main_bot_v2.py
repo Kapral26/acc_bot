@@ -578,6 +578,7 @@ class AlcoCinemaBot(BotSetting):
         }
 
         for msg in messages_text.keys():
+            logging.debug(f"Уфф, да тут словечко попалось {msg}")
             if msg in update.message.text.lower():
                 context.bot.send_sticker(
                         chat_id=update.effective_chat.id,
