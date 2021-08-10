@@ -102,7 +102,7 @@ class Cinema(BotSetting):
         :param cinema_id: id фильма
         :return: Текстовая информация о фильме
         """
-        sql = f"""SELECT title, movie_year, title_en, runtime, rating"
+        sql = f"""SELECT title, movie_year, title_en, runtime, rating
                     FROM public.cinema where id = {cinema_id}"""
         self.cursor.execute(sql)
         keys = [x.name for x in self.cursor.description]
