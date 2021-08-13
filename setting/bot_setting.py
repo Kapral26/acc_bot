@@ -169,7 +169,7 @@ class BotSetting:
                 needs_month, needs_year = 'Error', 'Ну и что ты ввел? ишак'
             needs_month, needs_year = month, year
 
-        elif command_text == '/statistic':
+        elif command_text == [] or command_text == '/statistic':
             needs_month, needs_year = date.today().month, date.today().year
 
         else:
