@@ -37,11 +37,9 @@ class Cinema(BotSetting):
         return list_movies
 
     def chk_availability(self, cinema_dict):
-        title_en = f"title_en = {cinema_dict['title_en']} and" if cinema_dict['title_en'] != "null" else ""
         movie_year = f"movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
         sql_chk = f"""SELECT * FROM cinema
                             where title = '{cinema_dict['title']}' and
-                            {title_en}
                             {movie_year}"""
         try:
             if self._pg_execute(sql_chk).fetchone():
@@ -57,8 +55,6 @@ class Cinema(BotSetting):
         :param is_watch: маркер статуса просмотра фильма
         :return: Сообщение
         """
-        cinema_dict['title_en'] = cinema_dict['title_en'].replace("'", "`")
-        cinema_dict['title'] = cinema_dict['title'].replace("'", "`")
 
         if self.chk_availability(cinema_dict):
             return f'''Фильм: "{cinema_dict['title']}" ранее был добавлен'''
@@ -75,7 +71,7 @@ class Cinema(BotSetting):
                         values(
                             '{cinema_dict['title']}',
                             {cinema_dict['year']},
-                            '{cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else cinema_dict['title']}',
+                            {cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else cinema_dict['title']},
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
