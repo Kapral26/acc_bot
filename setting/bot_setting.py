@@ -3,6 +3,7 @@
 """Настройки бота"""
 
 import logging
+import time
 from datetime import date, timedelta, datetime
 from random import randint
 
@@ -63,17 +64,12 @@ def chk_user(func):
     return inner
 
 
-class BotSetting:
-    """
-    Дополнительный класс для работы бота
-    """
+class PgConnect:
+    def __init__(self, max_try_connect=0):
+        self.__pg_connect = None
+        self.max_try_connect= max_try_connect if max_try_connect > -1 else 0
 
-    def __init__(self):
-        self.conn, self.cursor = self.pg_connect()
-        self.tg_token = tg_token
-
-    @staticmethod
-    def pg_connect():
+    def pg_connection(self):
         """
         Подключение к pg
         """
@@ -84,7 +80,90 @@ class BotSetting:
                                 port=pg_connect['port'])
 
         cursor = conn.cursor()
-        return conn, cursor
+        return {"conn": conn, "cur":cursor}
+
+    @property
+    def pg_connect(self):
+        if self.__pg_connect:
+            return self.__pg_connect
+        else:
+            self.__reconnect(True)
+        return self.__pg_connect
+
+    def connect_pg(self):
+        self.__reconnect()
+
+    def close_pg(self, rollback=False):
+        if self.__pg_connect:
+            try:
+                if rollback:
+                    self.pg_connect["conn"].rollback()
+                else:
+                    self.pg_connect["conn"].commit()
+                    self.__pg_connect = None
+            except Exception:
+                pass
+
+    def reconnect_pg(self):
+        self.__reconnect(is_new=True)
+
+    def commit_pg(self):
+        if self.__pg_connect:
+            self.pg_connect["conn"].commit()
+
+    def rollback_pg(self):
+        if self.__pg_connect:
+            self.pg_connect["conn"].rollback()
+
+    def __reconnect(self, is_new=False):
+        try_connect = 0
+
+        if try_connect < self.max_try_connect or is_new:
+            while True:
+                try:
+                    try_connect += 1
+                    if not is_new:
+                        self.close_pg(rollback=True)
+
+                    if is_new and try_connect > 1 or not is_new:
+                        logging.debug(f"Try connect pg: {try_connect}")
+
+                    self.__pg_connect = self.pg_connection()
+                    return True
+                except Exception:
+                    if try_connect >= self.max_try_connect: raise
+                    time.sleep(10)
+        else:
+            return False
+
+    def _pg_execute(self, sql, params=(), commit=False):
+
+        cur = self.pg_connect["cur"]
+        con = self.pg_connect["conn"]
+
+        try:
+            cur.execute(sql, params)
+        except:
+            if commit:
+                con.rollback()
+            logging.error(f"PG error:\nsql:{sql}\nparams:{params if params else None}")
+            raise
+        finally:
+            if commit:
+                con.commit()
+
+        return cur
+
+
+
+class BotSetting(PgConnect):
+    """
+    Дополнительный класс для работы бота
+    """
+
+    def __init__(self):
+        PgConnect.__init__(self)
+        self.tg_token = tg_token
 
     @staticmethod
     def next_closest(search_day):
@@ -213,10 +292,10 @@ class BotSetting:
                         (words)
                         VALUES('{text}')"""
         try:
-            self.cursor.execute(query_insert)
-            self.conn.commit()
+            self._pg_execute(query_insert, commit=True)
             return True
-        except:
+        except Exception as error:
+            logging.error(error)
             return False
 
 
@@ -238,14 +317,13 @@ class WorkWithUser(BotSetting):
         :return: id пользователя
         """
         sql = f"SELECT id from users where username = '{username}'"
-        self.cursor.execute(sql)
-        result = self.cursor.fetchone()
+        result = self._pg_execute(sql).fetchone()
 
         if not result:
             result = self.add_user(username, first_name, full_name)
         return result[0]
 
-    def add_user(self, username, first_name, full_name):
+    def add_user(self, username, first_name, full_name, role=1):
         """
 
         :param username: параметр из tg
@@ -253,12 +331,11 @@ class WorkWithUser(BotSetting):
         :param full_name: параметр из tg
         :return: id пользователя
         """
-        sql = f"""INSERT INTO users(username, first_name, full_name)
-                    VALUES('{username}','{first_name}', '{full_name}') RETURNING id"""
-        self.cursor.execute(sql)
-        self.conn.commit()
+        sql = f"""INSERT INTO users(username, first_name, full_name, role)
+                    VALUES('{username}','{first_name}', '{full_name}', '{role}') RETURNING id"""
+        added_user = self._pg_execute(sql, commit=True)
         logging.info(f'В БД добавлен пользователь под ником "{username}"')
-        return self.cursor.fetchone()
+        return added_user.fetchone()
 
     def chk_role_user(self, username):
         """
@@ -271,8 +348,8 @@ class WorkWithUser(BotSetting):
                     JOIN roles r on r.id = u.role 
                     WHERE u.username = '{username}' 
                         AND r.role_name = 'user'"""
-        self.cursor.execute(sql)
-        result = self.cursor.fetchone()
+
+        result = self._pg_execute(sql).fetchone()
         return True if result else False
 
     def get_all_users(self):
@@ -281,9 +358,7 @@ class WorkWithUser(BotSetting):
         :return: список пользователей
         """
         sql = "SELECT id, username FROM public.users"
-        self.cursor.execute(sql)
-        result = self.cursor.fetchall()
-        return result
+        return self._pg_execute(sql).fetchall()
 
     def calc_goes_fuck_to_self(self, user_id):
         """
@@ -291,8 +366,7 @@ class WorkWithUser(BotSetting):
         :param user_id: id пользоавтеля из БД
         """
         sql = f"INSERT INTO public.fuck_your_selfs (user_id) VALUES({user_id})"
-        self.cursor.execute(sql)
-        self.conn.commit()
+        self._pg_execute(sql, commit=True)
 
     def get_report_fys(self):
         """
@@ -304,8 +378,7 @@ class WorkWithUser(BotSetting):
                     LEFT JOIN public.fuck_your_selfs fys on fys.user_id = u.id
                     GROUP BY u.username 
                     ORDER BY count(fys.id) desc;"""
-        self.cursor.execute(sql)
-        mytable = from_db_cursor(self.cursor)
+        mytable = from_db_cursor(self._pg_execute(sql))
         text = f"<code>Количество посыланий нахуй:\n{mytable}</code>"
         return text
 
@@ -325,8 +398,7 @@ class WorkWithUser(BotSetting):
         :return: фраза из БД
         """
         sql = u"""SELECT words from public.main_words"""
-        self.cursor.execute(sql)
-        main_words = self.cursor.fetchall()
+        main_words = self._pg_execute(sql).fetchall()
         index_main_words = randint(0, len(main_words) - 1)
         main_word = main_words[index_main_words]
         return f'{main_word[0]}\n'
