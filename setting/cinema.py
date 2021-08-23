@@ -61,6 +61,7 @@ class Cinema(BotSetting):
 
 
         if cinema_dict:
+            title_en = cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else f"'{cinema_dict['title']}'"
             sql = f"""insert into cinema(title,
                             movie_year,
                             title_en,
@@ -71,7 +72,7 @@ class Cinema(BotSetting):
                         values(
                             '{cinema_dict['title']}',
                             {cinema_dict['year']},
-                            {cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else cinema_dict['title']},
+                            {title_en},
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
