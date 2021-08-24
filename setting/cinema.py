@@ -27,7 +27,7 @@ class Cinema(BotSetting):
         for cinema_id, movie in enumerate(movies):
             movie.title_en = movie.title_en.replace("'", "`")
             tmp_dict = {u'id': cinema_id,
-                        u'title': movie.title,
+                        u'title': f"'{movie.title}'",
                         u'year': movie.year if movie.year else 'null',
                         u'title_en': f"'{movie.title_en}'" if movie.title_en else 'null',
                         u'runtime': movie.runtime if movie.runtime else 'null',
@@ -39,7 +39,7 @@ class Cinema(BotSetting):
     def chk_availability(self, cinema_dict):
         movie_year = f"movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
         sql_chk = f"""SELECT * FROM cinema
-                            where title = '{cinema_dict['title']}' and
+                            where title = {cinema_dict['title']} and
                             {movie_year}"""
         try:
             if self._pg_execute(sql_chk).fetchone():
@@ -61,6 +61,7 @@ class Cinema(BotSetting):
 
 
         if cinema_dict:
+            title_en = cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else cinema_dict['title']
             sql = f"""insert into cinema(title,
                             movie_year,
                             title_en,
@@ -69,9 +70,9 @@ class Cinema(BotSetting):
                             added,
                             watch_status)
                         values(
-                            '{cinema_dict['title']}',
+                            {cinema_dict['title']},
                             {cinema_dict['year']},
-                            {cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else cinema_dict['title']},
+                            {title_en},
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
