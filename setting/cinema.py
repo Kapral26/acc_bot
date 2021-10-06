@@ -21,13 +21,13 @@ class Cinema(BotSetting):
         :param cinema_title: Наименовние фильма
         :return: Список фильмов, подходящих под запрашиваемое наименование
         """
-        movies = Movie.objects.search(f'{cinema_title}')
+        movies = Movie.objects.search(cinema_title)
         list_movies = list()
 
         for cinema_id, movie in enumerate(movies):
             movie.title_en = movie.title_en.replace("'", "`")
             tmp_dict = {u'id': cinema_id,
-                        u'title': movie.title,
+                        u'title': f"'{movie.title}'",
                         u'year': movie.year if movie.year else 'null',
                         u'title_en': f"'{movie.title_en}'" if movie.title_en else 'null',
                         u'runtime': movie.runtime if movie.runtime else 'null',
@@ -36,6 +36,18 @@ class Cinema(BotSetting):
             list_movies.append(tmp_dict)
         return list_movies
 
+    def chk_availability(self, cinema_dict):
+        movie_year = f"movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
+        sql_chk = f"""SELECT * FROM cinema
+                            where title = {cinema_dict['title']} and
+                            {movie_year}"""
+        try:
+            if self._pg_execute(sql_chk).fetchone():
+                return True
+        except Exception as error:
+            logging.error(f'{error}\n{sql_chk}')
+            return False
+
     def insert_cinema(self, cinema_dict: None, is_watch=False):
         """
         Метод добавления фильма в БД
@@ -43,20 +55,13 @@ class Cinema(BotSetting):
         :param is_watch: маркер статуса просмотра фильма
         :return: Сообщение
         """
-        sql_chk = f"""SELECT * FROM cinema
-                        where title = '{cinema_dict['title']}' and
-                        title_en = {cinema_dict['title_en']} and
-                        movie_year = '{cinema_dict['year']}'"""
-        try:
-            self.cursor.execute(sql_chk)
-            if self.cursor.fetchone():
-                return f'''Фильм: "{cinema_dict['title']}" ранее был добавлен'''
-        except Exception as error:
-            logging.error(f'{error}\n{sql_chk}')
-            self.cursor.execute('END TRANSACTION;')
-            return 'Произошла при проверке какая-то хуйня невообразимая\nПопробуй по новой'
+
+        if self.chk_availability(cinema_dict):
+            return f'''Фильм: "{cinema_dict['title']}" ранее был добавлен'''
+
 
         if cinema_dict:
+            title_en = cinema_dict['title_en'] if cinema_dict['title_en'] != "null" else cinema_dict['title']
             sql = f"""insert into cinema(title,
                             movie_year,
                             title_en,
@@ -65,9 +70,9 @@ class Cinema(BotSetting):
                             added,
                             watch_status)
                         values(
-                            '{cinema_dict['title']}',
+                            {cinema_dict['title']},
                             {cinema_dict['year']},
-                            {cinema_dict['title_en']},
+                            {title_en},
                             {cinema_dict['runtime']},
                             {cinema_dict['rating']},
                             {cinema_dict['user_pk']},
@@ -76,13 +81,10 @@ class Cinema(BotSetting):
                         ON CONFLICT (title, movie_year, title_en) DO UPDATE SET watch_status = {is_watch}
                     """
             try:
-                self.cursor.execute(sql)
-                self.conn.commit()
+                self._pg_execute(sql, commit=True)
             except Exception as error:
-                self.cursor.execute('END TRANSACTION;')
                 logging.error(f'{error}\n{sql}')
                 return 'Произошла при добавлении какая-то хуйня невообразимая\nПопробуй по новой'
-
         return True
 
     def view_list(self):
@@ -90,11 +92,12 @@ class Cinema(BotSetting):
         Генерация списка фильмов для вывода в бот
         :return: словарь фильмов
         """
-        sql = u"""select c.title, c.movie_year, c.id from cinema c
-                where c.watch_status = false;"""
-        self.cursor.execute(sql)
-        keys = [x.name for x in self.cursor.description]
-        return [dict(zip(keys, x)) for x in self.cursor.fetchall()]
+        sql = u"""SELECT c.title, c.movie_year, c.id FROM cinema c
+                WHERE c.watch_status = false
+                ORDER BY c.added_date;"""
+        execute_cur = self._pg_execute(sql)
+        keys = [x.name for x in execute_cur.description]
+        return [dict(zip(keys, x)) for x in execute_cur.fetchall()]
 
     def movie_detail(self, cinema_id):
         """
@@ -104,9 +107,9 @@ class Cinema(BotSetting):
         """
         sql = f"""SELECT title, movie_year, title_en, runtime, rating
                     FROM public.cinema where id = {cinema_id}"""
-        self.cursor.execute(sql)
-        keys = [x.name for x in self.cursor.description]
-        movie_dict = [dict(zip(keys, x)) for x in self.cursor.fetchall()][0]
+        execute_cur = self._pg_execute(sql)
+        keys = [x.name for x in execute_cur.description]
+        movie_dict = [dict(zip(keys, x)) for x in execute_cur.fetchall()][0]
         run_time = f"{movie_dict['runtime'] // 60} час(а/ов) {movie_dict['runtime'] % 60} мин."
         movie_dict['runtime'] = run_time
         detail_text = [f"Название: '{movie_dict['title']}'",
@@ -127,8 +130,7 @@ class Cinema(BotSetting):
                     poll = false,
                     watch_date = current_date
                     WHERE id = {cinema_id}"""
-        self.cursor.execute(sql)
-        self.conn.commit()
+        self._pg_execute(sql, commit=True)
         return "Я понял, посмотрели фильм. Че выёбываешься?"
 
     def to_poll(self, cinema_id):
@@ -138,8 +140,7 @@ class Cinema(BotSetting):
         :return: сообщение о добавлении филма в опросник
         """
         sql = f'UPDATE cinema set poll = true where id = {cinema_id}'
-        self.cursor.execute(sql)
-        self.conn.commit()
+        self._pg_execute(sql, commit=True)
         return "Фильм будет в след. опросе"
 
     def for_create_poll(self):
@@ -148,8 +149,7 @@ class Cinema(BotSetting):
         :return: словарь фильмов
         """
         sql = 'select c.title, c.movie_year from cinema c where c.poll is true '
-        self.cursor.execute(sql)
-        return [f'{x} ({y})' for x, y in self.cursor.fetchall()]
+        return [f'{x} ({y})' for x, y in self._pg_execute(sql).fetchall()]
 
     def for_statistic(self, month, year):
         """
@@ -162,10 +162,10 @@ class Cinema(BotSetting):
         param_year = f"and EXTRACT(year FROM c.watch_date) = {year}" if year else ""
         sql = f"""SELECT * FROM public.cinema c WHERE watch_status = true
                  {param_year} {param_month}"""
-        self.cursor.execute(sql)
-        keys = [x.name for x in self.cursor.description]
-        if self.cursor:
-            statis_dict = [dict(zip(keys, x)) for x in self.cursor.fetchall()]
+        execute_cur = self._pg_execute(sql)
+        keys = [x.name for x in execute_cur.description]
+        if execute_cur:
+            statis_dict = [dict(zip(keys, x)) for x in execute_cur.fetchall()]
         else:
             statis_dict = f'Бля, кажись нет данных за {month} месяц {year} года'
         return statis_dict
@@ -179,8 +179,8 @@ class Cinema(BotSetting):
         for movie in list_movie:
             movie = movie.split("(")[0].strip()
             sql = f"UPDATE cinema SET watch_date = '{day}' where title = '{movie}'"
-            self.cursor.execute(sql.format(movie))
-        self.conn.commit()
+            self._pg_execute(sql)
+        self.commit_pg()
 
 
 if __name__ == '__main__':
