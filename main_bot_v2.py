@@ -8,6 +8,7 @@
 from collections import Counter, OrderedDict
 from datetime import datetime, time
 from random import choice
+import httplib2
 
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
@@ -16,6 +17,7 @@ from telegram.utils.request import Request
 
 from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
+from os import path as os_path
 
 FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
@@ -566,6 +568,21 @@ class AlcoCinemaBot(BotSetting):
                 message_id=message.message_id,
         )
 
+    def getUserProfilePhotos(self, user_id, offset=None, limit=100):
+
+        users_avatars = self.bot.getUserProfilePhotos(user_id, 0, 0)
+        avatar_file_id = users_avatars['photos'][0][0]['file_id']
+        avatar_url = self.bot.getFile(avatar_file_id)['file_path']
+
+        h = httplib2.Http('.cache')
+        response, content = h.request(avatar_url)
+        img_path = os_path.join(self.bot_dir, f'img/avatar/{user_id}.jpg')
+        out = open(img_path, 'wb')
+        out.write(content)
+        out.close()
+        return img_path
+
+
     @log_error
     def all_message(self, update: Update, context: CallbackContext):
         """Обработка всех входящих сообщений."""
@@ -574,7 +591,8 @@ class AlcoCinemaBot(BotSetting):
             "ахмат сила": {"sticker": ["CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
                                        "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA"]},
             "шайтан": {"sticker": ["CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"]},
-            "путин": {"sticker": ["CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E"]}
+            "путин": {"sticker": ["CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E"]},
+            " да ": {"sticker": ["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"]},
         }
 
         for msg in messages_text.keys():
@@ -600,6 +618,15 @@ class AlcoCinemaBot(BotSetting):
                 context.bot.send_message(
                         text=msg_text,
                         chat_id=update.effective_chat.id
+                )
+            elif "цитата" in update.message.text.lower():
+                avatar = self.getUserProfilePhotos(update.message.reply_to_message.from_user.id)
+                quote_path = self.create_quote(avatar,
+                                               update.message.reply_to_message.from_user.username,
+                                               update.message.reply_to_message.text)
+                context.bot.send_photo(
+                        chat_id=update.effective_chat.id,
+                        photo=open(quote_path, 'rb')
                 )
 
     @chk_user
@@ -651,6 +678,8 @@ class AlcoCinemaBot(BotSetting):
         bot = Bot(
                 token=self.tg_token, request=req
         )
+        self.bot = bot
+        self.bot_dir = os_path.dirname(__file__)
         updater = Updater(
                 bot=bot,
                 use_context=True,
