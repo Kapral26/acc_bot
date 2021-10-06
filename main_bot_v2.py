@@ -577,6 +577,11 @@ class AlcoCinemaBot(BotSetting):
             "путин": {"sticker": ["CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E"]}
         }
 
+        msg_contain = {
+            "да": {"sticker":["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"]},
+            "нет": {"sticker":["CAACAgIAAxkBAAEDBz1hXa2JWSqo8KmVpUZhXmJ3SqOiCQACOQADLNecCBq6rU2GOcG5IQQ"]}
+        }
+
         for msg in messages_text.keys():
             logging.debug(f"Уфф, да тут словечко попалось {msg}")
             if msg in update.message.text.lower():
@@ -585,11 +590,12 @@ class AlcoCinemaBot(BotSetting):
                         sticker=choice(messages_text[msg]["sticker"])
                 )
 
-        if update.message.text.lower().endswith(u"да"):
-            context.bot.send_sticker(
-                    chat_id=update.effective_chat.id,
-                    sticker=choice(["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"])
-            )
+        for msg in msg_contain.keys():
+            if update.message.text.lower().endswith(msg):
+                context.bot.send_sticker(
+                        chat_id=update.effective_chat.id,
+                        sticker=choice(msg_contain[msg]["sticker"])
+                )
 
         if update.message.reply_to_message:
             if "послать" in update.message.text.lower():
