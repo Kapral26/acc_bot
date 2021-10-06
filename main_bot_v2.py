@@ -574,7 +574,8 @@ class AlcoCinemaBot(BotSetting):
             "ахмат сила": {"sticker": ["CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
                                        "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA"]},
             "шайтан": {"sticker": ["CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"]},
-            "путин": {"sticker": ["CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E"]}
+            "путин": {"sticker": ["CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E"]},
+            " да ": {"sticker": ["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"]}
         }
 
         for msg in messages_text.keys():
