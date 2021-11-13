@@ -37,9 +37,10 @@ class Cinema(BotSetting):
         return list_movies
 
     def chk_availability(self, cinema_dict):
-        movie_year = f"movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
+        movie_year = f" and movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
+        movie_title = cinema_dict['title'].replace("'", "").replace("\/", "")
         sql_chk = f"""SELECT * FROM cinema
-                            where title = {cinema_dict['title']} and
+                            where title = '{movie_title}'
                             {movie_year}"""
         try:
             if self._pg_execute(sql_chk).fetchone():
