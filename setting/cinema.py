@@ -37,9 +37,10 @@ class Cinema(BotSetting):
         return list_movies
 
     def chk_availability(self, cinema_dict):
-        movie_year = f"movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
+        movie_year = f" and movie_year = {cinema_dict['year']}" if cinema_dict['year'] != 'null' else ""
+        movie_title = cinema_dict['title'].replace("'", "").replace("\/", "")
         sql_chk = f"""SELECT * FROM cinema
-                            where title = {cinema_dict['title']} and
+                            where title = '{movie_title}'
                             {movie_year}"""
         try:
             if self._pg_execute(sql_chk).fetchone():
@@ -148,8 +149,8 @@ class Cinema(BotSetting):
         Метод для создания данныз для опросника
         :return: словарь фильмов
         """
-        sql = 'select c.title, c.movie_year from cinema c where c.poll is true '
-        return [f'{x} ({y})' for x, y in self._pg_execute(sql).fetchall()]
+        sql = "select c.title, c.movie_year from cinema c where c.poll is true limit 10"
+        return [f"{x} ({y})" for x, y in self._pg_execute(sql).fetchall()]
 
     def for_statistic(self, month, year):
         """
@@ -167,7 +168,7 @@ class Cinema(BotSetting):
         if execute_cur:
             statis_dict = [dict(zip(keys, x)) for x in execute_cur.fetchall()]
         else:
-            statis_dict = f'Бля, кажись нет данных за {month} месяц {year} года'
+            statis_dict = f"Бля, кажись нет данных за {month} месяц {year} года"
         return statis_dict
 
     def next_view(self, day, list_movie):
