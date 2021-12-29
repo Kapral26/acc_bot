@@ -360,12 +360,13 @@ class WorkWithUser(BotSetting):
         sql = "SELECT id, username FROM public.users"
         return self._pg_execute(sql).fetchall()
 
-    def calc_goes_fuck_to_self(self, user_id):
+    def calc_goes_fuck_to_self(self, goes, who_send):
         """
         Записать в БД кого послали нахуй, че тут еще писать-то?
-        :param user_id: id пользоавтеля из БД
+        :param who_send: Кто отправил команду
+        :param goes: id пользоавтеля из БД
         """
-        sql = f"INSERT INTO public.fuck_your_selfs (user_id) VALUES({user_id})"
+        sql = f"INSERT INTO public.fuck_your_selfs (user_id, who_send) VALUES({goes}, {who_send})"
         self._pg_execute(sql, commit=True)
 
     def get_report_fys(self):
@@ -375,9 +376,10 @@ class WorkWithUser(BotSetting):
         """
         sql = u"""SELECT u.username, count(fys.id)
                     FROM public.users u
-                    LEFT JOIN public.fuck_your_selfs fys on fys.user_id = u.id
+                    LEFT JOIN public.fuck_your_selfs fys ON fys.user_id = u.id
+                    WHERE EXTRACT(YEAR FROM fys.date_fuck_your_self) = EXTRACT(YEAR FROM NOW())
                     GROUP BY u.username 
-                    ORDER BY count(fys.id) desc;"""
+                    ORDER BY count(fys.id) DESC;"""
         mytable = from_db_cursor(self._pg_execute(sql))
         text = f"<code>Количество посыланий нахуй:\n{mytable}</code>"
         return text
