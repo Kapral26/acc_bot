@@ -16,7 +16,6 @@ from telegram.utils.request import Request
 
 from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
-from setting.config import check_chat_admins
 
 FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
