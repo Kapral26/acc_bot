@@ -16,6 +16,7 @@ from telegram.utils.request import Request
 
 from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
+from setting.config import check_chat_admins
 
 FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
@@ -155,10 +156,10 @@ class AlcoCinemaBot(BotSetting):
                     parse_mode=ParseMode.HTML,
             )
             return ConversationHandler.END
-
+        who_send = self.users.chk_users(update.message.from_user.username)
         user_goes = self.users.get_user_for_rulet()
         logging.info(f'{user_goes[1]}')
-        self.users.calc_goes_fuck_to_self(user_goes[0])
+        self.users.calc_goes_fuck_to_self(user_goes[0], who_send)
         main_word = self.users.get_main_word().format(user=user_goes[1])
         logging.info(f'{user_goes[1]}, {main_word}')
 
@@ -660,7 +661,7 @@ class AlcoCinemaBot(BotSetting):
                 connect_timeout=0.5,
                 read_timeout=1.0,
         )
-        bot = Bot(
+        self.bot = bot = Bot(
                 token=self.tg_token, request=req
         )
         updater = Updater(
