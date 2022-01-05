@@ -56,7 +56,7 @@ class AlcoCinemaBot(BotSetting):
                 /who_income - Создать опрос, кто планирует прийти
                 /statistic (-m) (-y) - Вывести статистику
                 /rus_rulet - Сыграть в хуёвую рулетку
-                /get_rep_fys - Вывести статистику хуёвой рулетки
+                /get_rep_fys (-who) - Вывести статистику хуёвой рулетки
                 /insert_phrase - Добавить фразу для определения направления,\n где необходимо вставить логин пользователя пишите @
                 ''',
                 parse_mode=ParseMode.HTML,
@@ -184,7 +184,7 @@ class AlcoCinemaBot(BotSetting):
             )
             return ConversationHandler.END
 
-        report_text = self.users.get_report_fys()
+        report_text = self.users.get_report_fys(update.message.text)
         chat_id = update.message.chat_id
 
         update.message.bot.send_message(

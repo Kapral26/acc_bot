@@ -369,16 +369,27 @@ class WorkWithUser(BotSetting):
         sql = f"INSERT INTO public.fuck_your_selfs (user_id, who_send) VALUES({goes}, {who_send})"
         self._pg_execute(sql, commit=True)
 
-    def get_report_fys(self):
+    def get_report_fys(self, command_text):
         """
         Формирвоание статистики кого сколько раз послали нахуй
+        :command_text -who выведется статистика кто сколько раз отпарвил команду
         :return: текст статисттики
         """
-        sql = u"""
+
+        command_text = command_text.split(" ")[1:]
+
+        if '@' in command_text:
+            command_text = command_text.split('@')[0]
+
+        column = "user_id"
+        if '-who' in command_text:
+            column = "who_send"
+
+        sql = f"""
             SELECT u.username,
                    count(fys.id)
             FROM public.users u
-            LEFT JOIN public.fuck_your_selfs fys ON fys.user_id = u.id
+            LEFT JOIN public.fuck_your_selfs fys ON fys.{column} = u.id
             AND extract(YEAR
                         FROM fys.date_fuck_your_self) = extract(YEAR
                                                                 FROM now())
