@@ -17,7 +17,7 @@ from telegram.utils.request import Request
 from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
 from setting.cinema import Cinema
 
-FIND_MOVIE, FIND_DONE, FINNALY_DONE = range(3)
+FIND_MOVIE, FIND_DONE, FINNALY_DONE, CHECK_SEQUEL = range(4)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)
 
 CALLBACK_BEGIN = 'x1'
@@ -200,7 +200,6 @@ class AlcoCinemaBot(BotSetting):
         обработчик команды /add
         """
         chat_id = update.message.chat_id
-
         update.message.bot.send_message(
                 chat_id=chat_id,
                 text='Введи название фильма:',
@@ -241,6 +240,8 @@ class AlcoCinemaBot(BotSetting):
         Обраобтчик действий выбранного фильма
         """
 
+        # context.user_data["need_del_msg"].append(update.message.message_id)
+
         if update.callback_query.data == 'cancel':
             context.bot.send_message(
                     text='Отмена.\nЧтобы начать сначала введите: /add',
@@ -255,6 +256,25 @@ class AlcoCinemaBot(BotSetting):
 
         inline_buttons = InlineKeyboardMarkup(
                 inline_keyboard=[
+                    [InlineKeyboardButton(text='Да', callback_data='true')],
+                    [InlineKeyboardButton(text='Нет', callback_data='false')]
+                ],
+        )
+
+        context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f" '{movie_data['title']} ({movie_data['year']})' Сиквел? ",
+                reply_markup=inline_buttons,
+        )
+
+        return CHECK_SEQUEL
+
+    def check_sequel_handler(self, update: Update, context: CallbackContext):
+
+        context.user_data[FIND_DONE]["sequel"] = update.callback_query.data
+
+        inline_buttons = InlineKeyboardMarkup(
+                inline_keyboard=[
                     [InlineKeyboardButton(text='Добавить в список на просмотр', callback_data='add_list_view')],
                     [InlineKeyboardButton(text='Посмотрели мы фильм сей', callback_data='was_viewed')]
                 ],
@@ -262,10 +282,9 @@ class AlcoCinemaBot(BotSetting):
 
         context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=f"""Че по фильму "{movie_data['title']} ({movie_data['year']})" ?""",
+                text=f"""Че по фильму "{context.user_data[FIND_DONE]['title']} ({context.user_data[FIND_DONE]['year']})" ?""",
                 reply_markup=inline_buttons,
         )
-
         return FINNALY_DONE
 
     def finally_find_done(self, update: Update, context: CallbackContext):
@@ -578,8 +597,8 @@ class AlcoCinemaBot(BotSetting):
         }
 
         msg_contain = {
-            "да": {"sticker":["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"]},
-            "нет": {"sticker":["CAACAgIAAxkBAAEDBz1hXa2JWSqo8KmVpUZhXmJ3SqOiCQACOQADLNecCBq6rU2GOcG5IQQ"]}
+            "да": {"sticker": ["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"]},
+            "нет": {"sticker": ["CAACAgIAAxkBAAEDBz1hXa2JWSqo8KmVpUZhXmJ3SqOiCQACOQADLNecCBq6rU2GOcG5IQQ"]}
         }
 
         for msg in messages_text.keys():
@@ -682,6 +701,9 @@ class AlcoCinemaBot(BotSetting):
                     ],
                     FIND_DONE: [
                         CallbackQueryHandler(self.find_done_handler, pass_user_data=True),
+                    ],
+                    CHECK_SEQUEL: [
+                        CallbackQueryHandler(self.check_sequel_handler, pass_user_data=True),
                     ],
                     FINNALY_DONE: [
                         CallbackQueryHandler(self.finally_find_done, pass_user_data=True),
