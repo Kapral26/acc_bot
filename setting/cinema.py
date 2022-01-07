@@ -69,15 +69,17 @@ class Cinema(BotSetting):
                             runtime,
                             rating,
                             added,
-                            watch_status)
+                            watch_status,
+                            sequel)
                         values(
-                            {cinema_dict['title']},
-                            {cinema_dict['year']},
+                            {cinema_dict["title"]},
+                            {cinema_dict["year"]},
                             {title_en},
-                            {cinema_dict['runtime']},
-                            {cinema_dict['rating']},
-                            {cinema_dict['user_pk']},
-                            {is_watch}
+                            {cinema_dict["runtime"]},
+                            {cinema_dict["rating"]},
+                            {cinema_dict["user_pk"]},
+                            {is_watch},
+                            {cinema_dict["sequel"]}
                             )
                         ON CONFLICT (title, movie_year, title_en) DO UPDATE SET watch_status = {is_watch}
                     """
@@ -149,7 +151,13 @@ class Cinema(BotSetting):
         Метод для создания данныз для опросника
         :return: словарь фильмов
         """
-        sql = "select c.title, c.movie_year from cinema c where c.poll is true limit 10"
+        sql = """
+            SELECT c.title, c.movie_year
+            FROM cinema c
+            WHERE c.sequel = false
+              AND c.watch_status = false
+            ORDER BY RANDOM()
+            LIMIT 10"""
         return [f"{x} ({y})" for x, y in self._pg_execute(sql).fetchall()]
 
     def for_statistic(self, month, year):
