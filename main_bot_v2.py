@@ -593,7 +593,7 @@ class AlcoCinemaBot(BotSetting):
             "ахмат сила": {"sticker": ["CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
                                        "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA"]},
             "шайтан": {"sticker": ["CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"]},
-            "путин": {"sticker": ["CAACAgIAAxkBAAECamBgw6PTDgUrOLUCMFxjhoci2VbNYwACJAYAAoA_ByhfcEf4inW0mx8E"]}
+            "путин": {"sticker": ["CAACAgQAAxkBAAEEGoZiKcheP226Z4tymWsjTnHMYFezLgACrAwAAvKsYVPBSte24VC1FCME"]}
         }
 
         msg_contain = {
