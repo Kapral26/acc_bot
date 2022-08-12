@@ -593,21 +593,34 @@ class AlcoCinemaBot(BotSetting):
             "ахмат сила": {"sticker": ["CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
                                        "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA"]},
             "шайтан": {"sticker": ["CAACAgIAAxkBAAIBKmC_M1CYl7JrWpXZT41F0MG4tyz0AALMAgAC1x4tBml4DooBSSkHHwQ"]},
-            "путин": {"sticker": ["CAACAgQAAxkBAAEEGoZiKcheP226Z4tymWsjTnHMYFezLgACrAwAAvKsYVPBSte24VC1FCME"]}
+            "путин": {"sticker": ["CAACAgIAAxkBAAEFihRi9ildNSHEVmdVhaU1RRn63dMfbQACZwsAAjxDCUiSIfl9CXKBjSkE",
+                                  "CAACAgIAAxkBAAEFihZi9ilgBvHvo3boYAWUu3oyXYTT5gACngsAAlSnCEjwOPTQlAPwJCkE",
+                                  "CAACAgIAAxkBAAEFihhi9ilj0Zjr85iwL4Zm9UccLpfODQACQQkAAoMvCEhY_4T2LcNQxSkE"]},
+            "пидор": {"sticker": ["CAACAgIAAxkBAAEFiiFi9iuEwwntXihKXJzjddO-T2y0cgAC71sAAmOLRgwtw5KTo0inRSkE"]},
+            "гей": {"sticker": ["CAACAgIAAxkBAAEFiiFi9iuEwwntXihKXJzjddO-T2y0cgAC71sAAmOLRgwtw5KTo0inRSkE"]},
+            "остановитесь": {"sticker": ["CAACAgIAAxkBAAEFiiVi9iyEwgHZlHSEU-BPwDUR2NjsTgACFAAD_wzODGha34IlqarAKQQ"]}
         }
 
         msg_contain = {
-            "да": {"sticker": ["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE"]},
+            "да": {"sticker": ["CAACAgIAAxkBAAEDBw5hXYZkNILo7WOmHG9XwWflKrRF-QAC8A4AAj9UOEmedvYE79OfKCEE",
+                               "CAACAgIAAxkBAAEFiiNi9iw00qF5-VFifb9Sv8OV8UpdMAACdQkAAtA90ggzbi8Nwx3UmykE"]},
             "нет": {"sticker": ["CAACAgIAAxkBAAEDBz1hXa2JWSqo8KmVpUZhXmJ3SqOiCQACOQADLNecCBq6rU2GOcG5IQQ"]}
         }
+
 
         for msg in messages_text.keys():
             logging.debug(f"Уфф, да тут словечко попалось {msg}")
             if msg in update.message.text.lower():
-                context.bot.send_sticker(
-                        chat_id=update.effective_chat.id,
-                        sticker=choice(messages_text[msg]["sticker"])
-                )
+                if msg == "путин":
+                    for sticker_item in messages_text[msg]["sticker"]:
+                        context.bot.send_sticker(
+                                chat_id=update.effective_chat.id,
+                                sticker=sticker_item)
+                else:
+                    context.bot.send_sticker(
+                            chat_id=update.effective_chat.id,
+                            sticker=choice(messages_text[msg]["sticker"])
+                    )
 
         for msg in msg_contain.keys():
             if update.message.text.lower().endswith(msg):
