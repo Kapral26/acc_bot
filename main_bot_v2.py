@@ -560,7 +560,7 @@ class AlcoCinemaBot(BotSetting):
             )
             return ConversationHandler.END
 
-        questions = ["Да, я буду", "Да буду я скорее всего", "Нет, меня не будет"]
+        questions = ["Точно приеду", "Резко слился"]
         message = context.bot.send_poll(
                 update.effective_chat.id,
                 f"Кого ждать в среду({self.next_wednesday()})?",
@@ -598,7 +598,10 @@ class AlcoCinemaBot(BotSetting):
                                   "CAACAgIAAxkBAAEFihhi9ilj0Zjr85iwL4Zm9UccLpfODQACQQkAAoMvCEhY_4T2LcNQxSkE"]},
             "пидор": {"sticker": ["CAACAgIAAxkBAAEFiiFi9iuEwwntXihKXJzjddO-T2y0cgAC71sAAmOLRgwtw5KTo0inRSkE"]},
             "гей": {"sticker": ["CAACAgIAAxkBAAEFiiFi9iuEwwntXihKXJzjddO-T2y0cgAC71sAAmOLRgwtw5KTo0inRSkE"]},
-            "остановитесь": {"sticker": ["CAACAgIAAxkBAAEFiiVi9iyEwgHZlHSEU-BPwDUR2NjsTgACFAAD_wzODGha34IlqarAKQQ"]}
+            "остановитесь": {"sticker": ["CAACAgIAAxkBAAEFiiVi9iyEwgHZlHSEU-BPwDUR2NjsTgACFAAD_wzODGha34IlqarAKQQ"]},
+            "серьезно": {"sticker": ["AACAgIAAxkBAAEF4VBjKL6sw73jwdqLBAcSCpMM37f0hgACphgAAoki6UtL_E4MCZO-1CkE"]},
+            "похуй": {"sticker": ["CAACAgIAAxkBAAEF4VZjKL-7Wt5NVCaoIqbP2qU0-941yAAC4hQAAhe2MEim2ZBFyON2SikE"]},
+            "ну типо": {"sticker": ["CAACAgIAAxkBAAEF4U5jKL5XOv7FvadyXL3HKSyYGQcGbwAC5BgAAqHp8Es6P4c-3GmYpSkE"]}
         }
 
         msg_contain = {
