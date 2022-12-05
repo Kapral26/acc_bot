@@ -466,7 +466,7 @@ class AlcoCinemaBot(BotSetting):
             )
             return ConversationHandler.END
 
-        questions = self.cinema.for_create_poll()
+        questions, links = self.cinema.for_create_poll()
         if len(questions) < 2:
             context.bot.send_message(
                     text="Нехуй Вам любезный, предложить.\n воспользуйтесь командой \\add",
@@ -474,15 +474,23 @@ class AlcoCinemaBot(BotSetting):
                     parse_mode=ParseMode.HTML,
             )
             return ConversationHandler.END
+
+        context.bot.send_message(
+                text=f"Для ленивых, особое сообщение: {''.join(links)}",
+                chat_id=update.effective_chat.id,
+                parse_mode=ParseMode.HTML,
+                disable_web_page_preview = True,
+        )
+
         message = context.bot.send_poll(
                 update.effective_chat.id,
                 f"Псс, ребзи в среду({self.next_wednesday()}) собираемся,\nЧто будем смотреть?",
                 questions,
                 is_anonymous=False,
                 allows_multiple_answers=True,
-                # open_period=30,
                 close_date=self.next_monday(),
         )
+
         # Save some info about the poll the bot_data for later use in receive_poll_answer
         payload = {
             message.poll.id: {
@@ -609,7 +617,6 @@ class AlcoCinemaBot(BotSetting):
                                "CAACAgIAAxkBAAEFiiNi9iw00qF5-VFifb9Sv8OV8UpdMAACdQkAAtA90ggzbi8Nwx3UmykE"]},
             "нет": {"sticker": ["CAACAgIAAxkBAAEDBz1hXa2JWSqo8KmVpUZhXmJ3SqOiCQACOQADLNecCBq6rU2GOcG5IQQ"]}
         }
-
 
         for msg in messages_text.keys():
             logging.debug(f"Уфф, да тут словечко попалось {msg}")

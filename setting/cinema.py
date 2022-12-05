@@ -26,12 +26,13 @@ class Cinema(BotSetting):
 
         for cinema_id, movie in enumerate(movies):
             movie.title_en = movie.title_en.replace("'", "`")
-            tmp_dict = {u'id': cinema_id,
-                        u'title': f"'{movie.title}'",
-                        u'year': movie.year if movie.year else 'null',
-                        u'title_en': f"'{movie.title_en}'" if movie.title_en else 'null',
-                        u'runtime': movie.runtime if movie.runtime else 'null',
-                        u'rating': movie.rating if movie.rating else 'null'
+            tmp_dict = {'id': cinema_id,
+                        'title': f"'{movie.title}'",
+                        'year': movie.year if movie.year else 'null',
+                        'title_en': f"'{movie.title_en}'" if movie.title_en else 'null',
+                        'runtime': movie.runtime if movie.runtime else 'null',
+                        'rating': movie.rating if movie.rating else 'null',
+                        "kinopoisk_id": movie.id if movie.id else 'null'
                         }
             list_movies.append(tmp_dict)
         return list_movies
@@ -70,7 +71,8 @@ class Cinema(BotSetting):
                             rating,
                             added,
                             watch_status,
-                            sequel)
+                            sequel,
+                            kinopoisk_id)
                         values(
                             {cinema_dict["title"]},
                             {cinema_dict["year"]},
@@ -79,7 +81,8 @@ class Cinema(BotSetting):
                             {cinema_dict["rating"]},
                             {cinema_dict["user_pk"]},
                             {is_watch},
-                            {cinema_dict["sequel"]}
+                            {cinema_dict["sequel"]},
+                            {cinema_dict["kinopoisk_id"]}
                             )
                         ON CONFLICT (title, movie_year, title_en) DO UPDATE SET watch_status = {is_watch}
                     """
@@ -95,9 +98,12 @@ class Cinema(BotSetting):
         Генерация списка фильмов для вывода в бот
         :return: словарь фильмов
         """
-        sql = u"""SELECT c.title, c.movie_year, c.id FROM cinema c
-                WHERE c.watch_status = false
-                ORDER BY c.added_date;"""
+        sql = u"""SELECT 
+                    c.title,
+                    c.movie_year,
+                    c.id FROM cinema c
+                    WHERE c.watch_status = false
+                    ORDER BY c.added_date;"""
         execute_cur = self._pg_execute(sql)
         keys = [x.name for x in execute_cur.description]
         return [dict(zip(keys, x)) for x in execute_cur.fetchall()]
@@ -152,13 +158,19 @@ class Cinema(BotSetting):
         :return: словарь фильмов
         """
         sql = """
-            SELECT c.title, c.movie_year
+            SELECT c.title, c.movie_year,
+            '<a href="https://www.kinopoisk.ru/film/' || c.kinopoisk_id || '">' || c.title|| '</a>' as link
             FROM cinema c
             WHERE c.sequel = false
               AND c.watch_status = false
             ORDER BY RANDOM()
             LIMIT 10"""
-        return [f"{x} ({y})" for x, y in self._pg_execute(sql).fetchall()]
+
+        query_result = self._pg_execute(sql).fetchall()
+        question = [f"{x[0]} ({x[1]})" for x in query_result]
+        links = [f"* {x[2]}\n" for x in query_result]
+
+        return question, links
 
     def for_statistic(self, month, year):
         """
