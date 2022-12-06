@@ -476,7 +476,7 @@ class AlcoCinemaBot(BotSetting):
             return ConversationHandler.END
 
         context.bot.send_message(
-                text=f"Для ленивых, особое сообщение: {''.join(links)}",
+                text=f"Для ленивых, особое сообщение:<br> {''.join(links)}",
                 chat_id=update.effective_chat.id,
                 parse_mode=ParseMode.HTML,
                 disable_web_page_preview = True,
