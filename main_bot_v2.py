@@ -596,7 +596,6 @@ class AlcoCinemaBot(BotSetting):
     @log_error
     def all_message(self, update: Update, context: CallbackContext):
         """Обработка всех входящих сообщений."""
-
         messages_text = {
             "ахмат сила": {"sticker": ["CAACAgIAAxkBAAICLGDBE8fnRHep4kxsPSEV-axEt8J4AAJPAAPXHi0GeLCyeFoYqwUfBA",
                                        "CAACAgIAAxkBAAICI2DBEs8OWKmi_s5V2vkk_tGz6bKHAAJNAAPXHi0Gyz6QUMa2fbIfBA"]},
@@ -621,16 +620,10 @@ class AlcoCinemaBot(BotSetting):
         for msg in messages_text.keys():
             logging.debug(f"Уфф, да тут словечко попалось {msg}")
             if msg in update.message.text.lower():
-                if msg == "путин":
-                    for sticker_item in messages_text[msg]["sticker"]:
-                        context.bot.send_sticker(
-                                chat_id=update.effective_chat.id,
-                                sticker=sticker_item)
-                else:
-                    context.bot.send_sticker(
-                            chat_id=update.effective_chat.id,
-                            sticker=choice(messages_text[msg]["sticker"])
-                    )
+                context.bot.send_sticker(
+                        chat_id=update.effective_chat.id,
+                        sticker=choice(messages_text[msg]["sticker"])
+                )
 
         for msg in msg_contain.keys():
             if update.message.text.lower().endswith(msg):
@@ -654,7 +647,27 @@ class AlcoCinemaBot(BotSetting):
                 context.bot.send_message(
                         text=msg_text,
                         chat_id=update.effective_chat.id
-                )
+                ) @log_error
+
+    @log_error
+    def skajem_net_pidoram(self, update: Update, context: CallbackContext):
+        """Обработка всех входящих сообщений."""
+        from_user = update.message.from_user.name
+        msg_text = f'{from_user} - Поешь говна ублюдок. Разраб тебя высрал, а не написал.'
+        context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=msg_text
+        )
+
+    @log_error
+    def skajem_net_posobnikam_pidorov(self, update: Update, context: CallbackContext):
+        """Обработка всех входящих сообщений."""
+        from_user = update.message.from_user.name
+        msg_text = f'{from_user} - Ну и нахуй ты это делаешь? Говна поел? Долбоёб.'
+        context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=msg_text
+        )
 
     @chk_user
     @log_error
@@ -770,7 +783,10 @@ class AlcoCinemaBot(BotSetting):
         updater.dispatcher.add_handler(CommandHandler('rus_rulet', self.rus_rulet_handler))
         updater.dispatcher.add_handler(CommandHandler('get_rep_fys', self.get_rep_fys_handler))
         updater.dispatcher.add_handler(CommandHandler('insert_phrase', self.insert_main_phrase_handler))
+        updater.dispatcher.add_handler(MessageHandler(Filters.user(567974246), self.skajem_net_pidoram))
+        updater.dispatcher.add_handler(MessageHandler(Filters.regex(r'pidor_pro_bot'), self.skajem_net_posobnikam_pidorov))
         updater.dispatcher.add_handler(MessageHandler(Filters.text, self.all_message))
+
 
         # Начать бесконечную обработку входящих сообщений
         try:
