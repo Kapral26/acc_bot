@@ -22,6 +22,7 @@ class UserRepository:
     get_user(self, user_id: int) -> UserProfile | None: Получает пользователя по идентификатору.
     get_user_by_name(self, username: str) -> UserProfile | None: Получает пользователя по имени.
     """
+
     session_factory: Callable[[T], AsyncSession]
 
     async def create_user(
@@ -30,6 +31,13 @@ class UserRepository:
             first_name: str,
             full_name: str
     ) -> User:
+        """
+        Асинхронный репозиторий для управления пользователями в базе данных.
+
+        Позволяет создавать новых пользователей, получать список всех пользователей,
+        а также искать пользователя по идентификатору или имени. Использует асинхронные
+        сессии SQLAlchemy для взаимодействия с таблицей пользователей.
+        """
         stmnt = (
             insert(User)
             .values(
@@ -47,6 +55,13 @@ class UserRepository:
 
         new_user = await self.get_user_by_id(new_user_id)
         return new_user
+
+
+    async def get_users(self) -> list[User]:
+        async with self.session_factory() as session:
+            query_result = await session.execute(select(User))
+            return query_result.scalars().all()
+
 
     async def get_user_by_id(self, user_id: int) -> User | None:
         """

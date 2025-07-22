@@ -17,23 +17,23 @@ async def create_user(
     body: UsersCreateSchema,
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
-    """
-    Создает нового пользователя.
-
-    Описание:
-    - Создает нового пользователя в базе данных.
-    - Генерирует токен доступа для нового пользователя.
-    - Возвращает данные пользователя в формате UserLoginSchema.
-
-    Аргументы:
-    - body: Данные пользователя в формате UserSchema.
-
-    Возвращает:
-    - Данные пользователя в формате UserLoginSchema.
-    """
     try:
-        create_user_result = await user_service.create_user(body.username, body.password)
+        create_user_result = await user_service.create_user(
+            username=body.username,
+            first_name=body.first_name,
+            full_name=body.full_name
+        )
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
 
     return create_user_result
+
+@router.get("/", response_model=list[UserSchema])
+async def get_users(
+    user_service: Annotated[UserService, Depends(get_user_service)]
+) -> list[UserSchema]:
+    try:
+        users = await user_service.get_users()
+    except Exception as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    return users

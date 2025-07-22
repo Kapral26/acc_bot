@@ -2,9 +2,12 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from app.roles.repository import RolesRepository
+from app.roles.service import RolesService
 from app.settings.database.database import async_session_factory
 from app.users.repository import UserRepository
 from app.users.service import UserService
+
 
 async def get_user_repository() -> UserRepository:
     """
@@ -31,3 +34,11 @@ def get_user_service(
     :return: Экземпляр UserService.
     """
     return UserService(user_repository=user_repository)
+
+async def get_roles_repository() -> RolesRepository:
+    return RolesRepository(session_factory=async_session_factory)
+
+def get_roles_service(
+        roles_repository: Annotated[RolesRepository, Depends(get_roles_repository)],
+) -> RolesService:
+    return RolesService(roles_repository=roles_repository)

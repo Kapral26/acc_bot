@@ -1,10 +1,8 @@
 """Содержит код для настройки соединения с базой данных, включая параметры подключения и инициализацию SQLAlchemy."""
 
 from datetime import datetime
-from typing import Annotated
 
-from sqlalchemy import String
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.settings.configs.settings import Settings
@@ -19,28 +17,6 @@ async_engine = create_async_engine(
 )
 
 async_session_factory = async_sessionmaker(async_engine)
-
-# Если указать в Mapped данный тип поля, то оно будет являться первичным ключом
-created_at = Annotated[
-    datetime,  # Тип данных datetime
-    mapped_column(
-        # При добавлении записи в таблицу, автоматически устанавливается текущее время
-        default=datetime.now
-        # server_default - Указывает, что будет использована СУБД для функции TIMEZONE
-        # Параметр default устанавливает значение по умолчанию, но на уровне python.
-    ),
-]
-updated_at = Annotated[
-    datetime,  # Тип данных datetime
-    mapped_column(
-        default=datetime.now,
-        onupdate=datetime.now,  # При обновлении записи, автоматически устанавливается текущее время
-        # метод now не инициализируем, что он отрабатывал каждый раз при добавлении записи
-    ),
-]
-
-intpk = Annotated[int, mapped_column(primary_key=True)]
-str_64 = mapped_column(String(64), nullable=False)
 
 
 class Base(DeclarativeBase):
@@ -63,9 +39,16 @@ class Base(DeclarativeBase):
     """
 
     # Поле для хранения даты и времени создания записи.  Автоматически заполняется при создании.
-    created_at: Mapped[created_at]
+    created_at: Mapped[datetime] = mapped_column(
+        # При добавлении записи в таблицу, автоматически устанавливается текущее время
+        default=datetime.now
+    ),
     # Поле для хранения даты и времени последнего обновления записи. Автоматически обновляется при каждом изменении.
-    updated_at: Mapped[updated_at]
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.now,
+        onupdate=datetime.now,  # При обновлении записи, автоматически устанавливается текущее время
+        # метод now не инициализируем, что он отрабатывал каждый раз при добавлении записи
+    )
 
     # Количество столбцов, которые будут отображаться в методе __repr__ по умолчанию.
     repr_cols_num = 3

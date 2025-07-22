@@ -22,3 +22,7 @@ class UserService:
         )
         new_user: UserSchema = UserSchema.model_validate(new_user)
         return new_user
+
+    async def get_users(self) -> list[UserSchema]:
+        users = await self.user_repository.get_users()
+        return [UserSchema.model_validate(x) for x in users]

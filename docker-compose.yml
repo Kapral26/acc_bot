@@ -35,20 +35,20 @@ services:
     tty: true
     stdin_open: true
 
-  cache:
-    image: redis:7.2.4-alpine
-    container_name: redis_akk_bot
-    ports:
-      - "6379:6379"
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+#  cache:
+#    image: redis:7.2.4-alpine
+#    container_name: redis_akk_bot
+#    ports:
+#      - "6379:6379"
+#    restart: always
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.50'
+#          memory: 512M
+#        reservations:
+#          cpus: '0.25'
+#          memory: 256M
 
 
 volumes:

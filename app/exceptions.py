@@ -8,6 +8,16 @@ class UserNotFoundError(Exception):
 
     detail = "User not found"
 
+class RoleNotFoundException(Exception):
+    """
+    Исключение, которое возникает, когда пользователь не найден.
+
+    Атрибуты:
+    detail (str): Сообщение об ошибке.
+    """
+
+    detail = "Roles not found"
+
 
 class UserInvalidError(Exception):
     """

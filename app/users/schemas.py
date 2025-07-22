@@ -1,14 +1,6 @@
 from pydantic import BaseModel
 
 
-class RoleSchema(BaseModel):
-    id: int
-    role_name: str
-
-    class Config:
-        from_attributes = True
-
-
 class UserSchema(BaseModel):
     id: int
     username: str
