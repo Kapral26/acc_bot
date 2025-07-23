@@ -1,48 +1,15 @@
 class UserNotFoundError(Exception):
-    """
-    Исключение, которое возникает, когда пользователь не найден.
 
-    Атрибуты:
-    detail (str): Сообщение об ошибке.
-    """
 
     detail = "User not found"
 
 class RoleNotFoundException(Exception):
-    """
-    Исключение, которое возникает, когда пользователь не найден.
-
-    Атрибуты:
-    detail (str): Сообщение об ошибке.
-    """
 
     detail = "Roles not found"
 
 
-class UserInvalidError(Exception):
-    """
-    Исключение, которое возникает, когда пароль пользователя неверный.
+class BadPhraseNotFoundError(Exception):
 
-    Атрибуты:
-    detail (str): Сообщение об ошибке.
-    """
-
-    detail = "User password invalid"
+    detail = "Не найдена фраза для отправки по направлению. Вероятно они вовсе не добавлены."
 
 
-class TokenExpiredError(Exception):
-    """Исключение, возникающее при истечении срока действия токена."""
-
-    detail = "Token expired"
-
-
-class TokenIsNotCorrectError(Exception):
-    """Исключение, возникающее при некорректности токена."""
-
-    detail = "Token is not correct"
-
-
-class TaskNotFoundError(Exception):
-    """Исключение, возникающее при отсутствии задачи."""
-
-    detail = "Task not found"

@@ -7,7 +7,7 @@ from app.settings.database.database import Base
 class Role(Base):
     __tablename__ = "roles"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     users = relationship(
         "User",

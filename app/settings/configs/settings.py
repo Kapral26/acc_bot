@@ -5,12 +5,11 @@
 секретные ключи и другие переменные окружения.
 - Может использоваться для загрузки переменных окружения из `.env` файлов и предоставления их в виде удобных атрибутов.
 """
-from datetime import timezone, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".env"
 

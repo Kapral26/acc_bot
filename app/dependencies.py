@@ -2,6 +2,10 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from app.analytics.bad_phrase.repository import BadPhraseRepository
+from app.analytics.bad_phrase.service import BadPhraseService
+from app.analytics.repository import AnalyticsRepository
+from app.analytics.service import AnalyticsService
 from app.roles.repository import RolesRepository
 from app.roles.service import RolesService
 from app.settings.database.database import async_session_factory
@@ -42,3 +46,20 @@ def get_roles_service(
         roles_repository: Annotated[RolesRepository, Depends(get_roles_repository)],
 ) -> RolesService:
     return RolesService(roles_repository=roles_repository)
+
+
+async def get_analytics_repository() -> RolesRepository:
+    return AnalyticsRepository(session_factory=async_session_factory)
+
+def get_analytics_service(
+        analytics_repository: Annotated[RolesRepository, Depends(get_analytics_repository)],
+) -> AnalyticsService:
+    return AnalyticsService(analytics_repository=analytics_repository)
+
+async def get_bad_phrase_repository() -> BadPhraseRepository:
+    return BadPhraseRepository(session_factory=async_session_factory)
+
+def get_bad_phrase_service(
+        bad_phrase_repository: Annotated[BadPhraseRepository, Depends(get_bad_phrase_repository)],
+) -> BadPhraseService:
+    return BadPhraseService(bad_phrase_repository=bad_phrase_repository)

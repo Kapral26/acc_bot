@@ -4,14 +4,36 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from app.dependencies import get_roles_service
-from app.roles.schemas import RoleCRUD, RoleSchema
-from app.roles.service import RolesService
+from app.analytics.schemas import RoleCRUD, RoleSchema
+from app.analytics.service import RolesService
 
 router = APIRouter(
-    prefix="/roles",
-    tags=["roles"],
+    prefix="/analytics",
+    tags=["analytics"],
 )
+
+
+# Создать новую роль
+@router.post("/", response_model=RoleSchema, status_code=status.HTTP_201_CREATED)
+async def create_role(
+        role: RoleCRUD,
+        roles_service: Annotated[RolesService, Depends(get_roles_service)]
+):
+    try:
+        roles = await roles_service.create_role(role)
+    except Exception as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    return roles
+
+
+@router.put("/{role_id}", response_model=RoleSchema, status_code=status.HTTP_200_OK)
+async def update_role(role_id:int,  role: RoleCRUD, roles_service: Annotated[RolesService, Depends(get_roles_service)]):
+    try:
+        roles = await roles_service.update_role(role_id, role)
+    except Exception as error:
+        raise HTTPException(status_code=404, detail=str(error))
+    return roles
+
 
 # Получить все роли
 @router.get("/", response_model=list[RoleSchema])
@@ -41,26 +63,10 @@ async def get_role_by_name(role_name: str, role_service: Annotated[RolesService,
         raise HTTPException(status_code=422, detail=str(error))
     return role
 
-# Создать новую роль
-@router.post("/", response_model=RoleSchema, status_code=status.HTTP_201_CREATED)
-async def create_role(
-        role: RoleCRUD,
-        roles_service: Annotated[RolesService, Depends(get_roles_service)]
-):
-    try:
-        roles = await roles_service.create_role(role)
-    except Exception as error:
-        raise HTTPException(status_code=422, detail=str(error))
-    return roles
+
 
 # Обновить роль
-@router.put("/{role_id}", response_model=RoleSchema, status_code=status.HTTP_200_OK)
-async def update_role(role_id:int,  role: RoleCRUD, roles_service: Annotated[RolesService, Depends(get_roles_service)]):
-    try:
-        roles = await roles_service.update_role(role_id, role)
-    except Exception as error:
-        raise HTTPException(status_code=404, detail=str(error))
-    return roles
+
 
 
 # Удалить роль

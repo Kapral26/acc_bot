@@ -1,13 +1,23 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar, Callable
+from typing import TypeVar
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.users.models import User
 
 T = TypeVar("T")
 
+async def find_user_by_username(session: AsyncSession, username: str) -> User | None:
+    stmt = select(User).where(User.username == username)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+async def get_random_user(session: AsyncSession) -> User | None:
+    stmt = select(User).order_by(func.random()).limit(1)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
 
 @dataclass
 class UserRepository:
@@ -24,6 +34,8 @@ class UserRepository:
     """
 
     session_factory: Callable[[T], AsyncSession]
+
+
 
     async def create_user(
             self,
@@ -84,23 +96,8 @@ class UserRepository:
             return user
 
     async def get_user_by_name(self, username: str) -> User | None:
-        """
-        Получает пользователя по имени.
-
-        Описание:
-        - Выполняет запрос на выборку пользователя по имени.
-        - Возвращает первого найденного пользователя или None, если пользователь не найден.
-
-        Аргументы:
-        - username: Имя пользователя.
-
-        Возвращает:
-        - Найденного пользователя или None, если пользователь не найден.
-        """
-        query = select(User).where(User.username == username)
         async with self.session_factory() as session:
             # Сбрасываем кэш SQLAlchemy
             session.expire_all()
-            query_result = await session.execute(query)
-            user = query_result.scalar_one_or_none()
+            user = await self.find_user_by_username(session, username)
             return user

@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
 
 """Настройки бота"""
 
 import logging
 import time
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 from random import randint
 
 import psycopg2
 from prettytable import from_db_cursor
 
-from .config import tg_token, pg_connect
+from .config import pg_connect, tg_token
 
 # Логирование
 logging.basicConfig(filename="acc_bot.log", level=logging.INFO,
-                    format='%(levelname)s %(filename)s %(module)s.%(funcName)s | %(asctime)s: %(message)s', )
+                    format="%(levelname)s %(filename)s %(module)s.%(funcName)s | %(asctime)s: %(message)s", )
 
 
 def log_error(func):
@@ -31,8 +30,8 @@ def log_error(func):
         try:
             return func(*args, **kwargs)
         except Exception as error:
-            print(f'{func.__name__}: {error}'.encode('utf8'))
-            logging.error(f'{func.__name__}: {error}'.encode('utf8'))
+            print(f"{func.__name__}: {error}".encode())
+            logging.exception(f"{func.__name__}: {error}".encode())
 
     return inner
 
@@ -57,8 +56,8 @@ def chk_user(func):
             chat_id = args[1].message.from_user.id
             w_user = WorkWithUser()
             w_user.chk_users(user, first_name, full_name)
-            if '/' in args[1].message.text:
-                logging.info(f'Пользователь: {user}, Запустил комаду: {args[1].message.text}, chat_id: {chat_id}')
+            if "/" in args[1].message.text:
+                logging.info(f"Пользователь: {user}, Запустил комаду: {args[1].message.text}, chat_id: {chat_id}")
         return func(*args, **kwargs)
 
     return inner
@@ -73,11 +72,11 @@ class PgConnect:
         """
         Подключение к pg
         """
-        conn = psycopg2.connect(dbname=pg_connect['dbname'],
-                                user=pg_connect['user'],
-                                password=pg_connect['password'],
-                                host=pg_connect['host'],
-                                port=pg_connect['port'])
+        conn = psycopg2.connect(dbname=pg_connect["dbname"],
+                                user=pg_connect["user"],
+                                password=pg_connect["password"],
+                                host=pg_connect["host"],
+                                port=pg_connect["port"])
 
         cursor = conn.cursor()
         return {"conn": conn, "cur":cursor}
@@ -125,7 +124,7 @@ class PgConnect:
                     if not is_new:
                         self.close_pg(rollback=True)
 
-                    if is_new and try_connect > 1 or not is_new:
+                    if (is_new and try_connect > 1) or not is_new:
                         logging.debug(f"Try connect pg: {try_connect}")
 
                     self.__pg_connect = self.pg_connection()
@@ -146,7 +145,7 @@ class PgConnect:
         except:
             if commit:
                 con.rollback()
-            logging.error(f"PG error:\nsql:{sql}\nparams:{params if params else None}")
+            logging.exception(f"PG error:\nsql:{sql}\nparams:{params if params else None}")
             raise
         finally:
             if commit:
@@ -157,9 +156,7 @@ class PgConnect:
 
 
 class BotSetting(PgConnect):
-    """
-    Дополнительный класс для работы бота
-    """
+    """Дополнительный класс для работы бота"""
 
     def __init__(self):
         PgConnect.__init__(self)
@@ -182,35 +179,35 @@ class BotSetting(PgConnect):
         След. понедельник
         :return: дата
         """
-        return date.strftime(self.next_closest(1), '%d.%m.%Y')
+        return date.strftime(self.next_closest(1), "%d.%m.%Y")
 
     def next_tuesday(self):
         """
         След. вторник
         :return: дата
         """
-        return date.strftime(self.next_closest(2), '%d.%m.%Y')
+        return date.strftime(self.next_closest(2), "%d.%m.%Y")
 
     def next_wednesday(self):
         """
         След. среда
         :return: дата
         """
-        return date.strftime(self.next_closest(3), '%d.%m.%Y')
+        return date.strftime(self.next_closest(3), "%d.%m.%Y")
 
     def next_thursday(self):
         """
         След. четверг
         :return: дата
         """
-        return date.strftime(self.next_closest(4), '%d.%m.%Y')
+        return date.strftime(self.next_closest(4), "%d.%m.%Y")
 
     def next_friday(self):
         """
         След. пятница
         :return: дата
         """
-        return date.strftime(self.next_closest(5), '%d.%m.%Y')
+        return date.strftime(self.next_closest(5), "%d.%m.%Y")
 
     def stat_com_prepare_params(self, command_text):
         """
@@ -218,37 +215,36 @@ class BotSetting(PgConnect):
         :param command_text: команда
         :return: тест статистики
         """
-
         needs_month, needs_year = None, None
         command_text = command_text.split(" ")[1:]
-        commands = dict(zip(command_text[::2], command_text[1::2]))
+        commands = dict(zip(command_text[::2], command_text[1::2], strict=False))
 
-        if '@' in command_text:
-            command_text = command_text.split('@')[0]
+        if "@" in command_text:
+            command_text = command_text.split("@")[0]
 
-        elif '-all' in command_text:
+        elif "-all" in command_text:
             needs_month, needs_year = False, False
 
-        elif commands.get('-y'):
-            month = commands.get('-m') if commands.get('-m') else False
-            year = commands.get('-y')
-            if month and month not in [f'{x}' for x in range(1, 13)]:
-                needs_month, needs_year = 'Error', 'Нет блять такого месяца, говно'
-            elif year not in [f'{x}' for x in range(2018, 2033)]:
-                needs_month, needs_year = 'Error', 'Ну и что ты ввел? ишак'
+        elif commands.get("-y"):
+            month = commands.get("-m") if commands.get("-m") else False
+            year = commands.get("-y")
+            if month and month not in [f"{x}" for x in range(1, 13)]:
+                needs_month, needs_year = "Error", "Нет блять такого месяца, говно"
+            elif year not in [f"{x}" for x in range(2018, 2033)]:
+                needs_month, needs_year = "Error", "Ну и что ты ввел? ишак"
             needs_month, needs_year = month, year
-        elif commands.get('-m'):
-            year = commands.get('-y') if commands.get('-y') else datetime.today().year
-            month = commands.get('-m')
+        elif commands.get("-m"):
+            year = commands.get("-y") if commands.get("-y") else datetime.today().year
+            month = commands.get("-m")
             year_range = [x for x in range(1970, 2033)]
-            month_range = [f'{x}' for x in range(1, 13)]
+            month_range = [f"{x}" for x in range(1, 13)]
             if month not in month_range:
-                needs_month, needs_year = 'Error', 'Нет блять такого месяца, говно'
+                needs_month, needs_year = "Error", "Нет блять такого месяца, говно"
             elif year not in year_range:
-                needs_month, needs_year = 'Error', 'Ну и что ты ввел? ишак'
+                needs_month, needs_year = "Error", "Ну и что ты ввел? ишак"
             needs_month, needs_year = month, year
 
-        elif command_text == [] or command_text == '/statistic':
+        elif command_text == [] or command_text == "/statistic":
             needs_month, needs_year = date.today().month, date.today().year
 
         else:
@@ -259,7 +255,7 @@ class BotSetting(PgConnect):
                 /statistic -y 2020: За весь 2020 год
                 /statistic -m 4 -y 2020: за 4 месяц 2020 года
                 /statistic -m 4 -y л: ошибка"""
-            needs_month, needs_year = 'Error', f'Хуйня ты ебаная, не правильно кулючи заюзал, {text_help}'
+            needs_month, needs_year = "Error", f"Хуйня ты ебаная, не правильно кулючи заюзал, {text_help}"
         return needs_month, needs_year
 
     def prepare_stat_text(self, dict_movies):
@@ -268,9 +264,9 @@ class BotSetting(PgConnect):
         :param dict_movies: словарь фильмов
         :return: тест для отправки в бот
         """
-        cinema_list = '\n'.join([x['title'] for x in dict_movies])
+        cinema_list = "\n".join([x["title"] for x in dict_movies])
         count_movies = len(dict_movies)
-        count_min = sum([x['runtime'] if x['runtime'] else 0 for x in dict_movies])
+        count_min = sum([x["runtime"] if x["runtime"] else 0 for x in dict_movies])
         count_hours = f"{count_min // 60} час(а/ов) {count_min % 60} мин."
         text = f"""
                 Ну`с итого:\n{cinema_list}
@@ -287,7 +283,7 @@ class BotSetting(PgConnect):
          для указания в какое место необходимо вставить логин
 
         """
-        text = text.replace('@', '@{user}')
+        text = text.replace("@", "@{user}")
         query_insert = f"""INSERT INTO public.main_words
                         (words)
                         VALUES('{text}')"""
@@ -295,7 +291,7 @@ class BotSetting(PgConnect):
             self._pg_execute(query_insert, commit=True)
             return True
         except Exception as error:
-            logging.error(error)
+            logging.exception(error)
             return False
 
 
@@ -375,14 +371,13 @@ class WorkWithUser(BotSetting):
         :command_text -who выведется статистика кто сколько раз отпарвил команду
         :return: текст статисттики
         """
-
         command_text = command_text.split(" ")[1:]
 
-        if '@' in command_text:
-            command_text = command_text.split('@')[0]
+        if "@" in command_text:
+            command_text = command_text.split("@")[0]
 
         column = "user_id"
-        if '-who' in command_text:
+        if "-who" in command_text:
             column = "who_send"
 
         sql = f"""
@@ -414,12 +409,12 @@ class WorkWithUser(BotSetting):
         Выбрать фразу которой пользователь будет послан нахуй
         :return: фраза из БД
         """
-        sql = u"""SELECT words from public.main_words"""
+        sql = """SELECT words from public.main_words"""
         main_words = self._pg_execute(sql).fetchall()
         index_main_words = randint(0, len(main_words) - 1)
         main_word = main_words[index_main_words]
-        return f'{main_word[0]}\n'
+        return f"{main_word[0]}\n"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     BotSetting().pg_connect()
