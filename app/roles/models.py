@@ -9,4 +9,8 @@ class Role(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    users = relationship("User", back_populates="role_rel")
+    users = relationship(
+        "User",
+        secondary="user_roles",
+        back_populates="roles"
+    )

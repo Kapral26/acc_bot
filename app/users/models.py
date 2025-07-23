@@ -11,7 +11,15 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(64), nullable=False)
     first_name: Mapped[str] = mapped_column(String(64), nullable=False)
     full_name: Mapped[str] = mapped_column(String(128), nullable=False)
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
-    role_rel = relationship("roles", back_populates="users")
+    roles = relationship(
+        "Role",
+        secondary="user_roles",
+        back_populates="users",
+    )
 
 
+class UserRoles(Base):
+    __tablename__ = "user_roles"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
