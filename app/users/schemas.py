@@ -1,19 +1,15 @@
 from pydantic import BaseModel
 
 
-class UserSchema(BaseModel):
-    id: int
+class UsersCreateSchema(BaseModel):
     username: str
     first_name: str | None = None
-    full_name: str
-    role_id: int
+    last_name: str | None = None
+    role_id: int = 3
 
     class Config:
         from_attributes = True
 
 
-class UsersCreateSchema(BaseModel):
-    username: str
-    first_name: str | None = None
-    full_name: str
-    role_id: int
+class UserSchema(UsersCreateSchema):
+    id: int

@@ -11,6 +11,8 @@ class Analytics(Base):
     who_send_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     bad_phrase_id: Mapped[int] = mapped_column(ForeignKey("bad_phrases.id"), nullable=False)
     users = relationship(
-        "User",
-        back_populates="analytics"
+        "User", foreign_keys=[user_id], back_populates="analytics_as_user"
+    )
+    who_send = relationship(
+        "User", foreign_keys=[who_send_id], back_populates="analytics_who_sent"
     )

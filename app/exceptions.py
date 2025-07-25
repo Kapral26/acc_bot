@@ -1,8 +1,3 @@
-class UserNotFoundError(Exception):
-
-
-    detail = "User not found"
-
 class RoleNotFoundException(Exception):
 
     detail = "Roles not found"

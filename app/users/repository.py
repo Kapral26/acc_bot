@@ -3,8 +3,10 @@ from dataclasses import dataclass
 from typing import TypeVar
 
 from sqlalchemy import insert, select, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.users.exceptions import UserWasExits
 from app.users.models import User
 
 T = TypeVar("T")
@@ -41,7 +43,7 @@ class UserRepository:
             self,
             username: str,
             first_name: str,
-            full_name: str
+            last_name: str
     ) -> User:
         """
         Асинхронный репозиторий для управления пользователями в базе данных.
@@ -55,13 +57,16 @@ class UserRepository:
             .values(
                 username=username,
                 first_name=first_name,
-                full_name=full_name,
+                last_name=last_name,
             )
             .returning(User.id)
         )
 
         async with self.session_factory() as session:
-            query_result = await session.execute(stmnt)
+            try:
+                query_result = await session.execute(stmnt)
+            except IntegrityError:
+                raise UserWasExits
             new_user_id = query_result.scalars().first()
             await session.commit()
 

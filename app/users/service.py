@@ -13,12 +13,12 @@ class UserService:
             self,
             username: str,
             first_name: str,
-            full_name: str
+            last_name: str
     ) -> UserSchema:
         new_user: User = await self.user_repository.create_user(
             username,
             first_name,
-            full_name
+            last_name
         )
         new_user: UserSchema = UserSchema.model_validate(new_user)
         return new_user

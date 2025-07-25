@@ -1,78 +1,62 @@
-
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from app.analytics.schemas import RoleCRUD, RoleSchema
-from app.analytics.service import RolesService
+from app.analytics.bad_phrase.schemas import BadPhraseCRUD
+from app.analytics.service import AnalyticsService
+from app.dependencies import get_analytics_service
+from app.settings.broker.kafka import kafka_producer
+from app.settings.configs.settings import Settings
+from app.users.schemas import UsersCreateSchema
 
-router = APIRouter(
-    prefix="/analytics",
-    tags=["analytics"],
-)
+router = APIRouter(prefix="/analytics", tags=["Analytics"])
+settings = Settings()
 
+# Определим топик для ответов. Можно вынести в настройки.
+REPLY_TOPIC = "analytics_replies"
 
-# Создать новую роль
-@router.post("/", response_model=RoleSchema, status_code=status.HTTP_201_CREATED)
-async def create_role(
-        role: RoleCRUD,
-        roles_service: Annotated[RolesService, Depends(get_roles_service)]
+@router.post("/track", status_code=status.HTTP_202_ACCEPTED)
+async def track_user_request_async(
+        who_send: UsersCreateSchema,
 ):
+    correlation_id = str(uuid.uuid4())
+
+    # Заголовки, чтобы консьюмер знал, куда и как отправить ответ
+    headers = [
+        ("reply_topic", REPLY_TOPIC.encode("utf-8")),
+        ("correlation_id", correlation_id.encode("utf-8"))
+    ]
+
     try:
-        roles = await roles_service.create_role(role)
-    except Exception as error:
-        raise HTTPException(status_code=422, detail=str(error))
-    return roles
+        # Отправляем событие в основной топик Kafka
+        await kafka_producer.send_event(
+            topic=settings.kafka_topic,
+            event=who_send.model_dump(),
+            headers=headers
+        )
+        return {"message": "Request accepted for processing.", "correlation_id": correlation_id}
+    except Exception as e:
+        # Обработка случая, если Kafka недоступна
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Could not send message to Kafka: {e}"
+        )
 
-
-@router.put("/{role_id}", response_model=RoleSchema, status_code=status.HTTP_200_OK)
-async def update_role(role_id:int,  role: RoleCRUD, roles_service: Annotated[RolesService, Depends(get_roles_service)]):
-    try:
-        roles = await roles_service.update_role(role_id, role)
-    except Exception as error:
-        raise HTTPException(status_code=404, detail=str(error))
-    return roles
-
-
-# Получить все роли
-@router.get("/", response_model=list[RoleSchema])
-async def get_roles(
-roles_service: Annotated[RolesService, Depends(get_roles_service)],
-):
-    try:
-        roles = await roles_service.get_roles()
-    except Exception as error:
-        raise HTTPException(status_code=422, detail=str(error))
-    return roles
-
-# Получить одну роль по id
-@router.get("/by-id/{role_id}", response_model=RoleSchema)
-async def get_role_by_id(role_id: int, roles_service: Annotated[RolesService, Depends(get_roles_service)],):
-    try:
-        roles = await roles_service.get_role_by_id(role_id)
-    except Exception as error:
-        raise HTTPException(status_code=422, detail=str(error))
-    return roles
-
-@router.get("/by-name/{role_name}", response_model=RoleSchema)
-async def get_role_by_name(role_name: str, role_service: Annotated[RolesService, Depends(get_roles_service)]):
-    try:
-        role = await role_service.get_role_by_name(role_name)
-    except Exception as error:
-        raise HTTPException(status_code=422, detail=str(error))
-    return role
-
-
-
-# Обновить роль
-
-
-
-# Удалить роль
-@router.delete("/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_role(role_id: int, roles_service: Annotated[RolesService, Depends(get_roles_service)]):
-    try:
-        await roles_service.delete_role(role_id)
-    except Exception as error:
-        raise HTTPException(status_code=404, detail=str(error))
+# Старый синхронный эндпоинт можно оставить для отладки или удалить
+@router.post("/track_sync")
+async def create_bad_phrase_request(
+        who_send: UsersCreateSchema,
+        analytics_service: Annotated[AnalyticsService, Depends(get_analytics_service)],
+) -> BadPhraseCRUD:
+    """
+    (Synchronous) Tracks user request and returns the result directly.
+    """
+    track_result = await analytics_service.track_user_request(who_send)
+    if not track_result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not track request",
+        )
+    return track_result

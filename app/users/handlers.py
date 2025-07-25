@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies import get_user_service
+from app.users.exceptions import UserWasExits
 from app.users.schemas import UserSchema, UsersCreateSchema
 from app.users.service import UserService
 
@@ -21,8 +22,10 @@ async def create_user(
         create_user_result = await user_service.create_user(
             username=body.username,
             first_name=body.first_name,
-            full_name=body.full_name
+            last_name=body.last_name
         )
+    except UserWasExits as e:
+        raise HTTPException(status_code=409, detail=e.detail)
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
 

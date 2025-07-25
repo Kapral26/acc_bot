@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.analytics.bad_phrase.schemas import BadPhraseCRUD
 from app.analytics.repository import AnalyticsRepository
 from app.roles.schemas import RoleCRUD, RoleSchema
 from app.users.schemas import UsersCreateSchema
@@ -9,7 +10,7 @@ from app.users.schemas import UsersCreateSchema
 class AnalyticsService:
     analytics_repository: AnalyticsRepository
 
-    async def track_user_request(self, username: UsersCreateSchema, who_send: UsersCreateSchema) -> RoleSchema:
-        new_role = await self.analytics_repository.track_user_request(who_send)
-        return RoleSchema.model_validate(new_role)
+    async def track_user_request(self, who_send: UsersCreateSchema) -> BadPhraseCRUD:
+        track_result = await self.analytics_repository.track_user_request(who_send)
+        return BadPhraseCRUD.model_validate(track_result)
 

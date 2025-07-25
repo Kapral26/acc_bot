@@ -49,3 +49,4 @@ dist/
 
 # Env files (all variants)
 .env*
+/.qodo/

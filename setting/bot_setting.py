@@ -52,7 +52,7 @@ def chk_user(func):
         if args[1].update_id:
             user = args[1].message.from_user.username
             first_name = args[1].message.from_user.first_name
-            full_name = args[1].message.from_user.full_name
+            full_name = args[1].message.from_user.last_name
             chat_id = args[1].message.from_user.id
             w_user = WorkWithUser()
             w_user.chk_users(user, first_name, full_name)
@@ -327,7 +327,7 @@ class WorkWithUser(BotSetting):
         :param full_name: параметр из tg
         :return: id пользователя
         """
-        sql = f"""INSERT INTO users(username, first_name, full_name, role)
+        sql = f"""INSERT INTO users(username, first_name, last_name, role)
                     VALUES('{username}','{first_name}', '{full_name}', '{role}') RETURNING id"""
         added_user = self._pg_execute(sql, commit=True)
         logging.info(f'В БД добавлен пользователь под ником "{username}"')

@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     redis_port: int = Field(..., alias="REDIS_PORT")
     redis_db: int = Field(..., alias="REDIS_DB")
 
+    kafka_bootstrap_servers: str = Field(..., alias="KAFKA_BOOTSTRAP_SERVERS")
+    kafka_topic: str = Field(..., alias="KAFKA_TOPIC")
+
+    bot_token: SecretStr = Field(..., alias="BOT_TOKEN")
+
     @property
     def async_database_dsn(
             self
