@@ -4,6 +4,7 @@ from core.storage import get_storage
 from domains.user_management.handlers import UserHandlers
 
 from app.settings.configs.settings import Settings
+from tg_bot.domains.dependencies import user_bot_service
 
 settings = Settings()
 
@@ -13,6 +14,10 @@ class TelegramBot:
         self.storage = get_storage()
         self.dp = Dispatcher(storage=self.storage)
         self._register_handlers()
+        self._register_depends()
+
+    def _register_depends(self):
+        self.dp["user_bot_service"] = user_bot_service
 
     def _register_handlers(self) -> None:
         self.dp.message.register(

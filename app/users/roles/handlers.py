@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.dependencies import get_roles_service
-from app.roles.schemas import RoleCRUD, RoleSchema
-from app.roles.service import RolesService
+from app.users.roles.schemas import RoleCRUD, RoleSchema
+from app.users.roles.service import RolesService
 
 router = APIRouter(
     prefix="/roles",

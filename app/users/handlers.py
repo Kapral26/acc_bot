@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies import get_user_service
 from app.users.exceptions import UserWasExits
+from app.users.roles.schemas import RoleCRUD
 from app.users.schemas import UserSchema, UsersCreateSchema
 from app.users.service import UserService
 
@@ -31,6 +32,7 @@ async def create_user(
 
     return create_user_result
 
+
 @router.get("/", response_model=list[UserSchema])
 async def get_users(
     user_service: Annotated[UserService, Depends(get_user_service)]
@@ -40,3 +42,11 @@ async def get_users(
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
     return users
+
+@router.patch("/{username}/new_role", response_model=UserSchema)
+async def update_user_role(
+        username: str,
+        new_role: RoleCRUD,
+        user_service: Annotated[UserService, Depends(get_user_service)]
+) -> UserSchema:
+    await user_service.update_user_role(username, new_role)

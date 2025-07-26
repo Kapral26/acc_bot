@@ -6,10 +6,18 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from app.exceptions import RoleNotFoundException
-from app.roles.models import Role
-from app.roles.schemas import RoleCRUD
+from app.users.roles.models import Role
+from app.users.roles.schemas import RoleCRUD
 
 T = TypeVar("T")
+
+async def find_role_by_name(session: AsyncSession, role_name: str) -> Role:
+    stmt = select(Role).where(Role.name == role_name)
+    result = await session.execute(stmt)
+    role = result.scalar_one_or_none()
+    if not role:
+        raise RoleNotFoundException
+    return role
 
 @dataclass
 class RolesRepository:
@@ -37,13 +45,9 @@ class RolesRepository:
                 raise RoleNotFoundException
             return role
 
-    async def get_roles_by_name(self, role_name: str):
+    async def get_roles_by_name(self, role_name: str) -> Role:
         async with self.session_factory() as session:
-            stmt = select(Role).where(Role.name == role_name)
-            result = await session.execute(stmt)
-            role = result.scalar_one_or_none()
-            if not role:
-                raise RoleNotFoundException
+            role = await find_role_by_name(session, role_name)
             return role
 
     async def get_roles(self):

@@ -1,8 +1,8 @@
-import httpx
+
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 
-from .services import UserService
+from tg_bot.domains.user_management.services import UserBotService
 
 
 class UserHandlers:
@@ -23,22 +23,34 @@ class UserHandlers:
         await message.answer(help_text.strip())
 
     @staticmethod
-    async def reg_user(message: types.Message) -> None:
-        user_data = UserService.extract_user_data(message)
-        payload = {
-            "username": user_data.username,
-            "first_name": user_data.first_name,
-            "last_name": user_data.last_name,
-        }
-        async with httpx.AsyncClient() as client:
-            response = await client.post("http://localhost:8000/users/", json=payload)
-            response.raise_for_status()
-            return response.json()
+    async def reg_user(
+            message: types.Message,
+            user_bot_service: UserBotService
+    ) -> None:
+        try:
+            user_data = await user_bot_service.extract_user_data(message)
+            await user_bot_service.register_user(user_data)
+        except Exception as e:
+            await message.answer(f"Проблема при добавлении пользователя: {e}")
+        else:
+            response = (
+                f"Пользователь зарегистрирован:\n"
+                f"ID: {user_data.id}\n"
+                f"Имя: {user_data.first_name}\n"
+                f"Фамилия: {user_data.last_name}\n"
+                f"Username: @{user_data.username}"
+            )
+            await message.answer(response)
+
 
     @staticmethod
-    async def track_command(message: types.Message, state: FSMContext) -> None:
+    async def track_command(
+            message: types.Message,
+            user_bot_service: UserBotService,
+            state: FSMContext
+    ) -> None:
         """Обработчик команды /track. Показывает информацию о пользователе."""
-        user_data = UserService.extract_user_data(message)
+        user_data = await user_bot_service.extract_user_data(message)
 
         response = (
             f"Собрана информация о пользователе:\n"

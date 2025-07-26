@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from app.roles.repository import RolesRepository
-from app.roles.schemas import RoleCRUD, RoleSchema
+from app.users.roles.repository import RolesRepository
+from app.users.roles.schemas import RoleCRUD, RoleSchema
 
 
 @dataclass
