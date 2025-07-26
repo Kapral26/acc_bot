@@ -1,11 +1,12 @@
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+from app.settings.configs.logger import setup_file_logger
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".env"
+dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".dev.env"
 
 
 class Settings(BaseSettings):
@@ -33,6 +34,10 @@ class Settings(BaseSettings):
 
     bot_token: SecretStr = Field(..., alias="BOT_TOKEN")
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        setup_file_logger()
+
     @property
     def async_database_dsn(
             self
@@ -50,11 +55,11 @@ class Settings(BaseSettings):
         Возвращает:
             float: Время истечения срока действия JWT-токена в формате Unix timestamp.
         """
-        return (datetime.now(timezone.utc) + timedelta(days=self.jwt_token_lifetime)).timestamp()
+        return (datetime.now(UTC) + timedelta(days=self.jwt_token_lifetime)).timestamp()
 
     # Начиная со второй версии pydantic, настройки класса настроек задаются
     # через model_config
-    # В данном случае будет использоваться файла .env, который будет прочитан
+    # В данном случае будет использоваться файла .dev.env, который будет прочитан
     # с кодировкой UTF-8
     model_config = SettingsConfigDict(env_file=dotenv_path, env_file_encoding="utf-8")
 

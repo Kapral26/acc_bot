@@ -18,6 +18,7 @@ redis.dump
 
 # Other
 *.env
+!.dev.env
 /temp
 .DS_Store
 Thumbs.db
@@ -48,5 +49,5 @@ dist/
 .ipynb_checkpoints/
 
 # Env files (all variants)
-.env*
+.dev.env
 /.qodo/

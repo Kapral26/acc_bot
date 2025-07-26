@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
@@ -30,18 +31,18 @@ async def get_random_user(session: AsyncSession) -> User | None:
 @dataclass
 class UserRepository:
     session_factory: Callable[[T], AsyncSession]
+    logger: logging.Logger
     async def create_user(
             self,
             user_data: UsersCreateSchema
     ) -> User:
-
-
         async with self.session_factory() as session:
-
+            self.logger.info(f"Register new user: {user_data}")
             chat_id = await get_chat_id(
                 session,
                 user_data.chat
             )
+            self.logger.info(f"Chat ID: {chat_id}")
 
             stmnt = (
                 insert(User)
@@ -58,15 +59,17 @@ class UserRepository:
                 query_result = await session.execute(stmnt)
             except IntegrityError:
                 await session.rollback()
+                self.logger.exception(UserWasExits.detail)
                 raise UserWasExits
 
             new_user_id = query_result.scalars().first()
-
+            self.logger.info(f"New user ID: {new_user_id}")
             await self.set_user_base_role(new_user_id, chat_id)
-
+            self.logger.info(f"base role was set for user: {new_user_id}")
             await session.commit()
 
         new_user = await self.get_user_by_id(new_user_id)
+        self.logger.info(f"User created: {new_user}")
         return new_user
 
 

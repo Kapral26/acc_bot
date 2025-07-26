@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from app.analytics.bad_phrase.repository import BadPhraseRepository
@@ -14,9 +15,17 @@ from app.users.service import UserService
 from fastapi import Depends
 
 
-async def get_user_repository() -> UserRepository:
+def get_logger() -> logging.Logger:
+    return logging.getLogger("app_logger")
 
-    return UserRepository(session_factory=async_session_factory)
+async def get_user_repository(
+        logger: logging.Logger = Depends(get_logger)
+) -> UserRepository:
+
+    return UserRepository(
+        session_factory=async_session_factory,
+        logger = logger,
+    )
 
 def get_user_service(
         user_repository: Annotated[UserRepository, Depends(get_user_repository)],
