@@ -1,15 +1,14 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from starlette import status
-
 from app.analytics.bad_phrase.schemas import BadPhraseCRUD
 from app.analytics.service import AnalyticsService
 from app.dependencies import get_analytics_service
 from app.settings.broker.kafka import kafka_producer
 from app.settings.configs.settings import Settings
 from app.users.schemas import UsersCreateSchema
+from fastapi import APIRouter, Depends, HTTPException
+from starlette import status
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 settings = Settings()

@@ -1,12 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.dependencies import get_user_service
 from app.users.exceptions import UserWasExits
 from app.users.roles.schemas import RoleCRUD
 from app.users.schemas import UserSchema, UsersCreateSchema
 from app.users.service import UserService
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter(
     prefix="/users",
@@ -16,14 +15,12 @@ router = APIRouter(
 
 @router.post("/", response_model=UserSchema)
 async def create_user(
-    body: UsersCreateSchema,
+    user_data: UsersCreateSchema,
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     try:
         create_user_result = await user_service.create_user(
-            username=body.username,
-            first_name=body.first_name,
-            last_name=body.last_name
+            user_data
         )
     except UserWasExits as e:
         raise HTTPException(status_code=409, detail=e.detail)
@@ -43,10 +40,10 @@ async def get_users(
         raise HTTPException(status_code=422, detail=str(error))
     return users
 
-@router.patch("/{username}/new_role", response_model=UserSchema)
-async def update_user_role(
+@router.patch("/{username}/to-admin")
+async def set_user_to_admin(
         username: str,
-        new_role: RoleCRUD,
+        chat_id: int,
         user_service: Annotated[UserService, Depends(get_user_service)]
 ) -> UserSchema:
-    await user_service.update_user_role(username, new_role)
+    await user_service.set_user_to_admin(username, chat_id)

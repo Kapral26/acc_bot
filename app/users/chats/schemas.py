@@ -1,7 +1,6 @@
 
-from pydantic import BaseModel
-
 from app.users.chats.enums import ChatTypeEnum
+from pydantic import BaseModel
 
 
 class UserChatSchema(BaseModel):

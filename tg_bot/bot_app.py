@@ -4,6 +4,7 @@ from core.storage import get_storage
 from domains.user_management.handlers import UserHandlers
 
 from app.settings.configs.settings import Settings
+from tg_bot.domains.base.handlers import BaseHandlers
 from tg_bot.domains.dependencies import user_bot_service
 
 settings = Settings()
@@ -21,11 +22,11 @@ class TelegramBot:
 
     def _register_handlers(self) -> None:
         self.dp.message.register(
-            UserHandlers.start_command,
+            BaseHandlers.start_command,
             Command("start")
         )
         self.dp.message.register(
-            UserHandlers.help_command,
+            BaseHandlers.help_command,
             Command("help")
         )
         self.dp.message.register(

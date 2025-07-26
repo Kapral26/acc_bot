@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 from app.users.models import User
 from app.users.repository import UserRepository
-from app.users.roles.schemas import RoleCRUD
-from app.users.schemas import UserSchema
+from app.users.schemas import UserSchema, UsersCreateSchema
 
 
 @dataclass
@@ -12,14 +11,10 @@ class UserService:
 
     async def create_user(
             self,
-            username: str,
-            first_name: str,
-            last_name: str
+            user_data: UsersCreateSchema
     ) -> UserSchema:
         new_user: User = await self.user_repository.create_user(
-            username,
-            first_name,
-            last_name
+            user_data
         )
         new_user: UserSchema = UserSchema.model_validate(new_user)
         return new_user
@@ -32,7 +27,6 @@ class UserService:
         user = await self.user_repository.get_user_by_username(username)
         return UserSchema.model_validate(user)
 
-    async def update_user_role(self, username: str, new_role: RoleCRUD) -> None:
+    async def set_user_to_admin(self, username: str, chat_id: int):
         user = await self.user_repository.get_user_by_username(username)
-        a = 1
-        # TODO Проверить
+        await self.user_repository.set_user_to_admin(user.id, chat_id)

@@ -1,11 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from starlette import status
-
 from app.dependencies import get_chats_service
 from app.users.chats.schemas import UserChatSchema, UserChatSchemaCRUD
 from app.users.chats.service import ChatsService
+from fastapi import APIRouter, Depends, HTTPException
+from starlette import status
 
 router = APIRouter(
     prefix="/chats",

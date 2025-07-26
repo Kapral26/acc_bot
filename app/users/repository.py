@@ -2,10 +2,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
-from sqlalchemy import and_, func, insert, select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.users.chats.repository import get_chat_id
 from app.users.exceptions import (
     UserRoleHasAlreadyBeenEstablishedException,
@@ -15,6 +11,9 @@ from app.users.exceptions import (
 from app.users.models import User, UserRoles
 from app.users.roles.repository import find_role_by_name
 from app.users.schemas import UsersCreateSchema
+from sqlalchemy import and_, func, insert, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 T = TypeVar("T")
 
@@ -58,8 +57,13 @@ class UserRepository:
             try:
                 query_result = await session.execute(stmnt)
             except IntegrityError:
+                await session.rollback()
                 raise UserWasExits
+
             new_user_id = query_result.scalars().first()
+
+            await self.set_user_base_role(new_user_id, chat_id)
+
             await session.commit()
 
         new_user = await self.get_user_by_id(new_user_id)
@@ -147,3 +151,6 @@ class UserRepository:
 
     async def set_user_to_admin(self, user_id: int, chat_id: int):
         await self.update_role_for_user(user_id, chat_id=chat_id, new_role_name="admin")
+
+    async def set_user_base_role(self, user_id: int, chat_id: int):
+        await self.update_role_for_user(user_id, chat_id=chat_id, new_role_name="user")

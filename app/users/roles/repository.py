@@ -2,12 +2,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio.session import AsyncSession
-
 from app.exceptions import RoleNotFoundException
 from app.users.roles.models import Role
 from app.users.roles.schemas import RoleCRUD
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
 T = TypeVar("T")
 

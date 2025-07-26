@@ -4,14 +4,13 @@ import logging
 from typing import List, Optional, Tuple
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-from fastapi import FastAPI
-
 from app.analytics.bad_phrase.schemas import BadPhraseCRUD
 
 # Импортируем зависимости, необходимые для обработки сообщений
 from app.dependencies import get_analytics_service
 from app.settings.configs.settings import Settings
 from app.users.schemas import UsersCreateSchema
+from fastapi import FastAPI
 
 settings = Settings()
 logger = logging.getLogger(__name__)

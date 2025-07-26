@@ -1,13 +1,11 @@
-from pydantic import BaseModel
-
 from app.users.chats.schemas import UserChatSchema
+from pydantic import BaseModel
 
 
 class UsersCreateSchema(BaseModel):
     username: str
     first_name: str | None = None
     last_name: str | None = None
-    role_id: int = 3
     chat: UserChatSchema
 
     class Config:
@@ -16,3 +14,4 @@ class UsersCreateSchema(BaseModel):
 
 class UserSchema(UsersCreateSchema):
     id: int
+    role_id: int

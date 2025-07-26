@@ -1,12 +1,11 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from starlette import status
-
 from app.dependencies import get_roles_service
 from app.users.roles.schemas import RoleCRUD, RoleSchema
 from app.users.roles.service import RolesService
+from fastapi import APIRouter, Depends, HTTPException
+from starlette import status
 
 router = APIRouter(
     prefix="/roles",

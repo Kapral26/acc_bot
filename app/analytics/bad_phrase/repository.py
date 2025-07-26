@@ -4,14 +4,13 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio.session import AsyncSession
-
 from app.analytics.bad_phrase.models import BadPhrase
 from app.analytics.bad_phrase.schemas import BadPhraseCRUD
 from app.exceptions import (
     RoleNotFoundException,  # Можно создать BadPhraseNotFoundException по аналогии
 )
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
 T = TypeVar("T")
 

@@ -2,10 +2,9 @@
 
 from datetime import datetime
 
+from app.settings.configs.settings import Settings
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
-from app.settings.configs.settings import Settings
 
 settings = Settings()
 

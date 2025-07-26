@@ -1,7 +1,6 @@
+from app.settings.database.database import Base
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.settings.database.database import Base
 
 
 class Role(Base):

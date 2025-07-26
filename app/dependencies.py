@@ -1,7 +1,5 @@
 from typing import Annotated
 
-from fastapi import Depends
-
 from app.analytics.bad_phrase.repository import BadPhraseRepository
 from app.analytics.bad_phrase.service import BadPhraseService
 from app.analytics.repository import AnalyticsRepository
@@ -13,6 +11,7 @@ from app.users.repository import UserRepository
 from app.users.roles.repository import RolesRepository
 from app.users.roles.service import RolesService
 from app.users.service import UserService
+from fastapi import Depends
 
 
 async def get_user_repository() -> UserRepository:

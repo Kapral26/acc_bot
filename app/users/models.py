@@ -1,7 +1,6 @@
+from app.settings.database.database import Base
 from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.settings.database.database import Base
 
 
 class User(Base):

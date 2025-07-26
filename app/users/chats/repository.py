@@ -2,12 +2,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.exceptions import RoleNotFoundException
 from app.users.chats.models import Chat
 from app.users.chats.schemas import UserChatSchema
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 T = TypeVar("T")
 async def find_chat_by_id(

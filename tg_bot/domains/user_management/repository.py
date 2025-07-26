@@ -16,8 +16,7 @@ class UserBotRepository:
 
     async def change_role(self, user_data: UsersCreateSchema):
         await self.api_adapter.api_post(
-            "/users",
-            data=user_data.model_dump(mode="json")
+            "http://localhost:8000/users/", data=user_data.model_dump(mode="json")
         )
 # a = {
 #     "chat":
