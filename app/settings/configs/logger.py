@@ -2,7 +2,8 @@ import logging
 import os
 from functools import wraps
 from pathlib import Path
-from typing import Callable, Type
+from typing import Type
+from collections.abc import Callable
 
 
 def setup_file_logger(
@@ -52,7 +53,7 @@ def with_logger(
     Декоратор класса: добавляет атрибут logger в экземпляр класса,
     получая логгер по имени через logging.getLogger.
     """
-    def decorator(cls: Type):
+    def decorator(cls: type):
         orig_init = cls.__init__
 
         @wraps(orig_init)
