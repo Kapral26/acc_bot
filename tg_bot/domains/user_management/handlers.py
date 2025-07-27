@@ -12,11 +12,11 @@ class UserHandlers:
             user_bot_service: UserBotService
     ) -> None:
         try:
-            await user_bot_service.register_user(message)
+            register_suer_result = await user_bot_service.register_user(message)
         except Exception as e:
             await message.answer(f"Проблема при добавлении пользователя: {e}")
         else:
-            await message.answer(f"Пользователь @{message.from_user.username} зарегистрирован!")
+            await message.answer(register_suer_result)
 
 
     @staticmethod

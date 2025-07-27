@@ -12,12 +12,11 @@ class UserService:
     async def create_user(
             self,
             user_data: UsersCreateSchema
-    ) -> UserSchema:
-        new_user: User = await self.user_repository.create_user(
+    ) -> None:
+       await self.user_repository.create_user(
             user_data
         )
-        new_user: UserSchema = UserSchema.model_validate(new_user)
-        return new_user
+
 
     async def get_users(self) -> list[UserSchema]:
         users = await self.user_repository.get_users()

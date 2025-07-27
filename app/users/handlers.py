@@ -1,9 +1,12 @@
 from typing import Annotated
 
+from starlette import status
+
 from app.dependencies import get_user_service
 from app.users.exceptions import UserWasExits
 from app.users.roles.schemas import RoleCRUD
-from app.users.schemas import UserSchema, UsersCreateSchema
+from app.users.schemas import UserSchema, UsersCreateSchema, \
+    UserWasCreated
 from app.users.service import UserService
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -13,21 +16,19 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=UserSchema)
+@router.post("/", response_model=UserWasCreated, status_code=status.HTTP_201_CREATED)
 async def create_user(
     user_data: UsersCreateSchema,
     user_service: Annotated[UserService, Depends(get_user_service)],
-) -> UserSchema:
+):
     try:
-        create_user_result = await user_service.create_user(
-            user_data
-        )
+        await user_service.create_user(user_data)
     except UserWasExits as e:
-        raise HTTPException(status_code=409, detail=e.detail)
+        raise HTTPException(status_code=409, detail="Ты дурак? Ты уже зарегистрирован")
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
-
-    return create_user_result
+    else:
+        return UserWasCreated()
 
 
 @router.get("/", response_model=list[UserSchema])

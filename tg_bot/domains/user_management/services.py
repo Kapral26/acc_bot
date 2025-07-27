@@ -20,9 +20,10 @@ class UserBotService:
             chat=UserChatSchema.model_validate(message.chat)
         )
 
-    async def register_user(self, message: types.Message) -> None:
+    async def register_user(self, message: types.Message) -> str:
         user_data = await self.extract_user_data(message)
-        await self.user_bot_repository.register_user(user_data)
+        register_user_result = await self.user_bot_repository.register_user(user_data)
+        return register_user_result
 
     async def set_admin_role(self, user_data: UsersCreateSchema) -> None:
         await self.user_bot_repository.change_role(user_data)

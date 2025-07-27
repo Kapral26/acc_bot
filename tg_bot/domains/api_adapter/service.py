@@ -9,6 +9,8 @@ class APIAdapter(APIAdapterABC):
     async def api_post(self, url: str, data: dict | None = None) -> httpx.Response:
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=data)
+            if response.status_code == 409:
+                return response
             response.raise_for_status()
             return response
 

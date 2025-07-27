@@ -10,7 +10,6 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(64), nullable=False)
     first_name: Mapped[str] = mapped_column(String(64))
     last_name: Mapped[str] = mapped_column(String(128), nullable=True)
-    chat_id: Mapped[int] = mapped_column(Integer, nullable=False)
     roles = relationship(
         "Role",
         secondary="user_roles",
@@ -28,13 +27,6 @@ class User(Base):
         "Analytics", foreign_keys="[Analytics.who_send_id]", back_populates="who_send"
     )
 
-    __table_args__ = (
-        UniqueConstraint(
-   "username",
-            "chat_id",
-            name="uq_username_chat_id"
-        ),
-    )
 
 
 class UserRoles(Base):

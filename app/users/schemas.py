@@ -15,3 +15,6 @@ class UsersCreateSchema(BaseModel):
 class UserSchema(UsersCreateSchema):
     id: int
     role_id: int
+
+class UserWasCreated(BaseModel):
+    text: str = "Пользователь был создан"

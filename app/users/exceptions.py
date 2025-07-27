@@ -1,5 +1,5 @@
 class UserWasExits(Exception):
-    detail = "User not found"
+    detail = "User was exist"
 
 class UserRoleHasAlreadyBeenEstablishedException(Exception):
     detail = "Role has already been established"
