@@ -18,7 +18,7 @@ class User(Base):
     )
     chats = relationship(
         "Chat",
-        secondary="chats",
+        secondary="user_roles",
         back_populates="users",
     )
     analytics_as_user = relationship(

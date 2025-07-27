@@ -8,10 +8,10 @@ class Chat(Base):
     __tablename__ = "chats"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    title: Mapped[str] = mapped_column(String(128), nullable=True)
     type: Mapped[ChatTypeEnum] = mapped_column(nullable=False)
     users = relationship(
         "User",
         secondary="user_roles",
-        back_populates="roles"
+        back_populates="chats"
     )

@@ -1,4 +1,4 @@
-
+import logging
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -36,7 +36,9 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        setup_file_logger()
+        setup_file_logger(
+            log_level=logging.INFO if not self.debug else logging.DEBUG
+        )
 
     @property
     def async_database_dsn(

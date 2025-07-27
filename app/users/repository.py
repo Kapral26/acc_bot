@@ -59,12 +59,15 @@ class UserRepository:
                 query_result = await session.execute(stmnt)
             except IntegrityError:
                 await session.rollback()
-                self.logger.exception(UserWasExits.detail)
+                self.logger.error(UserWasExits.detail)
                 raise UserWasExits
+            except Exception as e:
+                self.logger.error(str(e))
+                raise
 
             new_user_id = query_result.scalars().first()
             self.logger.info(f"New user ID: {new_user_id}")
-            await self.set_user_base_role(new_user_id, chat_id)
+            await self.set_user_base_role(session, new_user_id, chat_id)
             self.logger.info(f"base role was set for user: {new_user_id}")
             await session.commit()
 
@@ -93,67 +96,56 @@ class UserRepository:
             user = await find_user_by_username(session, username)
             return user
 
-    async def set_role_for_user(
-            self,
-            user_id: int,
-            role_id: int,
-            chat_id: int
-    ) -> None:
-        async with self.session_factory() as session:
-            try:
-                session.add(
-                    UserRoles(
-                    user_id=user_id,
-                    role_id=role_id,
-                    chat_id=chat_id
-                    )
-                )
-            except IntegrityError:
-                await session.rollback()
-                raise UserRoleHasAlreadyBeenEstablishedException
-            else:
-                await session.commit()
-
     async def update_role_for_user(
             self,
+            session: AsyncSession,
             user_id: int,
             new_role_name: str,
             chat_id: int
     ) -> None:
-        async with self.session_factory() as session:
-            new_role_id:int = (
-                await find_role_by_name(session,new_role_name)
-            ).id
-
-            try:
-                stmnt = (
-                    select(UserRoles)
-                    .where(
-                        and_(
-                                UserRoles.user_id == user_id,
-                                UserRoles.chat_id == chat_id
-                        )
+        self.logger.debug("Updating role for user: {user_id} in chat: {chat_id} to {new_role_name}")
+        new_role_id:int = (
+            await find_role_by_name(session,new_role_name)
+        ).id
+        self.logger.debug(f"New role ID: {new_role_id}")
+        try:
+            stmnt = (
+                select(UserRoles)
+                .where(
+                    and_(
+                            UserRoles.user_id == user_id,
+                            UserRoles.chat_id == chat_id
                     )
                 )
-                user_role: UserRoles | None = (
-                    await session.execute(stmnt)
-                ).scalar_one_or_none()
-                if user_role is None:
-                    raise UserRoleNotFount
+            )
+            user_role: UserRoles | None = (
+                await session.execute(stmnt)
+            ).scalar_one_or_none()
+            if user_role is None:
+                 session.add(
+                    UserRoles(
+                        user_id=user_id,
+                        chat_id=chat_id,
+                        role_id=new_role_id
+                    )
+                )
+            else:
 
                 user_role.role_id = new_role_id
 
                 await session.refresh(user_role)
 
-            except IntegrityError:
-                await session.rollback()
-                raise UserRoleHasAlreadyBeenEstablishedException
-            else:
-                await session.commit()
+        except IntegrityError:
+            await session.rollback()
+            raise UserRoleHasAlreadyBeenEstablishedException
+        except Exception as e:
+            self.logger.error(str(e))
+        else:
+            await session.commit()
 
 
-    async def set_user_to_admin(self, user_id: int, chat_id: int):
-        await self.update_role_for_user(user_id, chat_id=chat_id, new_role_name="admin")
+    async def set_user_to_admin(self, session: AsyncSession, user_id: int, chat_id: int):
+        await self.update_role_for_user(session, user_id, chat_id=chat_id, new_role_name="admin")
 
-    async def set_user_base_role(self, user_id: int, chat_id: int):
-        await self.update_role_for_user(user_id, chat_id=chat_id, new_role_name="user")
+    async def set_user_base_role(self, session: AsyncSession, user_id: int, chat_id: int):
+        await self.update_role_for_user(session, user_id, chat_id=chat_id, new_role_name="user")

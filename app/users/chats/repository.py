@@ -1,28 +1,30 @@
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
 from app.exceptions import RoleNotFoundException
+from app.settings.configs.logger import log_function
 from app.users.chats.models import Chat
 from app.users.chats.schemas import UserChatSchema
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 T = TypeVar("T")
+
 async def find_chat_by_id(
         session: AsyncSession, chat_id: int
     ) -> Chat | None:
-        stmt = select(Chat).where(Chat.id == chat_id)
+        stmt = select(Chat.id).where(Chat.id == chat_id)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
 async def create_new_chat(session: AsyncSession, chat: UserChatSchema) -> Chat:
-    new_chat = Chat(**chat.model_dump())
+    new_chat = Chat(**chat.model_dump(mode="json"))
     session.add(new_chat)
     await session.commit()
     await session.refresh(new_chat)
     return new_chat
-
 
 async def get_chat_id(session: AsyncSession, chat: UserChatSchema) -> int:
     chat_id = await find_chat_by_id(session, chat.id)
