@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 
 class UsersCreateSchema(BaseModel):
+    id: int
     username: str
     first_name: str | None = None
     last_name: str | None = None
@@ -13,7 +14,6 @@ class UsersCreateSchema(BaseModel):
 
 
 class UserSchema(UsersCreateSchema):
-    id: int
     role_id: int
 
 class UserWasCreated(BaseModel):

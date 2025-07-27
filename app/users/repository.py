@@ -25,10 +25,17 @@ async def find_user_by_username(session: AsyncSession, username: str) -> User | 
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
 
+
+async def find_user_by_id(session: AsyncSession, id: int) -> User | None:
+    stmt = select(User).where(User.id == id)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
 async def insert_new_user(session: AsyncSession, user_data: UsersCreateSchema) -> int:
     stmnt = (
         insert(User)
         .values(
+            id=user_data.id,
             username=user_data.username,
             first_name=user_data.first_name,
             last_name=user_data.last_name,
@@ -65,7 +72,7 @@ class UserRepository:
             )
             self.logger.info(f"Chat ID: {chat_id}")
 
-            exist_user = await find_user_by_username(session, user_data.username)
+            exist_user = await find_user_by_id(session, user_data.id)
             if not exist_user:
                 self.logger.debug("User doesn`t exist. Inserting new user.")
                 new_user_id = await insert_new_user(session, user_data)
@@ -101,10 +108,8 @@ class UserRepository:
 
 
     async def get_user_by_id(self, user_id: int) -> User | None:
-        query = select(User).where(User.id == user_id)
         async with self.session_factory() as session:
-            query_result = await session.execute(query)
-            user = query_result.scalars().first()
+            user = await find_user_by_id(session, user_id)
             return user
 
     async def get_user_by_username(self, username: str) -> User | None:

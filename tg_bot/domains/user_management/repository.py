@@ -12,7 +12,8 @@ class UserBotRepository:
         register_suer_result = await self.api_adapter.api_post(
             "http://localhost:8000/users/",
             data=user_data.model_dump(mode="json"))
-        return register_suer_result.json().get("detail", "text")
+        resp = register_suer_result.json()
+        return resp.get("detail") or resp.get("text")
 
 
     async def change_role(self, user_data: UsersCreateSchema):

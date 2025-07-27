@@ -13,9 +13,7 @@ class UserService:
             self,
             user_data: UsersCreateSchema
     ) -> None:
-       await self.user_repository.create_user(
-            user_data
-        )
+       await self.user_repository.create_user(user_data)
 
 
     async def get_users(self) -> list[UserSchema]:
