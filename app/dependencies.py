@@ -18,20 +18,6 @@ from fastapi import Depends
 def get_logger() -> logging.Logger:
     return logging.getLogger("app_logger")
 
-async def get_user_repository(
-        logger: logging.Logger = Depends(get_logger)
-) -> UserRepository:
-
-    return UserRepository(
-        session_factory=async_session_factory,
-        logger = logger,
-    )
-
-def get_user_service(
-        user_repository: Annotated[UserRepository, Depends(get_user_repository)],
-) -> UserService:
-    return UserService(user_repository=user_repository)
-
 async def get_roles_repository() -> RolesRepository:
     return RolesRepository(session_factory=async_session_factory)
 
@@ -40,9 +26,9 @@ def get_roles_service(
 ) -> RolesService:
     return RolesService(roles_repository=roles_repository)
 
-
 async def get_analytics_repository() -> AnalyticsRepository:
     return AnalyticsRepository(session_factory=async_session_factory)
+
 
 def get_analytics_service(
         analytics_repository: Annotated[AnalyticsRepository, Depends(get_analytics_repository)],
@@ -64,3 +50,23 @@ def get_chats_service(
         chats_repository: Annotated[ChatsRepository, Depends(get_chat_repository)],
 ) -> ChatsService:
     return ChatsService(chats_repository=chats_repository)
+
+async def get_user_repository(
+        logger: logging.Logger = Depends(get_logger)
+) -> UserRepository:
+
+    return UserRepository(
+        session_factory=async_session_factory,
+        logger = logger,
+    )
+
+def get_user_service(
+        user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+        chat_repository: Annotated[ChatsRepository, Depends(get_chat_repository)],
+        role_repository: Annotated[RolesRepository, Depends(get_roles_repository)],
+) -> UserService:
+    return UserService(
+        user_repository=user_repository,
+        chat_repository=chat_repository,
+        role_repository=role_repository
+    )

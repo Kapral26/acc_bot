@@ -1,15 +1,17 @@
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException
+from starlette import status
+
 from app.dependencies import get_chats_service
 from app.users.chats.schemas import UserChatSchema, UserChatSchemaCRUD
 from app.users.chats.service import ChatsService
-from fastapi import APIRouter, Depends, HTTPException
-from starlette import status
 
 router = APIRouter(
     prefix="/chats",
     tags=["chats"],
 )
+
 
 @router.get("/", response_model=list[UserChatSchema])
 async def get_chats(
@@ -20,6 +22,7 @@ async def get_chats(
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
     return chats
+
 
 @router.get("/{chat_id}", response_model=UserChatSchema)
 async def get_chat_by_id(
@@ -32,6 +35,7 @@ async def get_chat_by_id(
         raise HTTPException(status_code=404, detail=str(error))
     return chat
 
+
 @router.get("/by-title/{title}", response_model=UserChatSchema)
 async def get_chat_by_title(
     title: str,
@@ -42,6 +46,7 @@ async def get_chat_by_title(
     except Exception as error:
         raise HTTPException(status_code=404, detail=str(error))
     return chat
+
 
 @router.post("/", response_model=UserChatSchema, status_code=status.HTTP_201_CREATED)
 async def register_chat(
@@ -54,6 +59,7 @@ async def register_chat(
         raise HTTPException(status_code=422, detail=str(error))
     return new_chat
 
+
 @router.put("/{chat_id}", response_model=UserChatSchema, status_code=status.HTTP_200_OK)
 async def update_chat(
     chat_id: int,
@@ -65,6 +71,7 @@ async def update_chat(
     except Exception as error:
         raise HTTPException(status_code=404, detail=str(error))
     return updated_chat
+
 
 @router.delete("/{chat_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_chat(

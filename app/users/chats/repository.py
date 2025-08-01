@@ -7,8 +7,11 @@ from app.exceptions import RoleNotFoundException
 from app.settings.configs.logger import log_function
 from app.users.chats.models import Chat
 from app.users.chats.schemas import UserChatSchema
-from sqlalchemy import select
+from sqlalchemy import select, \
+    and_
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.users.models import UserChats
 
 T = TypeVar("T")
 
@@ -83,3 +86,15 @@ class ChatsRepository:
                 raise RoleNotFoundException
             await session.delete(db_chat)
             await session.commit()
+
+
+    async def is_user_in_chat(self, user_id: int, chat_id: int) -> bool:
+        async with self.session_factory as session:
+            stmt = select(UserChats).where(
+                and_(
+                    UserChats.user_id == user_id,
+                    UserChats.chat_id == chat_id
+                )
+            )
+            result = await session.execute(stmt)
+            return result.scalar_one_or_none() is not None

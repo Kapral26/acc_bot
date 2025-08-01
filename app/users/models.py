@@ -1,6 +1,8 @@
-from app.settings.database.database import Base
-from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.settings.database.database import Base
+from app.users.roles.schemas import RoleSchema
 
 
 class User(Base):
@@ -10,10 +12,10 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(64), nullable=False)
     first_name: Mapped[str] = mapped_column(String(64))
     last_name: Mapped[str] = mapped_column(String(128), nullable=True)
-    roles = relationship(
-        "Role",
-        secondary="user_roles",
-        back_populates="users",
+    roles_id: Mapped[int] = mapped_column(
+        comment=RoleSchema.get_description(),
+        nullable=False,
+        default=1
     )
     chats = relationship(
         "Chat",
@@ -25,19 +27,6 @@ class User(Base):
     )
     analytics_who_sent = relationship(
         "Analytics", foreign_keys="[Analytics.who_send_id]", back_populates="who_send"
-    )
-
-
-
-class UserRoles(Base):
-    __tablename__ = "user_roles"
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-    chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"))
-
-    __table_args__ = (
-        UniqueConstraint("user_id", "chat_id", name="uq_user_id_chat_id"),
     )
 
 

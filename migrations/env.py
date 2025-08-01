@@ -1,11 +1,22 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
+from app.analytics.bad_phrase.models import BadPhrase
+from app.analytics.models import Analytics
 from app.settings.configs.settings import Settings
 from app.settings.database.database import Base
+from app.users.chats.models import Chat
+from app.users.models import User, UserChats
+
+__models__ = [
+    Analytics,
+    BadPhrase,
+    Chat,
+    UserChats,
+    User,
+]
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,6 +36,7 @@ config.set_main_option("sqlalchemy.url", settings.async_database_dsn + "?async_f
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+print(target_metadata.tables.keys())
 
 
 # other values from the config, defined by the needs of env.py,

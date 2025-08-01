@@ -1,13 +1,15 @@
-
-from app.users.chats.enums import ChatTypeEnum
 from pydantic import BaseModel
 
+from app.users.chats.enums import ChatTypeEnum
 
-class UserChatSchema(BaseModel):
-    id: int
+
+class UserChatSchemaCRUD(BaseModel):
     title: str | None
     type: ChatTypeEnum
 
     class Config:
         from_attributes = True
 
+
+class UserChatSchema(UserChatSchemaCRUD):
+    id: int

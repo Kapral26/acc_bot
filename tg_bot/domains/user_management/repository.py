@@ -20,15 +20,3 @@ class UserBotRepository:
         await self.api_adapter.api_post(
             "http://localhost:8000/users/", data=user_data.model_dump(mode="json")
         )
-# a = {
-#     "chat":
-#         {
-#             "id": 471077141,
-#             "title": None,
-#             "type": "private"
-#         },
-#     "first_name": "kapral26",
-#     "last_name": None,
-#     "role_id": 3,
-#     "username": "kapral26"
-# }

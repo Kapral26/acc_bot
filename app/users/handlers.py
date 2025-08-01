@@ -4,7 +4,6 @@ from starlette import status
 
 from app.dependencies import get_user_service
 from app.users.exceptions import UserWasExits
-from app.users.roles.schemas import RoleCRUD
 from app.users.schemas import UserSchema, UsersCreateSchema, \
     UserWasCreated
 from app.users.service import UserService
