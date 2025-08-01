@@ -13,13 +13,10 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(64))
     last_name: Mapped[str] = mapped_column(String(128), nullable=True)
     roles_id: Mapped[int] = mapped_column(
-        comment=RoleSchema.get_description(),
-        nullable=False,
-        default=1
+        comment=RoleSchema.get_description(), nullable=False, default=1
     )
     chats = relationship(
         "Chat",
-        secondary="user_roles",
         back_populates="users",
     )
     analytics_as_user = relationship(

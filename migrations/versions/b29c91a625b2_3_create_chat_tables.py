@@ -1,7 +1,7 @@
 """any_changes
 
 Revision ID: b29c91a625b2
-Revises: fb4e46b86eb3
+Revises: 160bfa9738ec
 Create Date: 2025-07-27 01:36:14.546347
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'b29c91a625b2'
-down_revision: Union[str, Sequence[str], None] = 'fb4e46b86eb3'
+down_revision: Union[str, Sequence[str], None] = '160bfa9738ec'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -39,9 +39,8 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_user_chats_id'), 'user_chats', ['id'], unique=False)
-    op.add_column('user_roles', sa.Column('chat_id', sa.Integer(), nullable=False))
-    op.create_unique_constraint('uq_user_id_chat_id', 'user_roles', ['user_id', 'chat_id'])
-    op.create_foreign_key(None, 'user_roles', 'chats', ['chat_id'], ['id'])
+    op.add_column("users", sa.Column("chat_id", sa.Integer(), nullable=True))
+    op.create_unique_constraint("uq_username_chat_id", "users", ["username", "chat_id"])
     op.alter_column('users', 'chat_id',
                existing_type=sa.INTEGER(),
                nullable=False)
@@ -54,9 +53,6 @@ def downgrade() -> None:
     op.alter_column('users', 'chat_id',
                existing_type=sa.INTEGER(),
                nullable=True)
-    op.drop_constraint(None, 'user_roles', type_='foreignkey')
-    op.drop_constraint('uq_user_id_chat_id', 'user_roles', type_='unique')
-    op.drop_column('user_roles', 'chat_id')
     op.drop_index(op.f('ix_user_chats_id'), table_name='user_chats')
     op.drop_table('user_chats')
     op.drop_index(op.f('ix_chats_id'), table_name='chats')

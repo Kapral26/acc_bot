@@ -1,10 +1,7 @@
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar, \
-    Any, \
-    Coroutine, \
-    Sequence
+from typing import Sequence, TypeVar
 
 from sqlalchemy import func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession

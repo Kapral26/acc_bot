@@ -2,11 +2,12 @@
 
 from typing import Annotated
 
-from app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
-from app.analytics.bad_phrase.service import BadPhraseService
-from app.dependencies import get_bad_phrase_service
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
+
+from app.analytics.bad_phrase.dependencies import get_bad_phrase_service
+from app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
+from app.analytics.bad_phrase.service import BadPhraseService
 
 router = APIRouter(
     prefix="/bad-phrases",

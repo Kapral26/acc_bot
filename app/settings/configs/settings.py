@@ -2,9 +2,10 @@ import logging
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from app.settings.configs.logger import setup_file_logger
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.settings.configs.logger import setup_file_logger
 
 dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".dev.env"
 

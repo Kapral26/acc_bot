@@ -15,7 +15,9 @@ class BadPhraseService:
         return BadPhraseSchema.model_validate(new_bad_phrase)
 
     async def get_bad_phrase_by_id(self, bad_phrase_id: int) -> BadPhraseSchema:
-        bad_phrase = await self.bad_phrase_repository.get_bad_phrase_by_id(bad_phrase_id)
+        bad_phrase = await self.bad_phrase_repository.get_bad_phrase_by_id(
+            bad_phrase_id
+        )
         return BadPhraseSchema.model_validate(bad_phrase)
 
     async def get_bad_phrase_by_phrase(self, phrase: str) -> BadPhraseSchema:
@@ -26,8 +28,12 @@ class BadPhraseService:
         bad_phrases = await self.bad_phrase_repository.get_bad_phrases()
         return [BadPhraseSchema.model_validate(x) for x in bad_phrases]
 
-    async def update_bad_phrase(self, bad_phrase_id: int, bad_phrase: BadPhraseCRUD) -> BadPhraseSchema:
-        db_bad_phrase = await self.bad_phrase_repository.update_bad_phrase(bad_phrase_id, bad_phrase)
+    async def update_bad_phrase(
+        self, bad_phrase_id: int, bad_phrase: BadPhraseCRUD
+    ) -> BadPhraseSchema:
+        db_bad_phrase = await self.bad_phrase_repository.update_bad_phrase(
+            bad_phrase_id, bad_phrase
+        )
         return BadPhraseSchema.model_validate(db_bad_phrase)
 
     async def delete_bad_phrase(self, bad_phrase_id: int):

@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from app.dependencies import get_roles_service
+from app.users.roles.dependencies import get_roles_service
 from app.users.roles.schemas import RoleSchema
 from app.users.roles.service import RolesService
 

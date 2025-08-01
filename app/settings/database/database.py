@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from app.settings.configs.settings import Settings
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from app.settings.configs.settings import Settings
 
 settings = Settings()
 
@@ -19,8 +20,7 @@ async_session_factory = async_sessionmaker(async_engine)
 
 
 class Base(DeclarativeBase):
-    """
-    Базовый класс для всех моделей.
+    """Базовый класс для всех моделей.
 
     Атрибуты:
     created_at (Mapped[created_at]): Поле для хранения даты и времени создания записи.

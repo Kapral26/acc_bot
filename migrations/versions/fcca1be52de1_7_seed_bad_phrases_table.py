@@ -2,20 +2,18 @@
 seed bad_phrases table
 
 Revision ID: fcca1be52de1
-Revises: e55f296c67c9
+Revises: fb4e46b86eb3
 Create Date: 2025-07-27 15:45:56.957387
 
 """
-from typing import Union
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "fcca1be52de1"
-down_revision: str | Sequence[str] | None = "e55f296c67c9"
+down_revision: str | Sequence[str] | None = "54ac64393b91"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

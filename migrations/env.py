@@ -31,10 +31,6 @@ if config.config_file_name is not None:
 # Заменяем параметр sqlalchemy.url на наш указатель к БД.
 config.set_main_option("sqlalchemy.url", settings.async_database_dsn + "?async_fallback=true")
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 print(target_metadata.tables.keys())
 
