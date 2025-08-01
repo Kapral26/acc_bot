@@ -1,4 +1,5 @@
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, \
+    UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.settings.database.database import Base
@@ -17,6 +18,7 @@ class User(Base):
     )
     chats = relationship(
         "Chat",
+        secondary="user_chats",
         back_populates="users",
     )
     analytics_as_user = relationship(
@@ -29,6 +31,9 @@ class User(Base):
 
 class UserChats(Base):
     __tablename__ = "user_chats"
+    __table_args__ = (UniqueConstraint("user_id", "chat_id", name="uq_user_chat"),)
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"))
+
+
