@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 
 from app.users.chats.repository import ChatsRepository
-from app.users.exceptions import UserWasExits, \
-    UserAlreadyRegisterIntoThisChat
-from app.users.models import User
+from app.users.exceptions import UserAlreadyRegisterIntoThisChat
 from app.users.repository import UserRepository
 from app.users.roles.repository import RolesRepository
 from app.users.schemas import UserSchema, UsersCreateSchema
