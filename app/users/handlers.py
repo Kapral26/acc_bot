@@ -1,13 +1,12 @@
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.dependencies import get_user_service
 from app.users.exceptions import UserWasExits
-from app.users.schemas import UserSchema, UsersCreateSchema, \
-    UserWasCreated
+from app.users.schemas import UserSchema, UsersCreateSchema, UserWasCreated
 from app.users.service import UserService
-from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter(
     prefix="/users",
@@ -32,7 +31,7 @@ async def create_user(
 
 @router.get("/", response_model=list[UserSchema])
 async def get_users(
-    user_service: Annotated[UserService, Depends(get_user_service)]
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> list[UserSchema]:
     try:
         users = await user_service.get_users()
@@ -40,10 +39,11 @@ async def get_users(
         raise HTTPException(status_code=422, detail=str(error))
     return users
 
+
 @router.patch("/{username}/to-admin")
 async def set_user_to_admin(
-        username: str,
-        chat_id: int,
-        user_service: Annotated[UserService, Depends(get_user_service)]
+    username: str,
+    chat_id: int,
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     await user_service.set_user_to_admin(username, chat_id)

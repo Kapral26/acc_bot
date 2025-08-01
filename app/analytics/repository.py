@@ -8,7 +8,6 @@ from app.analytics.bad_phrase.schemas import BadPhraseCRUD
 from app.analytics.models import Analytics
 from app.exceptions import BadPhraseNotFoundError
 from app.users.exceptions import UserNotFoundError
-from app.users.repository import find_user_by_username, get_random_user
 from app.users.schemas import UsersCreateSchema
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
