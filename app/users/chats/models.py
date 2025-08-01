@@ -13,6 +13,6 @@ class Chat(Base):
     type: Mapped[ChatTypeEnum] = mapped_column(nullable=False)
     users = relationship(
         "User",
-        secondary="user_roles",
+        secondary="user_chats",
         back_populates="chats"
     )

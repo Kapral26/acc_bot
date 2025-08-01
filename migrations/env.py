@@ -20,8 +20,9 @@ __models__ = [
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
-config = context.config
 settings = Settings()
+
+config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -31,8 +32,9 @@ if config.config_file_name is not None:
 # Заменяем параметр sqlalchemy.url на наш указатель к БД.
 config.set_main_option("sqlalchemy.url", settings.async_database_dsn + "?async_fallback=true")
 
+
 target_metadata = Base.metadata
-print(target_metadata.tables.keys())
+
 
 
 # other values from the config, defined by the needs of env.py,

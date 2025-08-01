@@ -88,8 +88,11 @@ class ChatsRepository:
 
     async def get_user_chat(self, user_id: int, chat_id: int) -> UserChats | None:
         async with self.session_factory() as session:
-            stmt = select(UserChats).where(
-                and_(UserChats.user_id == user_id, UserChats.chat_id == chat_id)
-            )
+            try:
+                stmt = select(UserChats).where(
+                    and_(UserChats.user_id == user_id, UserChats.chat_id == chat_id)
+                )
+            except Exception as e:
+                a = 1
             result = await session.execute(stmt)
             return result.scalar_one_or_none()
