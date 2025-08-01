@@ -3,13 +3,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
+from sqlalchemy.ext.asyncio.session import AsyncSession
+
 from app.analytics.bad_phrase.repository import get_random_bad_phrase
 from app.analytics.bad_phrase.schemas import BadPhraseCRUD
 from app.analytics.models import Analytics
 from app.exceptions import BadPhraseNotFoundError
 from app.users.exceptions import UserNotFoundError
 from app.users.schemas import UsersCreateSchema
-from sqlalchemy.ext.asyncio.session import AsyncSession
 
 T = TypeVar("T")
 

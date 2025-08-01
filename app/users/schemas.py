@@ -1,5 +1,6 @@
-from app.users.chats.schemas import UserChatSchema
 from pydantic import BaseModel
+
+from app.users.chats.schemas import UserChatSchema
 
 
 class UsersCreateSchema(BaseModel):

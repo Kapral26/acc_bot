@@ -1,9 +1,8 @@
 import logging
 import os
+from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from typing import Type
-from collections.abc import Callable
 
 
 def setup_file_logger(
