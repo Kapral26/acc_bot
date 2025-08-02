@@ -7,6 +7,7 @@ async def russian_roulette(
     message: types.Message,
     russian_roulette_service: RussianRouletteService,
 ) -> None:
+    print("russian_roulette called")
     try:
         bad_phrase = await russian_roulette_service.start(message)
     except Exception as e:

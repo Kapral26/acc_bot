@@ -8,8 +8,8 @@ define handle_args
 	$(eval ARG3 := $(word 4,$(MAKECMDGOALS)))
 endef
 
-run: ## Запустить приложение с помощью uvicorn с заданными аргументами или значениями по умолчанию
-	uv run gunicorn main:app --worker-class uvicorn.workers.UvicornWorker -c gunicorn.conf.py
+run:
+	uv run uvicorn main:app
 
 install: ## Установить зависимость с помощью uv
 	$(call handle_args)
