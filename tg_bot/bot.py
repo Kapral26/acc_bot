@@ -1,16 +1,17 @@
+import asyncio
+
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from core.storage import get_storage
-from domains.user_management.handlers import UserHandlers
 
 from app.settings.configs.settings import Settings
+from tg_bot.core.storage import get_storage
 from tg_bot.domains.base.handlers import BaseHandlers
 from tg_bot.domains.dependencies import (
     russian_roulette_service,
     user_bot_service,
-    user_info_service,
 )
 from tg_bot.domains.russian_roulette.handlers import russian_roulette
+from tg_bot.domains.user_management.handlers import UserHandlers
 
 settings = Settings()
 
@@ -26,8 +27,6 @@ class TelegramBot:
     def _register_depends(self):
         self.dp["user_bot_service"] = user_bot_service
         self.dp["russian_roulette_service"] = russian_roulette_service
-        self.dp["user_info_service"] = user_info_service
-        print(self.dp["user_info_service"])
 
     def _register_handlers(self) -> None:
         self.dp.message.register(BaseHandlers.start_command, Command("start"))
@@ -36,13 +35,16 @@ class TelegramBot:
         self.dp.message.register(UserHandlers.track_command, Command("track"))
         self.dp.message.register(russian_roulette, Command("russian_roulette"))
 
-    async def on_shutdown(self, dp: Dispatcher) -> None:
+    async def on_shutdown(self) -> None:
         await self.storage.close()
-        await self.storage.wait_closed()
+        await self.dp.shutdown()
 
-    async def main(self):
+    async def start(self):
         # self.dp.message.middleware(LoggingMiddleware())
         try:
-            await self.dp.start_polling(self.bot)
+            await self.dp.start_polling(self.bot, skip_updates=True, timeout=1,  relax=0.1)
+        except asyncio.CancelledError:
+            await self.bot.session.close()
         finally:
             await self.storage.close()
+            await self.bot.session.close()

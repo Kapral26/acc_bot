@@ -12,6 +12,3 @@ russian_roulette_service = RussianRouletteService(
     russian_roulette_repository=russian_roulette_repository,
     user_bot_service=user_bot_service,
 )
-
-user_info_repository = UserInfoRepository(user_bot_service=user_bot_service)
-user_info_service = UserInfoService(user_info_repository=user_info_repository)
