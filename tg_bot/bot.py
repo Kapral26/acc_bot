@@ -5,6 +5,7 @@ from aiogram.filters import Command
 
 from app.settings.configs.settings import Settings
 from tg_bot.core.storage import get_storage
+from tg_bot.domains import commands
 from tg_bot.domains.base.handlers import BaseHandlers
 from tg_bot.domains.dependencies import (
     russian_roulette_service,
@@ -29,11 +30,8 @@ class TelegramBot:
         self.dp["russian_roulette_service"] = russian_roulette_service
 
     def _register_handlers(self) -> None:
-        self.dp.message.register(BaseHandlers.start_command, Command("start"))
-        self.dp.message.register(BaseHandlers.help_command, Command("help"))
-        self.dp.message.register(UserHandlers.reg_user, Command("reg_user"))
-        self.dp.message.register(UserHandlers.track_command, Command("track"))
-        self.dp.message.register(russian_roulette, Command("russian_roulette"))
+        for command, handler in commands.items():
+            self.dp.message.register(handler, Command(command))
 
     async def on_shutdown(self) -> None:
         await self.storage.close()

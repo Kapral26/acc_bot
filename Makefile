@@ -9,7 +9,7 @@ define handle_args
 endef
 
 run:
-	uv run uvicorn main:app --reload
+	uv run uvicorn main:app
 
 close:
 	kill -9 $(lsof -t -i :8000)
