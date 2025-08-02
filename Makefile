@@ -9,7 +9,10 @@ define handle_args
 endef
 
 run:
-	uv run uvicorn main:app
+	uv run uvicorn main:app --reload
+
+close:
+	kill -9 $(lsof -t -i :8000)
 
 install: ## Установить зависимость с помощью uv
 	$(call handle_args)

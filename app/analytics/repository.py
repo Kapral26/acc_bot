@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from app.analytics.bad_phrase.models import BadPhrase
 from app.analytics.models import Analytics
-from app.users.schemas import UserSchema, UsersSchemaWithoutChat
+from app.users.schemas import UserSchema, UsersCreateSchema
 
 T = TypeVar("T")
 
@@ -18,7 +18,7 @@ class AnalyticsRepository:
     async def track_user_request(
         self,
         user: UserSchema,
-        who_send: UsersSchemaWithoutChat,
+        who_send: UsersCreateSchema,
         random_bad_phrase_result: BadPhrase,
     ) -> None:
         async with self.session_factory() as session:
@@ -26,6 +26,7 @@ class AnalyticsRepository:
                 user_id=user.id,
                 bad_phrase_id=random_bad_phrase_result.id,
                 who_send_id=who_send.id,
+                chat_id=who_send.chat.id,
             )
             session.add(analytic_item)
             await session.commit()
