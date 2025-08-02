@@ -34,8 +34,6 @@ class TelegramBot:
         self.dp.message.register(BaseHandlers.help_command, Command("help"))
         self.dp.message.register(UserHandlers.reg_user, Command("reg_user"))
         self.dp.message.register(UserHandlers.track_command, Command("track"))
-        self.dp.message.register(user_info, Command("user_info"))  # новый хендлер
-
         self.dp.message.register(russian_roulette, Command("russian_roulette"))
 
     async def on_shutdown(self, dp: Dispatcher) -> None:
