@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 
 
@@ -8,6 +7,7 @@ class AnalyticsSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class AnalyticsSchema(BaseModel):
     id: int

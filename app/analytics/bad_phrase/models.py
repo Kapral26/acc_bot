@@ -10,6 +10,7 @@ class BadPhrase(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     phrase: Mapped[str] = mapped_column(String(1024), nullable=False)
 
+
 """
 Сделай перерыв @ - сходи нахуй
 Пес-борбос и @ нахуй иди

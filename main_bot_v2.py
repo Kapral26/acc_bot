@@ -9,13 +9,27 @@ from collections import Counter, OrderedDict
 from datetime import datetime, time
 from random import choice
 
-from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode, ReplyKeyboardRemove
-from telegram.ext import CallbackContext, CallbackQueryHandler, Updater, MessageHandler, CommandHandler, \
-    ConversationHandler, Filters, PollAnswerHandler
-from telegram.utils.request import Request
-
-from setting.bot_setting import BotSetting, WorkWithUser, log_error, logging, chk_user
+from setting.bot_setting import BotSetting, WorkWithUser, chk_user, log_error, logging
 from setting.cinema import Cinema
+from telegram import (
+    Bot,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ParseMode,
+    ReplyKeyboardRemove,
+    Update,
+)
+from telegram.ext import (
+    CallbackContext,
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    Filters,
+    MessageHandler,
+    PollAnswerHandler,
+    Updater,
+)
+from telegram.utils.request import Request
 
 FIND_MOVIE, FIND_DONE, FINNALY_DONE, CHECK_SEQUEL = range(4)
 NEXT, DETAIL_VIEW, VIEW_ALL, FINAL_VIEW = range(4)

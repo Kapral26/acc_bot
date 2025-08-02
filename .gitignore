@@ -39,3 +39,5 @@ dist/
 
 # Env files (all variants)
 /.qodo/
+/tmp
+/tmp/

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from app.users.chats.service import ChatsService
 from app.users.repository import UserRepository
 from app.users.roles.service import RolesService
-from app.users.schemas import UserSchema, UsersCreateSchema
+from app.users.schemas import UserSchema, UsersCreateSchema, UsersSchemaWithoutChat
 
 
 @dataclass
@@ -23,3 +23,7 @@ class UserService:
     async def get_user_by_username(self, username: str) -> UserSchema:
         user = await self.user_repository.get_user_by_username(username)
         return UserSchema.model_validate(user)
+
+    async def get_random_user(self, chat_id: int) -> UsersSchemaWithoutChat:
+        user = await self.user_repository.get_random_user(chat_id)
+        return UsersSchemaWithoutChat.model_validate(user)

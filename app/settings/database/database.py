@@ -23,10 +23,12 @@ class Base(DeclarativeBase):
     """Базовый класс для всех моделей."""
 
     # Поле для хранения даты и времени создания записи.  Автоматически заполняется при создании.
-    created_at: Mapped[datetime] = mapped_column(
-        # При добавлении записи в таблицу, автоматически устанавливается текущее время
-        default=datetime.now
-    ),
+    created_at: Mapped[datetime] = (
+        mapped_column(
+            # При добавлении записи в таблицу, автоматически устанавливается текущее время
+            default=datetime.now
+        ),
+    )
     # Поле для хранения даты и времени последнего обновления записи. Автоматически обновляется при каждом изменении.
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.now,

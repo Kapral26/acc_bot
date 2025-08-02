@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.users.dependencies import get_user_service
-from app.users.schemas import UserSchema, UsersCreateSchema, UserWasCreated
+from app.users.schemas import UserSchema, UsersCreateSchema
 from app.users.service import UserService
 
 router = APIRouter(
@@ -15,7 +15,6 @@ router = APIRouter(
 
 @router.post(
     "/",
-    response_model=UserWasCreated,
     status_code=status.HTTP_201_CREATED | status.HTTP_409_CONFLICT,
 )
 async def create_user(

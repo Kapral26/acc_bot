@@ -11,8 +11,4 @@ class Chat(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(128), nullable=True)
     type: Mapped[ChatTypeEnum] = mapped_column(nullable=False)
-    users = relationship(
-        "User",
-        secondary="user_chats",
-        back_populates="chats"
-    )
+    users = relationship("User", secondary="user_chats", back_populates="chats")

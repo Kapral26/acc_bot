@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # для конфиденциальных данных, например, токена бота
 
     postgres_user: str = Field(
-            ..., alias="POSTGRES_USER"
+        ..., alias="POSTGRES_USER"
     )  # Имя пользователя базы данных
     postgres_password: SecretStr = Field(..., alias="POSTGRES_PASSWORD")
     # Пароль пользователя, хранится как SecretStr для безопасности
@@ -32,44 +32,39 @@ class Settings(BaseSettings):
 
     kafka_bootstrap_servers: str = Field(..., alias="KAFKA_BOOTSTRAP_SERVERS")
     kafka_topic: str = Field(..., alias="KAFKA_TOPIC")
+    kafka_port: str = Field(..., alias="KAFKA_PORT")
+    kafka_consumer_group: str = Field(..., alias="KAFKA_CONSUMER_GROUP")
 
     bot_token: SecretStr = Field(..., alias="BOT_TOKEN")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        setup_file_logger(
-            log_level=logging.INFO if not self.debug else logging.DEBUG
+        setup_file_logger(log_level=logging.INFO if not self.debug else logging.DEBUG)
+
+    @property
+    def async_database_dsn(self) -> str:
+        """Возвращает объект URL для подключения к PostgreSQL с использованием sqlalchemy и драйвера psycopg2."""
+        return (
+            f"postgresql+asyncpg://{self.postgres_user}:"
+            f"{self.postgres_password.get_secret_value()}@"
+            f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
     @property
-    def async_database_dsn(
-            self
-    ) -> str:
-        """Возвращает объект URL для подключения к PostgreSQL с использованием sqlalchemy и драйвера psycopg2."""
-        return (f"postgresql+asyncpg://{self.postgres_user}:"
-                f"{self.postgres_password.get_secret_value()}@"
-                f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}")
-
-    @property
     def jwt_expires(self) -> float:
-        """
-        Возвращает время истечения срока действия JWT-токена.
+        """Возвращает время истечения срока действия JWT-токена.
 
         Возвращает:
             float: Время истечения срока действия JWT-токена в формате Unix timestamp.
         """
         return (datetime.now(UTC) + timedelta(days=self.jwt_token_lifetime)).timestamp()
 
-    # Начиная со второй версии pydantic, настройки класса настроек задаются
-    # через model_config
-    # В данном случае будет использоваться файла .dev.env, который будет прочитан
-    # с кодировкой UTF-8
+    @property
+    def kafka_servers_dsn(self) -> str:
+        return f"{self.kafka_bootstrap_servers}:{self.kafka_port}"
+
     model_config = SettingsConfigDict(env_file=dotenv_path, env_file_encoding="utf-8")
 
-
-# При импорте файла сразу создастся
-# и провалидируется объект конфига,
-# который можно далее импортировать из разных мест
 
 if __name__ == "__main__":
     settings = Settings()

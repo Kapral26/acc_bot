@@ -8,6 +8,7 @@ class BadPhraseSchema(BaseModel):
     class Config:
         from_attributes = True
 
+
 class BadPhraseCRUD(BaseModel):
     phrase: str
 

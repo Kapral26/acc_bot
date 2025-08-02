@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from app.analytics.bad_phrase.models import BadPhrase
 from app.analytics.bad_phrase.repository import BadPhraseRepository
 from app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
 
@@ -9,6 +10,10 @@ from app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
 @dataclass
 class BadPhraseService:
     bad_phrase_repository: BadPhraseRepository
+
+    async def get_random_bad_phrase(self) -> BadPhrase :
+        bad_phrase = await self.bad_phrase_repository.get_random_bad_phrase()
+        return bad_phrase
 
     async def create_bad_phrase(self, bad_phrase: BadPhraseCRUD) -> BadPhraseSchema:
         new_bad_phrase = await self.bad_phrase_repository.create_bad_phrase(bad_phrase)

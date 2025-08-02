@@ -4,7 +4,6 @@ import httpx
 
 
 class APIAdapterABC(ABC):
-
     @abstractmethod
     async def api_post(self, url: str, data: dict | None = None) -> httpx.Response:
         raise NotImplementedError()

@@ -15,14 +15,17 @@ from app.exceptions import (
 
 T = TypeVar("T")
 
-async def get_random_bad_phrase(session: AsyncSession) -> BadPhrase | None:
-    stmt = select(BadPhrase).order_by(func.random()).limit(1)
-    result = await session.execute(stmt)
-    return result.scalar_one_or_none()
+
 
 @dataclass
 class BadPhraseRepository:
     session_factory: Callable[[T], AsyncSession]
+
+    async def get_random_bad_phrase(self) -> BadPhrase | None:
+        async with self.session_factory() as session:
+            stmt = select(BadPhrase).order_by(func.random()).limit(1)
+            result = await session.execute(stmt)
+            return result.scalar_one_or_none()
 
     async def _get_bad_phrase_by_id(
         self, session: AsyncSession, bad_phrase_id: int

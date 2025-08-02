@@ -1,10 +1,11 @@
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Sequence, TypeVar
+from typing import TypeVar
 
-from sqlalchemy import func, insert, select
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.users.chats.repository import get_chat_id
 from app.users.models import User, UserChats
@@ -20,7 +21,7 @@ class UserRepository:
 
     @staticmethod
     async def _get_user_by_id(session: AsyncSession, id: int) -> User | None:
-        stmt = select(User).where(User.id == id)
+        stmt = select(User).options(joinedload(User.chats)).where(User.id == id)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -47,11 +48,16 @@ class UserRepository:
         new_user_id = query_result.scalars().first()
         return new_user_id
 
-    @staticmethod
-    async def get_random_user(session: AsyncSession) -> User | None:
-        stmt = select(User).order_by(func.random()).limit(1)
-        result = await session.execute(stmt)
-        return result.scalar_one_or_none()
+    async def get_random_user(self, chat_id: int) -> User | None:
+        async with self.session_factory() as session:
+            stmt = (
+                select(User)
+                .join(UserChats, User.id == UserChats.user_id)
+                .where(UserChats.chat_id == chat_id)
+            )
+            result = await session.execute(stmt)
+            user = result.scalar_one_or_none()
+            return user
 
     async def create_user(self, user_data: UsersCreateSchema) -> None:
         async with self.session_factory() as session:
@@ -76,7 +82,9 @@ class UserRepository:
 
     async def get_users(self) -> Sequence[User]:
         async with self.session_factory() as session:
-            query_result = await session.execute(select(User))
+            query_result = await session.execute(
+                select(User).options(joinedload(User.chats))
+            )
             return query_result.scalars().all()
 
     async def get_user_by_id(self, user_id: int) -> User | None:
@@ -88,9 +96,13 @@ class UserRepository:
         async with self.session_factory() as session:
             # Сбрасываем кэш SQLAlchemy
             session.expire_all()
-            stmt = select(User).where(User.username == username)
+            stmt = (
+                select(User)
+                .options(joinedload(User.chats))
+                .where(User.username == username)
+            )
             result = await session.execute(stmt)
-            return result.scalar_one_or_none()
+            return result.scalars().first()
 
     async def bind_chat_to_user(
         self, session: AsyncSession, user_id: int, chat_id: int
