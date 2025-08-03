@@ -6,13 +6,11 @@ from aiogram.filters import Command
 from app.settings.configs.settings import Settings
 from tg_bot.core.storage import get_storage
 from tg_bot.domains import commands
-from tg_bot.domains.base.handlers import BaseHandlers
 from tg_bot.domains.dependencies import (
     russian_roulette_service,
     user_bot_service,
 )
-from tg_bot.domains.russian_roulette.handlers import russian_roulette
-from tg_bot.domains.user_management.handlers import UserHandlers
+from tg_bot.domains.russian_roulette.keyboards import router
 
 settings = Settings()
 
@@ -33,14 +31,17 @@ class TelegramBot:
         for command, handler in commands.items():
             self.dp.message.register(handler, Command(command))
 
+        self.dp.include_router(router)
+
     async def on_shutdown(self) -> None:
         await self.storage.close()
         await self.dp.shutdown()
 
     async def start(self):
-        # self.dp.message.middleware(LoggingMiddleware())
         try:
-            await self.dp.start_polling(self.bot, skip_updates=True, timeout=1,  relax=0.1)
+            await self.dp.start_polling(
+                self.bot, skip_updates=True, timeout=1, relax=0.1
+            )
         except asyncio.CancelledError:
             await self.bot.session.close()
         finally:
