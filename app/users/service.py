@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from app.users.chats.service import ChatsService
+from app.users.exceptions import UserAlreadyRegisterIntoThisChat
 from app.users.repository import UserRepository
 from app.users.roles.service import RolesService
 from app.users.schemas import UserSchema, UsersCreateSchema, UsersSchemaWithoutChat
@@ -13,7 +14,11 @@ class UserService:
     role_service: RolesService
 
     async def create_user(self, user_data: UsersCreateSchema) -> None:
-        await self.chat_service.is_user_in_chat(user_data.id, user_data.chat.id)
+        user_exist_into_chat = await self.chat_service.is_user_in_chat(
+            user_data.id, user_data.chat.id
+        )
+        if user_exist_into_chat:
+            raise UserAlreadyRegisterIntoThisChat
         await self.user_repository.create_user(user_data)
 
     async def get_users(self) -> list[UserSchema]:

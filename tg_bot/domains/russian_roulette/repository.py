@@ -11,7 +11,7 @@ class RussianRouletteRepository:
 
     async def start(self, user_data: UsersCreateSchema) -> BadPhraseMessage:
         register_suer_result = await self.api_adapter.api_post(
-            "http://localhost:8000/russian_roulette/",
+            "/russian_roulette/",
             data=user_data.model_dump(mode="json"),
         )
         resp = register_suer_result.json()

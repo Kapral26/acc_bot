@@ -1,11 +1,15 @@
-from aiogram import types
+from aiogram.filters import Command
+from aiogram.types import Message
 
+from tg_bot.domains.russian_roulette import router
 from tg_bot.domains.russian_roulette.keyboards import roulette_kb
+from tg_bot.domains.user_management.filters import UserInChatFilter
 
 
-async def russian_roulette(
-    message: types.Message,
-) -> None:
+
+# Регистрация хендлера с фильтром
+@router.message(Command("russian_roulette"), UserInChatFilter())
+async def russian_roulette(message: Message) -> None:
     await message.answer(
-        "Что бы начать русскую рулетку, нажмите на кнопку:", reply_markup=roulette_kb
+        "Чтобы начать русскую рулетку, нажмите на кнопку:", reply_markup=roulette_kb
     )

@@ -1,14 +1,17 @@
+from dataclasses import dataclass
 
 import httpx
 
 from tg_bot.domains.api_adapter.abstracts import APIAdapterABC
 
 
+@dataclass
 class APIAdapter(APIAdapterABC):
+    base_url: str = "http://localhost:8000"
 
     async def api_post(self, url: str, data: dict | None = None) -> httpx.Response:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=data)
+            response = await client.post(self.base_url + url, json=data)
             if response.status_code == 409:
                 return response
             response.raise_for_status()
@@ -16,24 +19,23 @@ class APIAdapter(APIAdapterABC):
 
     async def api_get(self, url: str, param: dict | None = None) -> httpx.Response:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, params=param)
-            response.raise_for_status()
+            response = await client.get(self.base_url + url, params=param)
             return response
 
     async def api_put(self, url: str, data: dict | None = None) -> httpx.Response:
         async with httpx.AsyncClient() as client:
-            response = await client.put(url, json=data)
+            response = await client.put(self.base_url + url, json=data)
             response.raise_for_status()
             return response
 
     async def api_patch(self, url: str, data: dict | None = None) -> httpx.Response:
         async with httpx.AsyncClient() as client:
-            response = await client.patch(url, json=data)
+            response = await client.patch(self.base_url + url, json=data)
             response.raise_for_status()
             return response
 
     async def api_delete(self, url: str, params: dict | None = None) -> httpx.Response:
         async with httpx.AsyncClient() as client:
-            response = await client.delete(url, params=params)
+            response = await client.delete(self.base_url + url, params=params)
             response.raise_for_status()
             return response

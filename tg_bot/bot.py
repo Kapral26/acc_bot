@@ -5,12 +5,11 @@ from aiogram.filters import Command
 
 from app.settings.configs.settings import Settings
 from tg_bot.core.storage import get_storage
-from tg_bot.domains import commands
+from tg_bot.domains import commands, routes
 from tg_bot.domains.dependencies import (
     russian_roulette_service,
     user_bot_service,
 )
-from tg_bot.domains.russian_roulette.keyboards import router
 
 settings = Settings()
 
@@ -20,6 +19,7 @@ class TelegramBot:
         self.bot = Bot(token=settings.bot_token.get_secret_value())
         self.storage = get_storage()
         self.dp = Dispatcher(storage=self.storage)
+        self._register_routers()
         self._register_handlers()
         self._register_depends()
 
@@ -31,7 +31,9 @@ class TelegramBot:
         for command, handler in commands.items():
             self.dp.message.register(handler, Command(command))
 
-        self.dp.include_router(router)
+    def _register_routers(self) -> None:
+        for router in routes:
+            self.dp.include_router(router)
 
     async def on_shutdown(self) -> None:
         await self.storage.close()

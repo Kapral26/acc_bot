@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.post(
     "/",
-    status_code=status.HTTP_201_CREATED | status.HTTP_409_CONFLICT,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
     user_data: UsersCreateSchema,

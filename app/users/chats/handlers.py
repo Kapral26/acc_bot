@@ -6,6 +6,7 @@ from starlette import status
 from app.users.chats.dependencies import get_chats_service
 from app.users.chats.schemas import UserChatSchema, UserChatSchemaCRUD
 from app.users.chats.service import ChatsService
+from app.users.exceptions import UserIsNotRegisteredIntoThisChat
 
 router = APIRouter(
     prefix="/chats",
@@ -82,3 +83,19 @@ async def delete_chat(
         await chats_service.delete_chat(chat_id)
     except Exception as error:
         raise HTTPException(status_code=404, detail=str(error))
+
+
+@router.get(
+    "/{chat_id}/users/{user_id}",
+    status_code=status.HTTP_200_OK,
+)
+async def is_user_in_chat(
+    chat_id: int,
+    user_id: int,
+    chat_service: Annotated[ChatsService, Depends(get_chats_service)],
+):
+    user_exist_into_chat = await chat_service.is_user_in_chat(user_id, chat_id)
+    if not user_exist_into_chat:
+        raise UserIsNotRegisteredIntoThisChat
+
+    return {"in_chat": True}

@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
+from starlette import status
+
 from app.users.schemas import UsersCreateSchema
 from tg_bot.domains.api_adapter.service import APIAdapter
+from tg_bot.domains.user_management.schemas import UserChatCheckResponse
 
 
 @dataclass
@@ -9,14 +12,29 @@ class UserBotRepository:
     api_adapter: APIAdapter
 
     async def register_user(self, user_data: UsersCreateSchema) -> str:
-        register_suer_result = await self.api_adapter.api_post(
-            "http://localhost:8000/users/", data=user_data.model_dump(mode="json")
+        response = await self.api_adapter.api_post(
+            "/users/", data=user_data.model_dump(mode="json")
         )
-        resp = register_suer_result.json()
-        return resp.get("detail") or resp.get("text")
+        if response.status_code != status.HTTP_201_CREATED:
+            response_text = response.json().get("detail")
+        else:
+            response_text = "Пользователь успешно зарегистрирован."
+        return response_text
 
     async def change_role(self, user_data: UsersCreateSchema):
         await self.api_adapter.api_post(
-            "http://localhost:8000/users/", data=user_data.model_dump(mode="json")
+            "/users/", data=user_data.model_dump(mode="json")
         )
 
+    async def is_user_in_chat(
+        self, user_data: UsersCreateSchema
+    ) -> UserChatCheckResponse:
+        response = await self.api_adapter.api_get(
+            f"/chats/{user_data.chat.id}/users/{user_data.id}"
+        )
+        return UserChatCheckResponse(
+            in_chat=response.status_code == status.HTTP_200_OK,
+            detail=response.json().get("detail")
+            if response.status_code != 200
+            else None,
+        )

@@ -32,7 +32,4 @@ class ChatsService:
     async def is_user_in_chat(self, user_id: int, chat_id: int) -> None:
         self.logger.debug(f"Checking if user is in chat: {user_id}, {chat_id}")
         user_in_chat = await self.chats_repository.get_user_chat(user_id, chat_id)
-        if user_in_chat:
-            self.logger.debug("User is already in chat")
-            raise UserAlreadyRegisterIntoThisChat
-        self.logger.debug("User is not in chat")
+        return user_in_chat is not None

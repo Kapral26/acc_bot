@@ -23,7 +23,7 @@ class UserRepository:
     async def _get_user_by_id(session: AsyncSession, id: int) -> User | None:
         stmt = select(User).options(joinedload(User.chats)).where(User.id == id)
         result = await session.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     @staticmethod
     async def _insert_new_user(
