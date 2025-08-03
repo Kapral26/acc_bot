@@ -6,6 +6,5 @@ commands = {
     "start": BaseHandlers.start_command,
     "help": BaseHandlers.help_command,
     "reg_user": UserHandlers.reg_user,
-    "track": UserHandlers.track_command,
     "russian_roulette": russian_roulette,
 }

@@ -19,3 +19,4 @@ class UserBotRepository:
         await self.api_adapter.api_post(
             "http://localhost:8000/users/", data=user_data.model_dump(mode="json")
         )
+
