@@ -136,6 +136,7 @@ dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
     { name = "confluent-kafka" },
+    { name = "dishka" },
     { name = "fastapi" },
     { name = "greenlet" },
     { name = "httpx" },
@@ -153,6 +154,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.16.4" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "confluent-kafka", specifier = ">=2.11.0" },
+    { name = "dishka", specifier = ">=1.6.0" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "greenlet", specifier = ">=3.2.3" },
     { name = "httpx", specifier = ">=0.28.1" },
@@ -289,6 +291,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/45/98/c6e56bdd8c5c7ac4acce4f28a367bcfee4b42eca45d461c40637a038c445/confluent_kafka-2.11.0-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:ed0981e686bdc4ee86034113a750242fe1b405826bf4a553498bf558429188af", size = 3912654, upload-time = "2025-07-03T17:35:13.965Z" },
     { url = "https://files.pythonhosted.org/packages/1a/a6/a5efb07b25bdf47305ef21e27bbfa970d7b1083af5a3c7159a0379d658d2/confluent_kafka-2.11.0-cp313-cp313-win_amd64.whl", hash = "sha256:6d6ec6e791b1c97668ff0823dff1dc005ab418b353a430fede7b5cd6c5490497", size = 4094746, upload-time = "2025-07-03T17:35:15.677Z" },
     { url = "https://files.pythonhosted.org/packages/b2/11/0b5ef56d9d024ddb01a97ac36dbcd8c3105ae3ca76396429a64651e5b5dd/confluent_kafka-2.11.0-cp313-cp313t-manylinux_2_28_aarch64.whl", hash = "sha256:9f44a476241a81e6b3259d3f3f00aa0e94ed64a924131f83cb3b640ecdfcd633", size = 15368809, upload-time = "2025-07-03T17:35:17.906Z" },
+]
+
+[[package]]
+name = "dishka"
+version = "1.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/04/f3add05678a3ac1ab7736faae45b18b5365d84b1cd3cf3af64b09a1d6a5f/dishka-1.6.0.tar.gz", hash = "sha256:f1fa5ec7e980d4f618d0c425d1bb81d8e9414894d8ec6553b197d2298774e12f", size = 65971, upload-time = "2025-05-18T21:40:53.259Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/6b/f9cd08543c4f55bf129a0ebce5c09e43528235dd6e7cb906761ca094979a/dishka-1.6.0-py3-none-any.whl", hash = "sha256:ab1aedee152ce7bb11cfd2673d7ce4001fe2b330d14e84535d7525a68430b2c2", size = 90789, upload-time = "2025-05-18T21:40:51.352Z" },
 ]
 
 [[package]]
