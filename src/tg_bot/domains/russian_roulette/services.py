@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 from aiogram import types
+from dishka import FromDishka
+from dishka.integrations.aiogram import inject
 
 from src.app.users.schemas import UsersCreateSchema
 from src.tg_bot.domains.russian_roulette.repository import RussianRouletteRepository
@@ -10,8 +12,7 @@ from src.tg_bot.domains.user_management.services import UserBotService, extract_
 
 @dataclass
 class RussianRouletteService:
-    russian_roulette_repository: RussianRouletteRepository
-    user_bot_service: UserBotService
+    russian_roulette_repository: FromDishka[RussianRouletteRepository]
 
     @extract_user_data
     async def start(

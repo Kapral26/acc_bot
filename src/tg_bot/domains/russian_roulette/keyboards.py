@@ -1,7 +1,9 @@
 from aiogram import F
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
+from dishka import FromDishka
+from dishka.integrations.aiogram import inject
 
-from src.tg_bot.domains.russian_roulette import router
+from src.tg_bot.domains.russian_roulette import russian_roulette_router
 from src.tg_bot.domains.russian_roulette.services import RussianRouletteService
 from src.tg_bot.domains.user_management.filters import UserInChatFilter
 
@@ -13,14 +15,15 @@ roulette_kb = ReplyKeyboardMarkup(keyboard=[[roulette_button]], resize_keyboard=
 active_tasks = set()
 
 
-@router.message(
+@russian_roulette_router.message(
     F.text == TEXT_BUTTON,
  #   TimeRangeFilter(8, 23),
     UserInChatFilter()
 )
+@inject
 async def handle_roulette_game(
     message: Message,
-    russian_roulette_service: RussianRouletteService,
+    russian_roulette_service: FromDishka[RussianRouletteService],
 ):
     try:
         bad_phrase = await russian_roulette_service.start(message)

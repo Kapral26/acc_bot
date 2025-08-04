@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from functools import wraps
 
 from aiogram import types
+from dishka import FromDishka
 
 from src.app.users.chats.schemas import UserChatSchema
 from src.app.users.schemas import UsersCreateSchema
@@ -28,18 +29,8 @@ def extract_user_data(func):
 
 @dataclass
 class UserBotService:
-    user_bot_repository: UserBotRepository
+    user_bot_repository: FromDishka[UserBotRepository]
 
-    # @staticmethod
-    # async def extract_user_data(message: types.Message) -> UsersCreateSchema:
-    #     user = message.from_user
-    #     return UsersCreateSchema(
-    #         id=user.id,
-    #         username=user.username,
-    #         first_name=user.first_name,
-    #         last_name=user.last_name,
-    #         chat=UserChatSchema.model_validate(message.chat),
-    #     )
     @extract_user_data
     async def register_user(
         self, message: types.Message, user_data: UsersCreateSchema
