@@ -1,14 +1,17 @@
 from dishka import Provider, Scope, provide
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from src.app.analytics.bad_phrase.repository import BadPhraseRepository
 from src.app.analytics.bad_phrase.service import BadPhraseService
-from src.app.settings.database.database import async_session_factory
 
 
 class BadPhraseProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    async def get_bad_phrase_repository(self) -> BadPhraseRepository:
-        return BadPhraseRepository(session_factory=async_session_factory)
+    async def get_bad_phrase_repository(
+            self,
+            session_factory: async_sessionmaker
+    ) -> BadPhraseRepository:
+        return BadPhraseRepository(session_factory=session_factory)
 
     @provide(scope=Scope.REQUEST)
     async def get_bad_phrase_service(

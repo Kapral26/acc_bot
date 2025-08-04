@@ -1,16 +1,19 @@
 from dishka import Provider, Scope, provide
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from src.app.analytics.bad_phrase.service import BadPhraseService
 from src.app.analytics.repository import AnalyticsRepository
 from src.app.analytics.service import AnalyticsService
-from src.app.settings.database.database import async_session_factory
 from src.app.users.service import UserService
 
 
 class AnalyticsProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    async def get_analytics_repository(self) -> AnalyticsRepository:
-        return AnalyticsRepository(session_factory=async_session_factory)
+    async def get_analytics_repository(
+        self,
+        session_factory: async_sessionmaker
+    ) -> AnalyticsRepository:
+        return AnalyticsRepository(session_factory=session_factory)
 
     @provide(scope=Scope.REQUEST)
     def get_analytics_service(

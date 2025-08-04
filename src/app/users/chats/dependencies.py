@@ -1,8 +1,8 @@
 import logging
 
 from dishka import Provider, Scope, provide
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.app.settings.database.database import async_session_factory
 from src.app.users.chats.repository import ChatsRepository
 from src.app.users.chats.service import ChatsService
 
@@ -10,8 +10,11 @@ from src.app.users.chats.service import ChatsService
 class ChatsProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
-    async def get_chat_repository(self) -> ChatsRepository:
-        return ChatsRepository(session_factory=async_session_factory)
+    async def get_chat_repository(
+        self,
+        session_factory: async_sessionmaker
+    ) -> ChatsRepository:
+        return ChatsRepository(session_factory=session_factory)
 
     @provide(scope=Scope.REQUEST)
     async def get_chats_service(
