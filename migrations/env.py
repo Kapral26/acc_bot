@@ -3,12 +3,12 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from app.analytics.bad_phrase.models import BadPhrase
-from app.analytics.models import Analytics
-from app.settings.configs.settings import Settings
-from app.settings.database.database import Base
-from app.users.chats.models import Chat
-from app.users.models import User, UserChats
+from src.app.analytics.bad_phrase.models import BadPhrase
+from src.app import Analytics
+from src.app.settings.configs.settings import Settings
+from src.app.settings.database.database import Base
+from src.app.users.chats.models import Chat
+from src.app.users import User, UserChats
 
 __models__ = [
     Analytics,

@@ -12,7 +12,7 @@ redis.dump
 
 # Other
 *.env
-!.dev.env
+!src/.dev.env
 
 # Python virtual environments
 .venv/
