@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,8 +8,6 @@ from src.app.exceptions import RoleNotFoundException
 from src.app.users.chats.models import Chat
 from src.app.users.chats.schemas import UserChatSchema
 from src.app.users.models import UserChats
-
-T = TypeVar("T")
 
 
 async def find_chat_by_id(session: AsyncSession, chat_id: int) -> Chat | None:
@@ -38,7 +35,7 @@ async def get_chat_id(session: AsyncSession, chat: UserChatSchema) -> int:
 
 @dataclass
 class ChatsRepository:
-    session_factory: Callable[[T], AsyncSession]
+    session_factory: Callable[[], AsyncSession]
 
     async def register_chat(self, chat: UserChatSchema):
         async with self.session_factory() as session:

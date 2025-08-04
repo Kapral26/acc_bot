@@ -11,7 +11,7 @@ from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
 class BadPhraseService:
     bad_phrase_repository: BadPhraseRepository
 
-    async def get_random_bad_phrase(self) -> BadPhrase :
+    async def get_random_bad_phrase(self) -> BadPhrase:
         bad_phrase = await self.bad_phrase_repository.get_random_bad_phrase()
         return bad_phrase
 

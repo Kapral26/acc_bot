@@ -2,7 +2,6 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -13,13 +12,10 @@ from src.app.exceptions import (
     RoleNotFoundException,  # Можно создать BadPhraseNotFoundException по аналогии
 )
 
-T = TypeVar("T")
-
-
 
 @dataclass
 class BadPhraseRepository:
-    session_factory: Callable[[T], AsyncSession]
+    session_factory: Callable[[], AsyncSession]
 
     async def get_random_bad_phrase(self) -> BadPhrase | None:
         async with self.session_factory() as session:

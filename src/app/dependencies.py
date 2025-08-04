@@ -1,10 +1,6 @@
 import logging
 
-from dishka import Provider, provide, Scope
-
-
-def get_logger() -> logging.Logger:
-    return
+from dishka import Provider, Scope, provide
 
 
 class LoggerProvider(Provider):

@@ -1,7 +1,6 @@
 import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import TypeVar
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,17 +10,15 @@ from src.app.users.chats.repository import get_chat_id
 from src.app.users.models import User, UserChats
 from src.app.users.schemas import UsersCreateSchema
 
-T = TypeVar("T")
-
 
 @dataclass
 class UserRepository:
-    session_factory: Callable[[T], AsyncSession]
+    session_factory: Callable[[], AsyncSession]
     logger: logging.Logger
 
     @staticmethod
-    async def _get_user_by_id(session: AsyncSession, id: int) -> User | None:
-        stmt = select(User).options(joinedload(User.chats)).where(User.id == id)
+    async def _get_user_by_id(session: AsyncSession, user_id: int) -> User | None:
+        stmt = select(User).options(joinedload(User.chats)).where(User.id == user_id)
         result = await session.execute(stmt)
         return result.scalars().first()
 
@@ -41,7 +38,7 @@ class UserRepository:
         )
         try:
             query_result = await session.execute(stmnt)
-        except Exception as e:
+        except Exception:
             await session.rollback()
             raise
 

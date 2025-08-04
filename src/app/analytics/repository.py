@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar
 
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
@@ -8,12 +7,10 @@ from src.app.analytics.bad_phrase.models import BadPhrase
 from src.app.analytics.models import Analytics
 from src.app.users.schemas import UserSchema, UsersCreateSchema
 
-T = TypeVar("T")
-
 
 @dataclass
 class AnalyticsRepository:
-    session_factory: Callable[[T], AsyncSession]
+    session_factory: Callable[[], AsyncSession]
 
     async def track_user_request(
         self,

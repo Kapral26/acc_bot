@@ -1,9 +1,8 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException
+from dishka import FromDishka
+from dishka.integrations.fastapi import inject
+from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from src.app.users.dependencies import get_user_service
 from src.app.users.schemas import UserSchema, UsersCreateSchema
 from src.app.users.service import UserService
 
@@ -17,28 +16,21 @@ router = APIRouter(
     "/",
     status_code=status.HTTP_201_CREATED,
 )
+@inject
 async def create_user(
     user_data: UsersCreateSchema,
-    user_service: Annotated[UserService, Depends(get_user_service)],
+    user_service: FromDishka[UserService],
 ):
     await user_service.create_user(user_data)
 
 
 @router.get("/", response_model=list[UserSchema])
+@inject
 async def get_users(
-    user_service: Annotated[UserService, Depends(get_user_service)],
+    user_service: FromDishka[UserService],
 ) -> list[UserSchema]:
     try:
         users = await user_service.get_users()
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
     return users
-
-
-@router.patch("/{username}/to-admin")
-async def set_user_to_admin(
-    username: str,
-    chat_id: int,
-    user_service: Annotated[UserService, Depends(get_user_service)],
-) -> UserSchema:
-    await user_service.set_user_to_admin(username, chat_id)

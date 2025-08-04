@@ -52,7 +52,8 @@ class Settings(BaseSettings):
 
     @property
     def jwt_expires(self) -> float:
-        """Возвращает время истечения срока действия JWT-токена.
+        """
+        Возвращает время истечения срока действия JWT-токена.
 
         Возвращает:
             float: Время истечения срока действия JWT-токена в формате Unix timestamp.
