@@ -1,4 +1,43 @@
-/tmp.py
-./example
-/acc_bot.log
-/setting/config.py
+
+__pycache__/
+*.py[cod]
+# Log files
+*.log
+# Redis files
+redis.dump
+
+# IDE files
+.vscode/
+.idea/
+
+# Other
+*.env
+!src/.dev.env
+
+# Python virtual environments
+.venv/
+venv/
+
+# Python cache and test artifacts
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database files
+*.sqlite3
+*.db
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.tox/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Env files (all variants)
+/.qodo/
+/tmp
+/tmp/

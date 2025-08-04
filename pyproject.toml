@@ -1,0 +1,106 @@
+[project]
+name = "akk_bot"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.21.0",
+    "aiokafka>=0.12.0",
+    "alembic>=1.16.4",
+    "asyncpg>=0.30.0",
+    "confluent-kafka>=2.11.0",
+    "dishka>=1.6.0",
+    "fastapi>=0.116.1",
+    "greenlet>=3.2.3",
+    "httpx>=0.28.1",
+    "kafka-python>=2.2.15",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "sqlalchemy>=2.0.41",
+    "uvicorn>=0.35.0",
+]
+
+
+[tool.ruff]
+lint.select = [
+    "W",
+    "B",
+    "Q",
+    "N",
+    "D",
+    "UP",
+    "S",
+    "T20",
+    "RUF",
+    "FLY",
+    "TRY",
+    "PD",
+    "TCH",
+    "ANN",
+]
+
+lint.ignore = [
+    #    "F",
+    "D107",
+    "D203",
+    "S608",
+    "D212",
+    "D205",
+    "D400",
+    "B904",
+    "D415",
+    "E722",
+    "F401",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "ANN101",
+    "ANN002",
+    "ANN003",
+    "ANN204",
+    "TRY003",
+    "B904",
+    "ANN101",
+    "S101"
+]
+# Разрешить автоматическое исправление всех включенных правил (при использовании `--fix`)
+[lint]
+fixable = ["ALL"]
+# Игнорировать следующие правила
+# Исключить следующие директории
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    ".idea",
+    "migratons/verdions"
+]
+per-file-ignores = { }
+# Игнорировать следующие файлы
+unfixable = []
+
+[format]
+# Включить переформатирование кода в docstring
+docstring-code-format = true
+# Стиль кавычек
+quote-style = "double"
+# Разрешить неиспользуемые переменные с префиксом "_"
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
