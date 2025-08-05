@@ -10,20 +10,7 @@ def setup_file_logger(
     log_level: int = logging.INFO,
     logger_name: str = "app_logger",
 ) -> logging.Logger:
-    """
-    Инициализирует и возвращает логгер, который пишет в файл с заданным форматом.
 
-    Формат: дата| уровень | путь к файлу | функция | номер строки | Сообщение
-
-    Args:
-        log_file (str): Имя файла для логов.
-        log_level (int): Уровень логирования.
-        logger_name (str): Имя логгера.
-
-    Returns:
-        logging.Logger: Настроенный логгер.
-
-    """
     logger = logging.getLogger(logger_name)
     logger.setLevel(log_level)
 

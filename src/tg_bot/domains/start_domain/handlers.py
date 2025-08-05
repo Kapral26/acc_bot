@@ -1,56 +1,33 @@
 from aiogram import Bot, types
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from dishka import FromDishka
+from dishka.integrations.aiogram import inject
 
 from src.tg_bot.domains.start_domain import start_router
 from src.tg_bot.domains.start_domain.keyboards import get_start_inline_keyboard
-from src.tg_bot.domains.user_management.filters import UserInChatFilter
+from src.tg_bot.domains.user_management.services import UserBotService
 
 
 @start_router.message(Command("start"))
+@inject
 async def start_command(
     message: types.Message,
     bot: Bot,
+    user_bot_service: FromDishka[UserBotService],
 ) -> None:
     """Обработчик команды /start."""
-    is_registered = False
-    bot = await bot.get_me()
-    kb = await get_start_inline_keyboard(bot.username, is_registered)
+    user = await user_bot_service.is_user_in_chat(message)
+
+    kb = await get_start_inline_keyboard(bot, user.in_chat)
     await message.answer(
-        "Привет! Я бот с базовыми командами. Используй /help для списка команд.",
+        """
+*Привет!* ✌️
+➡️ Иди по *известному* направлению.
+🔫 Хочешь сыграть в *Русскую рулетку*? — *Зарегистрируйся!*
+🤡*Личный кабинет*:
+- Можно посмотреть статистику по конкретному чату.
+- Добавить новые фразы.
+""",
         reply_markup=kb,
+        parse_mode="Markdown",  # Не забудьте включить парсинг Markdown
     )
-
-
-@start_router.message(Command("lk"), UserInChatFilter())
-async def start_command(message: types.Message, bot: Bot) -> None:
-    """Обработчик команды /start."""
-    bot_info = await bot.get_me()
-    bot_username = bot_info.username
-
-    if message.chat.type == "private":
-        # Личный чат - клавиатура ReplyKeyboardMarkup
-        reply_keyboard = types.ReplyKeyboardMarkup(
-            keyboard=[
-                [
-                    types.KeyboardButton(text="1"),
-                    types.KeyboardButton(text="2"),
-                    types.KeyboardButton(text="3"),
-                ]
-            ],
-            resize_keyboard=True,
-        )
-        await message.answer("Выберите опцию:", reply_markup=reply_keyboard)
-    else:
-        # Публичный чат - inline-кнопка для перехода в личный чат
-        inline_keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="Личный кабинет",
-                        url=f"https://t.me/{bot_username}?start",
-                    )
-                ]
-            ]
-        )
-        await message.answer("Перейдите в личный чат:", reply_markup=inline_keyboard)

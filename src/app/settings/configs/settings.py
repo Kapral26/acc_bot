@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.app.settings.configs.logger import setup_file_logger
 
-dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".dev.env"
+dotenv_path = Path(__file__).parent.parent.parent.absolute() / ".dev.env"
 
 
 class Settings(BaseSettings):

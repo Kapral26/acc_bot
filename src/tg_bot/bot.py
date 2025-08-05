@@ -24,10 +24,7 @@ class TelegramBot:
 
     def _register_routers(self) -> None:
         for router in routes:
-            try:
-                self.dp.include_router(router)
-            except Exception as e:
-                a = 1
+            self.dp.include_router(router)
 
     async def on_shutdown(self) -> None:
         await self.storage.close()

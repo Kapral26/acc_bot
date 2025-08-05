@@ -1,3 +1,5 @@
+import logging
+
 from dishka import FromDishka, Provider, Scope, provide
 
 from src.tg_bot.core.api_adapter.service import APIAdapter
@@ -26,8 +28,9 @@ class UserBotProvider(Provider):
     async def get_user_bot_service(
         self,
         user_bot_repository: FromDishka[UserBotRepository],
+        logger: FromDishka[logging.Logger],
     ) -> UserBotService:
-        return UserBotService(user_bot_repository=user_bot_repository)
+        return UserBotService(user_bot_repository=user_bot_repository, logger=logger)
 
 
 class RussianRouletteProvider(Provider):

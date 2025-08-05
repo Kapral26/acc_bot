@@ -18,7 +18,7 @@ class UserBotRepository:
         if response.status_code != status.HTTP_201_CREATED:
             response_text = response.json().get("detail")
         else:
-            response_text = "Пользователь успешно зарегистрирован."
+            response_text = "Зарегистрирован.✅"
         return response_text
 
     async def change_role(self, user_data: UsersCreateSchema):

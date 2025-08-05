@@ -12,11 +12,15 @@ class UserInChatFilter(BaseFilter):
         self, message: Message, user_bot_service: FromDishka[UserBotService]
     ) -> bool:
         # Получаем текущее время
-        try:
-            await user_bot_service.is_user_in_chat(message)
-        except ValueError as e:
+        user = await user_bot_service.is_user_in_chat(message)
+        if not user.in_chat:
             filter_text = (
-                "Ты не зарегистрирован в этом чате, используй команду /reg_user."
+                f"""
+                @{message.from_user.username} - иди нахуй!
+                Потом не забудь зарегистрироваться.
+                'Основное меню' -> 'Зарегистрироваться'
+                Для тупых: /reg_user
+                """
             )
             await message.answer(filter_text)
             return False

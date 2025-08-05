@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from src.app.settings.configs.logger import setup_file_logger
+from src.tg_bot.core.settings.configs.logger import setup_file_logger
 
 dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".dev.env"
 
@@ -23,7 +23,11 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        setup_file_logger(log_level=logging.INFO if not self.debug else logging.DEBUG)
+        setup_file_logger(
+            log_file="bot.log",
+            logger_name="bot_logger",
+            log_level=logging.INFO if not self.debug else logging.DEBUG,
+        )
 
     @property
     def kafka_servers_dsn(self) -> str:
