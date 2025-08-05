@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from starlette import status
 
 from src.app.users.schemas import UsersCreateSchema
-from src.tg_bot.domains.api_adapter.service import APIAdapter
+from src.tg_bot.core.api_adapter.service import APIAdapter
 from src.tg_bot.domains.user_management.schemas import UserChatCheckResponse
 
 

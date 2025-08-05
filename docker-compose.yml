@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: postgres_akk_bot
     env_file:
-      - src/.dev.env
+      - src/app/.dev.env
     environment:
       PGDATA: ./pgdata
     ports:

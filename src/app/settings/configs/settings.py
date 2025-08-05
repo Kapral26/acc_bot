@@ -30,13 +30,6 @@ class Settings(BaseSettings):
     redis_port: int = Field(..., alias="REDIS_PORT")
     redis_db: int = Field(..., alias="REDIS_DB")
 
-    kafka_bootstrap_servers: str = Field(..., alias="KAFKA_BOOTSTRAP_SERVERS")
-    kafka_topic: str = Field(..., alias="KAFKA_TOPIC")
-    kafka_port: str = Field(..., alias="KAFKA_PORT")
-    kafka_consumer_group: str = Field(..., alias="KAFKA_CONSUMER_GROUP")
-
-    bot_token: SecretStr = Field(..., alias="BOT_TOKEN")
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         setup_file_logger(log_level=logging.INFO if not self.debug else logging.DEBUG)
@@ -59,10 +52,6 @@ class Settings(BaseSettings):
             float: Время истечения срока действия JWT-токена в формате Unix timestamp.
         """
         return (datetime.now(UTC) + timedelta(days=self.jwt_token_lifetime)).timestamp()
-
-    @property
-    def kafka_servers_dsn(self) -> str:
-        return f"{self.kafka_bootstrap_servers}:{self.kafka_port}"
 
     model_config = SettingsConfigDict(env_file=dotenv_path, env_file_encoding="utf-8")
 

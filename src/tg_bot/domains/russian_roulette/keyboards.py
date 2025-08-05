@@ -12,7 +12,6 @@ TEXT_BUTTON = "Играть в русскую рулетку"
 
 roulette_button = KeyboardButton(text=TEXT_BUTTON)
 roulette_kb = ReplyKeyboardMarkup(keyboard=[[roulette_button]], resize_keyboard=True)
-active_tasks = set()
 
 
 @russian_roulette_router.message(
@@ -25,6 +24,7 @@ async def handle_roulette_game(
     message: Message,
     russian_roulette_service: FromDishka[RussianRouletteService],
 ):
+    """Хендлер для отлова сообщение TEXT_BUTTON."""
     try:
         bad_phrase = await russian_roulette_service.start(message)
     except Exception as e:

@@ -3,8 +3,8 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from dishka.integrations.aiogram import setup_dishka
 
-from src.app.settings.configs.settings import Settings
-from src.core.di.containers import create_bot_container
+from src.tg_bot.core.di.containers import create_bot_container
+from src.tg_bot.core.settings.configs.settings import Settings
 from src.tg_bot.core.storage import get_storage
 from src.tg_bot.domains import routes
 

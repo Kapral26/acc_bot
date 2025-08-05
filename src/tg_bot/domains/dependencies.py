@@ -1,6 +1,6 @@
 from dishka import FromDishka, Provider, Scope, provide
 
-from src.tg_bot.domains.api_adapter.service import APIAdapter
+from src.tg_bot.core.api_adapter.service import APIAdapter
 from src.tg_bot.domains.russian_roulette.repository import RussianRouletteRepository
 from src.tg_bot.domains.russian_roulette.services import RussianRouletteService
 from src.tg_bot.domains.user_management.filters import UserInChatFilter
