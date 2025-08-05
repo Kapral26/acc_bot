@@ -1,13 +1,12 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command
 from dishka.integrations.aiogram import setup_dishka
 
 from src.app.settings.configs.settings import Settings
 from src.core.di.containers import create_bot_container
 from src.tg_bot.core.storage import get_storage
-from src.tg_bot.domains import commands, routes
+from src.tg_bot.domains import routes
 
 settings = Settings()
 
@@ -22,16 +21,13 @@ class TelegramBot:
         # Подключаем контейнер к диспетчеру
         setup_dishka(container, self.dp)
         self._register_routers()
-        self._register_handlers()
-
-
-    def _register_handlers(self) -> None:
-        for command, handler in commands.items():
-            self.dp.message.register(handler, Command(command))
 
     def _register_routers(self) -> None:
         for router in routes:
-            self.dp.include_router(router)
+            try:
+                self.dp.include_router(router)
+            except Exception as e:
+                a = 1
 
     async def on_shutdown(self) -> None:
         await self.storage.close()

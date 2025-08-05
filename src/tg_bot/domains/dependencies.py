@@ -33,8 +33,7 @@ class UserBotProvider(Provider):
 class RussianRouletteProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_russian_roulette_repository(
-        self,
-        api_adapter: FromDishka[APIAdapter]
+        self, api_adapter: FromDishka[APIAdapter]
     ) -> RussianRouletteRepository:
         return RussianRouletteRepository(api_adapter=api_adapter)
 
@@ -43,14 +42,12 @@ class RussianRouletteProvider(Provider):
         self,
         repository: FromDishka[RussianRouletteRepository],
     ) -> RussianRouletteService:
-        return RussianRouletteService(
-            russian_roulette_repository=repository
-        )
+        return RussianRouletteService(russian_roulette_repository=repository)
+
 
 class UserInChatFilterProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_user_in_chat_filter(
         self,
-        user_bot_service: FromDishka[UserBotService]
     ) -> UserInChatFilter:
-        return UserInChatFilter(user_bot_service=user_bot_service)
+        return UserInChatFilter()

@@ -13,17 +13,6 @@ bot_instance = None  # Глобальная переменная для хран
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Контейнер создается ДО создания FastAPI приложения
-
-    yield
-    await container.close()
-
-
-# Сначала создаем контейнер, потом приложение
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
     global bot_instance
 
     # Создаём экземпляр бота

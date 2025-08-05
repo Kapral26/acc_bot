@@ -30,6 +30,8 @@ def create_api_container() -> AsyncContainer:
 
 def create_bot_container() -> AsyncContainer:
     containers = [
+        LoggerProvider(),
+        ConfigProvider(),
         ApiAdapterProvider(),
         UserInChatFilterProvider(),
         UserBotProvider(),
