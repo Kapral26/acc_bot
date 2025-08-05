@@ -11,16 +11,14 @@ from dishka.integrations.aiogram import inject
 async def get_start_inline_keyboard(
     bot: Bot,
     is_registered: bool,
+    chat_id: int,
 ) -> InlineKeyboardMarkup:
-    bot = await bot.get_me()
 
     builder = InlineKeyboardBuilder()
-
-    # Личный кабинет — ведёт в чат бота
     builder.row(
         InlineKeyboardButton(
             text=f"Личный кабинет {'✅' if is_registered else ''}",
-            url=f"https://t.me/{bot.username}?start",
+            url=f"https://t.me/{(await bot.get_me()).username}?start=from_group_{chat_id}"
         )
     )
 
@@ -30,7 +28,9 @@ async def get_start_inline_keyboard(
         )
     else:
         builder.row(
-            InlineKeyboardButton(text="Крутить барабан 🔫", callback_data="russia_roulette"),
+            InlineKeyboardButton(
+                text="Крутить барабан 🔫", callback_data="russia_roulette"
+            ),
         )
 
     return builder.as_markup()
