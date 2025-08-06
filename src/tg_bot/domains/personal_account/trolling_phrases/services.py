@@ -12,3 +12,5 @@ class TrollingPhrasesService:
     async def get_all_phrases(self) -> list[str]:
         register_user_result = await self.trolling_phrases_repository.get_all_phrases()
         return register_user_result
+
+

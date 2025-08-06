@@ -35,3 +35,17 @@ async def get_trolling_phrases_inline_keyboard() -> InlineKeyboardMarkup:
     )
 
     return builder.as_markup()
+
+
+async def get_phrases_keyboards(page: int, total_pages: int):
+    # Создаем клавиатуру с пагинацией
+    builder = InlineKeyboardBuilder()
+    # Кнопки пагинации
+    if page > 1:
+        builder.button(text="⬅️ Назад", callback_data=f"phrases_page_{page - 1}")
+    if page < total_pages:
+        builder.button(text="Вперед ➡️", callback_data=f"phrases_page_{page + 1}")
+    # Кнопка возврата
+    builder.button(text="🔙 Назад", callback_data="trolling_phrases")
+    builder.adjust(2)  # Группируем кнопки пагинации
+    return builder.as_markup()
