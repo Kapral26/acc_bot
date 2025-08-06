@@ -12,7 +12,6 @@ redis.dump
 
 # Other
 *.env
-!src/app/.dev.env
 
 # Python virtual environments
 .venv/
@@ -41,3 +40,4 @@ dist/
 /.qodo/
 /tmp
 /tmp/
+/src/app/.dev.env

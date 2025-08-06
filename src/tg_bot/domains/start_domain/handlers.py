@@ -48,16 +48,7 @@ from src.tg_bot.domains.user_management.services import UserBotService
 
 
 # Обработчик для личных сообщений
-@start_router.message(Command("start"), F.chat.type == ChatType.PRIVATE)
-async def start_private(message: types.Message, bot: Bot):
-    await message.answer(
-        "Привет в личных сообщениях!",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="Основное меню", callback_data="main_menu")]
-            ]
-        ),
-    )
+
 
 
 # Обработчик для групповых чатов
@@ -109,11 +100,4 @@ async def handle_deeplink(message: types.Message, command: CommandObject, bot: B
         )
 
 
-@start_router.callback_query(
-    F.data == "main_menu",
-    F.chat.type == ChatType.PRIVATE
-)
-async def private_actions(callback: CallbackQuery):
-    await callback.message.edit_text(
-        "Доступные действия в ЛС:",
-    )
+
