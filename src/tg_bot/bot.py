@@ -1,15 +1,12 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command
+from dishka.integrations.aiogram import setup_dishka
 
-from src.app.settings.configs.settings import Settings
+from src.tg_bot.core.di.containers import create_bot_container
+from src.tg_bot.core.settings.configs.settings import Settings
 from src.tg_bot.core.storage import get_storage
-from src.tg_bot.domains import commands, routes
-from src.tg_bot.domains.dependencies import (
-    russian_roulette_service,
-    user_bot_service,
-)
+from src.tg_bot.domains import routes
 
 settings = Settings()
 
@@ -19,17 +16,11 @@ class TelegramBot:
         self.bot = Bot(token=settings.bot_token.get_secret_value())
         self.storage = get_storage()
         self.dp = Dispatcher(storage=self.storage)
+        container = create_bot_container()
+
+        # Подключаем контейнер к диспетчеру
+        setup_dishka(container, self.dp)
         self._register_routers()
-        self._register_handlers()
-        self._register_depends()
-
-    def _register_depends(self):
-        self.dp["user_bot_service"] = user_bot_service
-        self.dp["russian_roulette_service"] = russian_roulette_service
-
-    def _register_handlers(self) -> None:
-        for command, handler in commands.items():
-            self.dp.message.register(handler, Command(command))
 
     def _register_routers(self) -> None:
         for router in routes:

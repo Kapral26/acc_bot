@@ -5,21 +5,10 @@ from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 
 from src.app import all_routers
-from src.core.di.containers import create_container
+from src.app.settings.di.containers import create_api_container
 from src.tg_bot.bot import TelegramBot
 
 bot_instance = None  # Глобальная переменная для хранения экземпляра бота
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Контейнер создается ДО создания FastAPI приложения
-
-    yield
-    await container.close()
-
-
-# Сначала создаем контейнер, потом приложение
 
 
 @asynccontextmanager
@@ -44,7 +33,7 @@ async def lifespan(app: FastAPI):
         await bot_instance.on_shutdown()
 
 
-container = create_container()
+container = create_api_container()
 app = FastAPI(lifespan=lifespan)
 setup_dishka(container, app)
 

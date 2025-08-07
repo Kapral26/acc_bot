@@ -2,21 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
-from src.app.settings.configs.settings import Settings
-
-settings = Settings()
-
-async_engine = create_async_engine(
-    url=settings.async_database_dsn,  # dsn-url
-    echo=settings.debug,  # Echo отвечает, будут ли запросы выводиться в консоль
-    pool_size=5,  # Количество соединений
-    max_overflow=10,  # На сколько больше соединений можно открывать
-)
-
-async_session_factory = async_sessionmaker(async_engine)
 
 
 class Base(DeclarativeBase):

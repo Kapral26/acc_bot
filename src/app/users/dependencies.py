@@ -1,8 +1,8 @@
 import logging
 
 from dishka import Provider, Scope, provide
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.app.settings.database.database import async_session_factory
 from src.app.users.chats.service import ChatsService
 from src.app.users.repository import UserRepository
 from src.app.users.roles.service import RolesService
@@ -14,9 +14,10 @@ class UserProvider(Provider):
     async def get_user_repository(
         self,
         logger: logging.Logger,
+        session_factory: async_sessionmaker
     ) -> UserRepository:
         return UserRepository(
-            session_factory=async_session_factory,
+            session_factory=session_factory,
             logger=logger,
         )
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from src.app.users.schemas import UsersCreateSchema
-from src.tg_bot.domains.api_adapter.service import APIAdapter
+from src.tg_bot.core.api_adapter.service import APIAdapter
 from src.tg_bot.domains.russian_roulette.schemas import BadPhraseMessage
 
 

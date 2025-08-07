@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.app.analytics.bad_phrase.models import BadPhrase
-from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD
+from src.app.russian_roulette_analytics.bad_phrase.models import BadPhrase
+from src.app.russian_roulette_analytics.bad_phrase.schemas import BadPhraseCRUD
 from src.app.exceptions import (
     RoleNotFoundException,  # Можно создать BadPhraseNotFoundException по аналогии
 )
@@ -23,8 +23,9 @@ class BadPhraseRepository:
             result = await session.execute(stmt)
             return result.scalar_one_or_none()
 
+    @staticmethod
     async def _get_bad_phrase_by_id(
-        self, session: AsyncSession, bad_phrase_id: int
+            session: AsyncSession, bad_phrase_id: int
     ) -> BadPhrase | None:
         stmt = select(BadPhrase).where(BadPhrase.id == bad_phrase_id)
         result = await session.execute(stmt)

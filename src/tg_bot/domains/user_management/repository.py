@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from starlette import status
 
 from src.app.users.schemas import UsersCreateSchema
-from src.tg_bot.domains.api_adapter.service import APIAdapter
+from src.tg_bot.core.api_adapter.service import APIAdapter
 from src.tg_bot.domains.user_management.schemas import UserChatCheckResponse
 
 
@@ -18,7 +18,7 @@ class UserBotRepository:
         if response.status_code != status.HTTP_201_CREATED:
             response_text = response.json().get("detail")
         else:
-            response_text = "Пользователь успешно зарегистрирован."
+            response_text = "Зарегистрирован.✅"
         return response_text
 
     async def change_role(self, user_data: UsersCreateSchema):
