@@ -4,7 +4,7 @@ from typing import Any, \
 
 from httpx import Response
 
-from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD
+from src.app.russian_roulette_analytics.bad_phrase.schemas import BadPhraseCRUD
 from src.tg_bot.core.api_adapter.service import APIAdapter
 
 

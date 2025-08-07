@@ -1,8 +1,8 @@
 from dishka import AsyncContainer, \
     make_async_container
 
-from src.app.analytics.bad_phrase.dependencies import BadPhraseProvider
-from src.app.analytics.dependencies import AnalyticsProvider
+from src.app.russian_roulette_analytics.bad_phrase.dependencies import BadPhraseProvider
+from src.app.russian_roulette_analytics.dependencies import AnalyticsProvider
 from src.app.dependencies import LoggerProvider, \
     ConfigProvider, \
     DatabaseProvider

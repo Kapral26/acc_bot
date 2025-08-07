@@ -1,8 +1,8 @@
 from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.app.analytics.bad_phrase.repository import BadPhraseRepository
-from src.app.analytics.bad_phrase.service import BadPhraseService
+from src.app.russian_roulette_analytics.bad_phrase.repository import BadPhraseRepository
+from src.app.russian_roulette_analytics.bad_phrase.service import BadPhraseService
 
 
 class BadPhraseProvider(Provider):

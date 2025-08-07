@@ -3,8 +3,8 @@ from dishka.integrations.fastapi import inject
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
-from src.app.analytics.bad_phrase.service import BadPhraseService
+from src.app.russian_roulette_analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
+from src.app.russian_roulette_analytics.bad_phrase.service import BadPhraseService
 
 router = APIRouter(
     prefix="/bad-phrases",

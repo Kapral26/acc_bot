@@ -4,10 +4,10 @@ from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError
 
-from src.app.analytics.bad_phrase.exceptions import PhraseAlreadyExist
-from src.app.analytics.bad_phrase.models import BadPhrase
-from src.app.analytics.bad_phrase.repository import BadPhraseRepository
-from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
+from src.app.russian_roulette_analytics.bad_phrase.exceptions import PhraseAlreadyExist
+from src.app.russian_roulette_analytics.bad_phrase.models import BadPhrase
+from src.app.russian_roulette_analytics.bad_phrase.repository import BadPhraseRepository
+from src.app.russian_roulette_analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
 
 
 @dataclass
