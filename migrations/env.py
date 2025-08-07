@@ -3,8 +3,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from src.app.analytics.bad_phrase.models import BadPhrase
-from src.app.analytics.models import Analytics
+from src.app.russian_roulette_analytics.bad_phrase.models import BadPhrase
+from src.app.russian_roulette_analytics.models import Analytics
 from src.app.settings.configs.settings import Settings
 from src.app.settings.database.database import Base
 from src.app.users.chats.models import Chat

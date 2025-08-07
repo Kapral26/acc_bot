@@ -1,51 +1,103 @@
-from aiogram import Bot, types
-from aiogram.filters import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram import Bot, F, types
+from aiogram.enums import ChatType
+from aiogram.filters import Command, CommandObject, CommandStart
+from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from dishka import FromDishka
+from dishka.integrations.aiogram import inject
 
 from src.tg_bot.domains.start_domain import start_router
-from src.tg_bot.domains.user_management.filters import UserInChatFilter
+from src.tg_bot.domains.start_domain.keyboards import get_start_inline_keyboard
+from src.tg_bot.domains.user_management.services import UserBotService
+
+#
+#
+# @start_router.message(Command("start"), F.chat.type == ChatType.PRIVATE)
+# async def start_private_command(
+#     message: types.Message,
+# ):
+#     await message.answer("Привет в личных сообщениях!")
+#
+#
+# @start_router.message(
+#     Command("start"), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP})
+# )
+# @inject
+# async def start_group_command(
+#     message: types.Message,
+#     bot: Bot,
+#     user_bot_service: FromDishka[UserBotService],
+# ) -> None:
+#     """Обработчик команды /start."""
+#     user = await user_bot_service.is_user_in_chat(message)
+#
+#     kb = await get_start_inline_keyboard(bot, user.in_chat)
+#     await message.answer(
+#         """
+# *Привет!* ✌️
+# ➡️ Иди по *известному* направлению.
+#
+# 🔫 Хочешь сыграть в *Русскую рулетку*? — *Зарегистрируйся!*
+#
+# 🤡*Личный кабинет*:
+# - Можно посмотреть статистику по конкретному чату.
+# - Добавить новые фразы.
+# """,
+#         reply_markup=kb,
+#         parse_mode="Markdown",
+#     )
 
 
-@start_router.message(Command("start"))
-async def start_command(
+# Обработчик для личных сообщений
+
+
+
+# Обработчик для групповых чатов
+@start_router.message(
+    Command("start"), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP})
+)
+@inject
+async def start_group(
     message: types.Message,
-) -> None:
+    bot: Bot,
+    user_bot_service: FromDishka[UserBotService],
+):
     """Обработчик команды /start."""
+    user = await user_bot_service.is_user_in_chat(message)
+
+    kb = await get_start_inline_keyboard(bot, user.in_chat, message.chat.title)
     await message.answer(
-        "Привет! Я бот с базовыми командами. Используй /help для списка команд."
+        """
+*Привет!* ✌️
+➡️ Иди по *известному* направлению.
+
+🔫 Хочешь сыграть в *Русскую рулетку*? — *Зарегистрируйся!*
+
+🤡*Личный кабинет*:
+- Можно посмотреть статистику по конкретному чату.
+- Добавить новые фразы.
+""",
+        reply_markup=kb,
+        parse_mode="Markdown",
     )
 
 
-@start_router.message(Command("lk"), UserInChatFilter())
-async def start_command(message: types.Message, bot: Bot) -> None:
-    """Обработчик команды /start."""
-
-    bot_info = await bot.get_me()
-    bot_username = bot_info.username
-
-    if message.chat.type == "private":
-        # Личный чат - клавиатура ReplyKeyboardMarkup
-        reply_keyboard = types.ReplyKeyboardMarkup(
-            keyboard=[
-                [
-                    types.KeyboardButton(text="1"),
-                    types.KeyboardButton(text="2"),
-                    types.KeyboardButton(text="3"),
+# Обработчик deep link из группы
+@start_router.message(CommandStart(deep_link=True), F.chat.type == ChatType.PRIVATE)
+async def handle_deeplink(message: types.Message, command: CommandObject, bot: Bot):
+    if command.args and command.args.startswith("from_group_"):
+        group_id = command.args.split("_")[-1]
+        await message.answer(
+            f"Вы перешли из группы {group_id}. Добро пожаловать в личные сообщения!",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text="Основное меню", callback_data="main_menu"
+                        )
+                    ]
                 ]
-            ],
-            resize_keyboard=True,
+            ),
         )
-        await message.answer("Выберите опцию:", reply_markup=reply_keyboard)
-    else:
-        # Публичный чат - inline-кнопка для перехода в личный чат
-        inline_keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="Личный кабинет",
-                        url=f"https://t.me/{bot_username}?start",
-                    )
-                ]
-            ]
-        )
-        await message.answer("Перейдите в личный чат:", reply_markup=inline_keyboard)
+
+
+

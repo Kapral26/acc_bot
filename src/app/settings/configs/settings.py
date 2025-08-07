@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.app.settings.configs.logger import setup_file_logger
 
-dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".dev.env"
+dotenv_path = Path(__file__).parent.parent.parent.absolute() / ".dev.env"
 
 
 class Settings(BaseSettings):
@@ -29,13 +29,6 @@ class Settings(BaseSettings):
     redis_host: str = Field(..., alias="REDIS_HOST")
     redis_port: int = Field(..., alias="REDIS_PORT")
     redis_db: int = Field(..., alias="REDIS_DB")
-
-    kafka_bootstrap_servers: str = Field(..., alias="KAFKA_BOOTSTRAP_SERVERS")
-    kafka_topic: str = Field(..., alias="KAFKA_TOPIC")
-    kafka_port: str = Field(..., alias="KAFKA_PORT")
-    kafka_consumer_group: str = Field(..., alias="KAFKA_CONSUMER_GROUP")
-
-    bot_token: SecretStr = Field(..., alias="BOT_TOKEN")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -59,10 +52,6 @@ class Settings(BaseSettings):
             float: Время истечения срока действия JWT-токена в формате Unix timestamp.
         """
         return (datetime.now(UTC) + timedelta(days=self.jwt_token_lifetime)).timestamp()
-
-    @property
-    def kafka_servers_dsn(self) -> str:
-        return f"{self.kafka_bootstrap_servers}:{self.kafka_port}"
 
     model_config = SettingsConfigDict(env_file=dotenv_path, env_file_encoding="utf-8")
 

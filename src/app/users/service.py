@@ -32,3 +32,7 @@ class UserService:
     async def get_random_user(self, chat_id: int) -> UsersSchemaWithoutChat:
         user = await self.user_repository.get_random_user(chat_id)
         return UsersSchemaWithoutChat.model_validate(user)
+
+    async def get_user_by_id(self, user_id: int) -> bool:
+        user = await self.user_repository.get_user_by_id(user_id)
+        return user is not None

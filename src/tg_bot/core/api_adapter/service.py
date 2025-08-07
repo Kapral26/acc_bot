@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import httpx
 
-from src.tg_bot.domains.api_adapter.abstracts import APIAdapterABC
+from src.tg_bot.core.api_adapter.abstracts import APIAdapterABC
 
 
 @dataclass

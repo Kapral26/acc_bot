@@ -34,3 +34,14 @@ async def get_users(
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
     return users
+
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+@inject
+async def get_user_by_id(
+        user_id: int,
+        user_service: FromDishka[UserService],
+):
+    user_exist = await user_service.get_user_by_id(user_id)
+    return {
+        "user_status_exist": user_exist
+    }

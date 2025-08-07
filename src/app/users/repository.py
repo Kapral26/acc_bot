@@ -2,7 +2,7 @@ import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from sqlalchemy import insert, select
+from sqlalchemy import func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -51,6 +51,8 @@ class UserRepository:
                 select(User)
                 .join(UserChats, User.id == UserChats.user_id)
                 .where(UserChats.chat_id == chat_id)
+                .order_by(func.random())
+                .limit(1)
             )
             result = await session.execute(stmt)
             user = result.scalar_one_or_none()

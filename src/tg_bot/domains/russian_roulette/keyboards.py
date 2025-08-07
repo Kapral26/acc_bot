@@ -1,33 +1,26 @@
-from aiogram import F
-from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
-from dishka import FromDishka
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dishka.integrations.aiogram import inject
 
-from src.tg_bot.domains.russian_roulette import russian_roulette_router
-from src.tg_bot.domains.russian_roulette.services import RussianRouletteService
-from src.tg_bot.domains.user_management.filters import UserInChatFilter
 
-TEXT_BUTTON = "Играть в русскую рулетку"
-
-
-roulette_button = KeyboardButton(text=TEXT_BUTTON)
-roulette_kb = ReplyKeyboardMarkup(keyboard=[[roulette_button]], resize_keyboard=True)
-active_tasks = set()
-
-
-@russian_roulette_router.message(
-    F.text == TEXT_BUTTON,
- #   TimeRangeFilter(8, 23),
-    UserInChatFilter()
-)
 @inject
-async def handle_roulette_game(
-    message: Message,
-    russian_roulette_service: FromDishka[RussianRouletteService],
-):
-    try:
-        bad_phrase = await russian_roulette_service.start(message)
-    except Exception as e:
-        await message.answer(f"Проблема при запуске русской рулетки: {e}")
-    else:
-        await message.answer(bad_phrase.phrase)
+async def get_rr_inline_keyboard(
+) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+            InlineKeyboardButton(
+                text="Найти жертву 🖕🏿",
+                callback_data="russia_roulette"
+            ),
+        )
+    builder.row(
+            InlineKeyboardButton(
+                text="Завершить игру 🫡",
+                callback_data="russia_roulette_finish"
+            ),
+        )
+
+    return builder.as_markup()
