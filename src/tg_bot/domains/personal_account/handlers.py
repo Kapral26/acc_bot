@@ -2,22 +2,18 @@ from aiogram import Bot, F, types
 from aiogram.enums import ChatType
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
-from dishka.integrations.aiogram import inject
 
 from src.tg_bot.domains.personal_account import personal_account_router
 from src.tg_bot.domains.personal_account.keyboards import (
     get_personal_account_inline_keyboard,
-)
-from src.tg_bot.domains.personal_account.trolling_phrases import trolling_phrases_router
-from src.tg_bot.domains.personal_account.trolling_phrases.keyboards import (
-    get_trolling_phrases_inline_keyboard,
 )
 
 
 @personal_account_router.message(Command("start"), F.chat.type == ChatType.PRIVATE)
 async def start_private(message: types.Message, bot: Bot):
     await message.answer(
-        "Привет в личных сообщениях! Петух",
+        "`Да, это личный кабинет бота. Нажми на кнопочку.`",
+        parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="Основное меню", callback_data="main_menu")]
@@ -56,4 +52,3 @@ async def private_actions(callback: CallbackQuery):
         parse_mode="HTML",
         reply_markup=await get_personal_account_inline_keyboard(),
     )
-

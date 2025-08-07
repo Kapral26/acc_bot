@@ -34,7 +34,9 @@ async def handle_register(
     if user.in_chat:
         await callback.message.edit_text(
             "Ты шо дурак? Ты уже зарегистрирован!",
-            reply_markup=await get_start_inline_keyboard(bot, user.in_chat, callback.message.chat.id),
+            reply_markup=await get_start_inline_keyboard(
+                bot, user.in_chat, callback.message.chat.title
+            ),
         )
     try:
         register_suer_result = await user_bot_service.register_user(callback)

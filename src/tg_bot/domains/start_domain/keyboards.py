@@ -11,14 +11,14 @@ from dishka.integrations.aiogram import inject
 async def get_start_inline_keyboard(
     bot: Bot,
     is_registered: bool,
-    chat_id: int,
+    chat_title: str,
 ) -> InlineKeyboardMarkup:
 
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
             text=f"Личный кабинет {'✅' if is_registered else ''}",
-            url=f"https://t.me/{(await bot.get_me()).username}?start=from_group_{chat_id}"
+            url=f"https://t.me/{(await bot.get_me()).username}?start=from_group_{chat_title}"
         )
     )
 

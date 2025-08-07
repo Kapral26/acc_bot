@@ -64,7 +64,7 @@ async def start_group(
     """Обработчик команды /start."""
     user = await user_bot_service.is_user_in_chat(message)
 
-    kb = await get_start_inline_keyboard(bot, user.in_chat, message.chat.id)
+    kb = await get_start_inline_keyboard(bot, user.in_chat, message.chat.title)
     await message.answer(
         """
 *Привет!* ✌️
