@@ -19,18 +19,6 @@ async def russian_roulette(
     return bad_phrase
 
 
-#
-#
-# @router.get("/analytics", status_code=status.HTTP_200_OK)
-# @inject
-# async def get_analytics(
-#     analytics_service: FromDishka[AnalyticsService],
-#     user_data: UsersCreateSchema,
-# ):
-#     bad_phrase = await analytics_service.get_analytics(user_data)
-#     return bad_phrase
-
-
 @router.get("/analytics/{user_id}", status_code=status.HTTP_200_OK)
 @inject
 async def get_count_user_send(

@@ -9,6 +9,12 @@ from src.tg_bot.domains.personal_account.trolling_phrases.repository import (
 from src.tg_bot.domains.personal_account.trolling_phrases.services import (
     TrollingPhrasesService,
 )
+from src.tg_bot.domains.personal_account.user_analytics.repository import (
+    UserAnalyticsRepository,
+)
+from src.tg_bot.domains.personal_account.user_analytics.services import (
+    UserAnalyticsService,
+)
 from src.tg_bot.domains.russian_roulette.repository import RussianRouletteRepository
 from src.tg_bot.domains.russian_roulette.services import RussianRouletteService
 from src.tg_bot.domains.user_management.filters import UserInChatFilter
@@ -53,6 +59,7 @@ class RussianRouletteProvider(Provider):
     ) -> RussianRouletteService:
         return RussianRouletteService(russian_roulette_repository=repository)
 
+
 class TrollingPhrasesProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_trolling_phrases_repository(
@@ -66,6 +73,21 @@ class TrollingPhrasesProvider(Provider):
         repository: FromDishka[TrollingPhrasesRepository],
     ) -> TrollingPhrasesService:
         return TrollingPhrasesService(trolling_phrases_repository=repository)
+
+
+class UserAnalyticsProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    async def get_trolling_phrases_repository(
+        self, api_adapter: FromDishka[APIAdapter]
+    ) -> UserAnalyticsRepository:
+        return UserAnalyticsRepository(api_adapter=api_adapter)
+
+    @provide(scope=Scope.REQUEST)
+    async def get_trolling_phrases_service(
+        self,
+        repository: FromDishka[UserAnalyticsRepository],
+    ) -> UserAnalyticsService:
+        return UserAnalyticsService(user_analytics_repository=repository)
 
 
 class UserInChatFilterProvider(Provider):

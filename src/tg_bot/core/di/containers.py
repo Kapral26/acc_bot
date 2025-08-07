@@ -5,6 +5,7 @@ from src.tg_bot.domains.dependencies import (
     ApiAdapterProvider,
     RussianRouletteProvider,
     TrollingPhrasesProvider,
+    UserAnalyticsProvider,
     UserBotProvider,
     UserInChatFilterProvider,
 )
@@ -19,5 +20,6 @@ def create_bot_container() -> AsyncContainer:
         UserBotProvider(),
         RussianRouletteProvider(),
         TrollingPhrasesProvider(),
+        UserAnalyticsProvider(),
     ]
     return make_async_container(*containers)
