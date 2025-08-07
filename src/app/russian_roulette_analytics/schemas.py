@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class UserStatisticResponse(BaseModel):
+class UserOverallStats(BaseModel):
     """
     Модель ответа с общей статистикой пользователя.
 
@@ -58,7 +58,14 @@ class UserCount(BaseModel):
     user: str
     count: int
 
+
 class TopPartnersResponse(BaseModel):
     received_from: list[UserCount]
     sent_to: list[UserCount]
 
+
+class UserStatisticRespone(BaseModel):
+    activity: UserOverallStats
+    rank_in_chats: UserChatRanksResponse
+    favorite_phrases: FavoritePhrasesResponse
+    top_partners: TopPartnersResponse

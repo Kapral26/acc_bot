@@ -10,7 +10,8 @@ from src.app.russian_roulette_analytics.schemas import (
     FavoritePhrasesResponse,
     TopPartnersResponse,
     UserChatRanksResponse,
-    UserStatisticResponse,
+    UserOverallStats,
+    UserStatisticRespone,
 )
 from src.app.users.schemas import UsersCreateSchema
 from src.app.users.service import UserService
@@ -36,11 +37,11 @@ class AnalyticsService:
             phrase=random_bad_phrase_result.phrase.replace("@", f"@{user.username}")
         )
 
-    async def get_user_total_activity(self, user_id: int) -> UserStatisticResponse:
+    async def get_user_total_activity(self, user_id: int) -> UserOverallStats:
         total_received = await self.analytics_repository.get_total_received(user_id)
         total_sent = await self.analytics_repository.get_total_sent(user_id)
 
-        return UserStatisticResponse(
+        return UserOverallStats(
             total_received=total_received,
             total_sent=total_sent,
             total_actions=total_received + total_sent,
@@ -49,7 +50,7 @@ class AnalyticsService:
     async def get_analytics(self, user_data: UsersCreateSchema):
         user = self.user_service.get_user_by_id(user_data.id)
 
-    async def get_user_stats(self, user_id: int) -> dict:
+    async def get_user_stats(self, user_id: int) -> UserStatisticRespone:
         results = await asyncio.gather(
             self.get_user_total_activity(user_id),
             self.get_user_rank_in_chats(user_id),
@@ -59,14 +60,14 @@ class AnalyticsService:
 
         activity, rank_in_chats, favorite_phrases, top_partners = results
 
-        return {
-            "activity": activity,
-            "rank_in_chats": rank_in_chats,
-            "favorite_phrases": favorite_phrases,
-            "top_partners": top_partners,
-        }
+        return UserStatisticRespone(
+            activity=activity,
+            rank_in_chats=rank_in_chats,
+            favorite_phrases=favorite_phrases,
+            top_partners=top_partners,
+        )
 
-    async def get_user_top_partners(self, user_id):
+    async def get_user_top_partners(self, user_id: int) -> TopPartnersResponse:
         data = await self.analytics_repository.get_user_top_partners(user_id)
         converted_data = {
             "received_from": [
@@ -77,7 +78,7 @@ class AnalyticsService:
         top_partners = TopPartnersResponse(**converted_data)
         return top_partners
 
-    async def get_user_favorite_phrases(self, user_id):
+    async def get_user_favorite_phrases(self, user_id: int) -> FavoritePhrasesResponse:
         data = await self.analytics_repository.get_user_favorite_phrases(user_id)
         converted_data = {
             "favorite_received": [
