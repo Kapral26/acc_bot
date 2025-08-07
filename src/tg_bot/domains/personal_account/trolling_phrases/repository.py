@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from typing import Any, \
+    Coroutine
 
-from starlette import status
+from httpx import Response
 
-from src.app.users.schemas import UsersCreateSchema
+from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD
 from src.tg_bot.core.api_adapter.service import APIAdapter
-from src.tg_bot.domains.user_management.schemas import UserChatCheckResponse
 
 
 @dataclass
@@ -15,3 +16,15 @@ class TrollingPhrasesRepository:
         response = await self.api_adapter.api_get("/bad-phrases/")
         response.raise_for_status()
         return response.json()
+
+    async def add_phrase(self, phrase_text: str) -> Response | None:
+        data = BadPhraseCRUD(phrase=phrase_text).model_dump()
+        response = await self.api_adapter.api_post(
+            "/bad-phrases/",
+            data=data,
+        )
+        if response.status_code == 409:
+            return response
+
+        response.raise_for_status()
+        return None

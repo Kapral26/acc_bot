@@ -3,8 +3,8 @@ from dishka.integrations.fastapi import inject
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from src.app.analytics.bad_phrase.repository import BadPhraseRepository
 from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
+from src.app.analytics.bad_phrase.service import BadPhraseService
 
 router = APIRouter(
     prefix="/bad-phrases",
@@ -16,7 +16,7 @@ router = APIRouter(
 @router.get("/", response_model=list[BadPhraseSchema])
 @inject
 async def get_bad_phrases(
-    bad_phrase_service: FromDishka[BadPhraseRepository],
+    bad_phrase_service: FromDishka[BadPhraseService],
 ):
     try:
         bad_phrases = await bad_phrase_service.get_bad_phrases()
@@ -27,9 +27,10 @@ async def get_bad_phrases(
 
 # Получить одну запрещённую фразу по id
 @router.get("/by-id/{bad_phrase_id}", response_model=BadPhraseSchema)
+@inject
 async def get_bad_phrase_by_id(
     bad_phrase_id: int,
-    bad_phrase_service: FromDishka[BadPhraseRepository],
+    bad_phrase_service: FromDishka[BadPhraseService],
 ):
     try:
         bad_phrase = await bad_phrase_service.get_bad_phrase_by_id(bad_phrase_id)
@@ -40,9 +41,10 @@ async def get_bad_phrase_by_id(
 
 # Получить одну запрещённую фразу по тексту
 @router.get("/by-phrase/{phrase}", response_model=BadPhraseSchema)
+@inject
 async def get_bad_phrase_by_phrase(
     phrase: str,
-    bad_phrase_service: FromDishka[BadPhraseRepository],
+    bad_phrase_service: FromDishka[BadPhraseService],
 ):
     try:
         bad_phrase = await bad_phrase_service.get_bad_phrase_by_phrase(phrase)
@@ -52,26 +54,24 @@ async def get_bad_phrase_by_phrase(
 
 
 # Создать новую запрещённую фразу
-@router.post("/", response_model=BadPhraseSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
+@inject
 async def create_bad_phrase(
     bad_phrase: BadPhraseCRUD,
-    bad_phrase_service: FromDishka[BadPhraseRepository],
+    bad_phrase_service: FromDishka[BadPhraseService],
 ):
-    try:
-        new_bad_phrase = await bad_phrase_service.create_bad_phrase(bad_phrase)
-    except Exception as error:
-        raise HTTPException(status_code=422, detail=str(error))
-    return new_bad_phrase
+    await bad_phrase_service.create_bad_phrase(bad_phrase)
 
 
 # Обновить запрещённую фразу
 @router.put(
     "/{bad_phrase_id}", response_model=BadPhraseSchema, status_code=status.HTTP_200_OK
 )
+@inject
 async def update_bad_phrase(
     bad_phrase_id: int,
     bad_phrase: BadPhraseCRUD,
-    bad_phrase_service: FromDishka[BadPhraseRepository],
+    bad_phrase_service: FromDishka[BadPhraseService],
 ):
     try:
         updated_bad_phrase = await bad_phrase_service.update_bad_phrase(
@@ -84,9 +84,10 @@ async def update_bad_phrase(
 
 # Удалить запрещённую фразу
 @router.delete("/{bad_phrase_id}", status_code=status.HTTP_204_NO_CONTENT)
+@inject
 async def delete_bad_phrase(
     bad_phrase_id: int,
-    bad_phrase_service: FromDishka[BadPhraseRepository],
+    bad_phrase_service: FromDishka[BadPhraseService],
 ):
     try:
         await bad_phrase_service.delete_bad_phrase(bad_phrase_id)

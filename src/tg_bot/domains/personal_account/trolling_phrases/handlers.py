@@ -1,10 +1,13 @@
-from aiogram import Bot, F
+from aiogram import Bot, F, types
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 from dishka import FromDishka
 from dishka.integrations.aiogram import inject
 
 from src.tg_bot.domains.personal_account.trolling_phrases import trolling_phrases_router
 from src.tg_bot.domains.personal_account.trolling_phrases.keyboards import (
+    get_after_preview_inline_keyboard,
     get_phrases_keyboards,
     get_trolling_phrases_inline_keyboard,
 )
@@ -21,9 +24,12 @@ async def handle_trolling_phrases(callback: CallbackQuery):
     <b>🔧 ФУНКЦИОНАЛ 🔧</b>
 
     <i>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</i>
-    • 📁 <i>Просмотр архива</i> (Тебе делать хуй?)
-    • ⚙️ <i>Добавление новой</i> (спасибо, что не в наш чат)
-    • 🗑️ <i>Удаление</i> (наконец-то адекватный выбор)
+    • 📁 <i>Просмотр архива</i>
+    (Тебе делать хуй?)
+    • ⚙️ <i>Добавление новой</i>
+    (спасибо, что не в наш чат)
+    • 🗑️ <i>Удаление</i>
+    (наконец-то адекватный выбор)
 
     <i>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</i>  
     <code>⚠️ Внимание: Я подключил ИИ - так что нахуй иди.</code>  
@@ -35,6 +41,70 @@ async def handle_trolling_phrases(callback: CallbackQuery):
     )
 
 
+class TrollingPhrasesStates(StatesGroup):
+    WAITING_FOR_PHRASE = State()
+
+
+@trolling_phrases_router.callback_query(F.data == "add_phrase")
+async def start_adding_phrase(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await callback.message.answer("📝 Введи новую троллинговую фразу:")
+    await state.set_state(TrollingPhrasesStates.WAITING_FOR_PHRASE)
+
+
+@trolling_phrases_router.message(TrollingPhrasesStates.WAITING_FOR_PHRASE)
+@inject
+async def handle_preview_new_phrase(
+    message: types.Message,
+    state: FSMContext,
+    bot: Bot,
+    trolling_phrases_service: FromDishka[TrollingPhrasesService],
+):
+    try:
+        preview_phrase = await trolling_phrases_service.preview_phrase(
+            message.text, message.from_user.username
+        )
+    except ValueError as e:
+        await message.answer(
+            str(e),
+            reply_markup=await get_trolling_phrases_inline_keyboard(),
+        )
+    else:
+        await message.answer(
+            preview_phrase, reply_markup=await get_after_preview_inline_keyboard()
+        )
+
+    await state.clear()
+
+
+@trolling_phrases_router.callback_query(F.data == "add_previewed_phrase")
+@inject
+async def add_previewed_phrase(
+    callback: CallbackQuery,
+    trolling_phrases_service: FromDishka[TrollingPhrasesService],
+):
+    await callback.answer()
+
+    # Сохраняем фразу
+    try:
+        await trolling_phrases_service.add_phrase(callback.message.text)
+    except ValueError as e:
+        await callback.message.edit_text(
+            str(e),
+            reply_markup=await get_trolling_phrases_inline_keyboard(),
+        )
+    else:
+        # Возвращаемся в меню
+        await callback.message.edit_text(
+            f"✅ Фраза добавлена: <i>{callback.message.text}</i>", parse_mode="HTML"
+        )
+        await callback.message.answer(
+            "Выберите действие:",
+            reply_markup=await get_trolling_phrases_inline_keyboard(),
+        )
+
+
+# --
 PHRASES_PER_PAGE = 5
 
 
@@ -44,7 +114,6 @@ async def show_first_page(
     callback: CallbackQuery,
     trolling_phrases_service: FromDishka[TrollingPhrasesService],
 ):
-    # Вместо создания нового CallbackQuery, просто вызываем обработчик страницы
     await _handle_phrases_page(callback, trolling_phrases_service, page=1)
 
 

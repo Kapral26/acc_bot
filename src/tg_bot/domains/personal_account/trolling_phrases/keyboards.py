@@ -17,14 +17,8 @@ async def get_trolling_phrases_inline_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(
-            text=f"Добавление новой",
-            callback_data="add_phrases",
-        )
-    )
-    builder.row(
-        InlineKeyboardButton(
-            text=f"Удаление",
-            callback_data="delete_phrases",
+            text=f"Добавление новой ✏️",
+            callback_data="add_phrase",
         )
     )
     builder.row(
@@ -48,4 +42,11 @@ async def get_phrases_keyboards(page: int, total_pages: int):
     # Кнопка возврата
     builder.button(text="🔙 Назад", callback_data="trolling_phrases")
     builder.adjust(2)  # Группируем кнопки пагинации
+    return builder.as_markup()
+
+
+async def get_after_preview_inline_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✅ Отлично", callback_data=f"add_previewed_phrase")
+    builder.button(text="🔄 Давай по новой", callback_data=f"add_phrase")
     return builder.as_markup()

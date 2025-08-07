@@ -2,6 +2,9 @@
 
 from dataclasses import dataclass
 
+from sqlalchemy.exc import IntegrityError
+
+from src.app.analytics.bad_phrase.exceptions import PhraseAlreadyExist
 from src.app.analytics.bad_phrase.models import BadPhrase
 from src.app.analytics.bad_phrase.repository import BadPhraseRepository
 from src.app.analytics.bad_phrase.schemas import BadPhraseCRUD, BadPhraseSchema
@@ -16,7 +19,12 @@ class BadPhraseService:
         return bad_phrase
 
     async def create_bad_phrase(self, bad_phrase: BadPhraseCRUD) -> BadPhraseSchema:
-        new_bad_phrase = await self.bad_phrase_repository.create_bad_phrase(bad_phrase)
+        try:
+            new_bad_phrase = await self.bad_phrase_repository.create_bad_phrase(
+                bad_phrase
+            )
+        except IntegrityError:
+            raise PhraseAlreadyExist
         return BadPhraseSchema.model_validate(new_bad_phrase)
 
     async def get_bad_phrase_by_id(self, bad_phrase_id: int) -> BadPhraseSchema:

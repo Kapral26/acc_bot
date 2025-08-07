@@ -8,7 +8,8 @@ class BadPhrase(Base):
     __tablename__ = "bad_phrases"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    phrase: Mapped[str] = mapped_column(String(1024), nullable=False)
+    phrase: Mapped[str] = mapped_column(String(1024), nullable=False, unique=True)
+
 
 
 """
