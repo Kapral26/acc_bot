@@ -6,7 +6,7 @@ from src.app.settings.database.database import Base
 
 class Analytics(Base):
     __tablename__ = "analytics"
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True, name="analytics_pk")
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     who_send_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"), nullable=False)
