@@ -1,0 +1,38 @@
+# Виртуальные окружения
+*.venv
+__pycache__
+*.egg-info
+dist
+build
+env/
+venv/
+.venv/
+
+# Логи и данные
+*.log
+*.tmp
+*.sqlite3
+*.db
+pgdata/
+node_modules/
+
+# Конфигурации разработчика
+.env
+*.env
+*.env.local
+src/app/.dev.env  # если .dev.env не должен быть в контейнере
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.swn
+*.bak
+*.orig
+*.rej
+
+# Кэши
+.cache/
+.tmp/
+logs/
