@@ -11,7 +11,6 @@ class BadPhrase(Base):
     phrase: Mapped[str] = mapped_column(String(1024), nullable=False, unique=True)
 
 
-
 """
 Сделай перерыв @ - сходи нахуй
 Пес-борбос и @ нахуй иди

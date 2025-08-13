@@ -18,8 +18,8 @@ class TimeRangeFilter(BaseFilter):
             return True
         else:
             filter_text = (
-                    f"@{message.from_user.username}, К вам выехали чеченцы, ибо нехуй!\n Рулетка работает "
-                    f"{self.start_hour }:00-{self.end_hour}:00"
-                )
+                f"@{message.from_user.username}, К вам выехали чеченцы, ибо нехуй!\n Рулетка работает "
+                f"{self.start_hour}:00-{self.end_hour}:00"
+            )
             await message.answer(filter_text)
             return False

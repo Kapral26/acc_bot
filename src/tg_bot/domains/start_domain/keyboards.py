@@ -13,12 +13,11 @@ async def get_start_inline_keyboard(
     is_registered: bool,
     chat_title: str,
 ) -> InlineKeyboardMarkup:
-
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
             text=f"Личный кабинет {'✅' if is_registered else ''}",
-            url=f"https://t.me/{(await bot.get_me()).username}?start=from_group_{chat_title}"
+            url=f"https://t.me/{(await bot.get_me()).username}?start=from_group_{chat_title}",
         )
     )
 

@@ -44,7 +44,7 @@ jobs:
           KAFKA_PORT=29092
           KAFKA_TOPIC=analytics-events
           KAFKA_CONSUMER_GROUP=analytics-consumer-group
-      
+          
           BOT_TOKEN=${{ secrets.BOT_TOKEN }}
           DEBUG=${{ secrets.DEBUG }}
           EOT

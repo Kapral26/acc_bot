@@ -8,8 +8,7 @@ from src.app.russian_roulette_analytics.bad_phrase.service import BadPhraseServi
 class BadPhraseProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_bad_phrase_repository(
-            self,
-            session_factory: async_sessionmaker
+        self, session_factory: async_sessionmaker
     ) -> BadPhraseRepository:
         return BadPhraseRepository(session_factory=session_factory)
 

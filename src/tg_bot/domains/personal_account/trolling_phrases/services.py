@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass
 
-from src.app.russian_roulette_analytics.bad_phrase.exceptions import PhraseAlreadyExist
 from src.tg_bot.domains.personal_account.trolling_phrases.repository import (
     TrollingPhrasesRepository,
 )

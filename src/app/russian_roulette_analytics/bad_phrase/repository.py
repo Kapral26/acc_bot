@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.app.russian_roulette_analytics.bad_phrase.models import BadPhrase
-from src.app.russian_roulette_analytics.bad_phrase.schemas import BadPhraseCRUD
 from src.app.exceptions import (
     RoleNotFoundException,  # Можно создать BadPhraseNotFoundException по аналогии
 )
+from src.app.russian_roulette_analytics.bad_phrase.models import BadPhrase
+from src.app.russian_roulette_analytics.bad_phrase.schemas import BadPhraseCRUD
 
 
 @dataclass

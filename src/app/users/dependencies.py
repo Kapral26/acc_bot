@@ -12,9 +12,7 @@ from src.app.users.service import UserService
 class UserProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_user_repository(
-        self,
-        logger: logging.Logger,
-        session_factory: async_sessionmaker
+        self, logger: logging.Logger, session_factory: async_sessionmaker
     ) -> UserRepository:
         return UserRepository(
             session_factory=session_factory,

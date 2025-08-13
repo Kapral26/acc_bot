@@ -8,17 +8,15 @@ from src.app.users.chats.service import ChatsService
 
 
 class ChatsProvider(Provider):
-
     @provide(scope=Scope.REQUEST)
     async def get_chat_repository(
-        self,
-        session_factory: async_sessionmaker
+        self, session_factory: async_sessionmaker
     ) -> ChatsRepository:
         return ChatsRepository(session_factory=session_factory)
 
     @provide(scope=Scope.REQUEST)
     async def get_chats_service(
-            self,
+        self,
         chats_repository: ChatsRepository,
         logger: logging.Logger,
     ) -> ChatsService:

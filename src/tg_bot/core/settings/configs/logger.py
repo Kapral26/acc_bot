@@ -1,9 +1,7 @@
 import logging
-import os
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from tempfile import gettempdir
 
 
 def setup_file_logger(
@@ -11,13 +9,12 @@ def setup_file_logger(
     log_level: int = logging.INFO,
     logger_name: str = "app_logger",
 ) -> logging.Logger:
-
     logger = logging.getLogger(logger_name)
     logger.setLevel(log_level)
 
     # Не добавлять повторно хендлеры
     if not logger.handlers:
-        log_dir = Path(gettempdir())
+        log_dir = Path(__file__).parent.parent.parent.absolute()
         handler = logging.FileHandler(log_dir / log_file, encoding="utf-8")
         formatter = logging.Formatter(
             fmt="%(asctime)s| %(levelname)s | %(pathname)s | %(funcName)s | %(lineno)d | %(message)s",

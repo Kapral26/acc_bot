@@ -10,8 +10,7 @@ from src.app.users.service import UserService
 class AnalyticsProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_analytics_repository(
-        self,
-        session_factory: async_sessionmaker
+        self, session_factory: async_sessionmaker
     ) -> AnalyticsRepository:
         return AnalyticsRepository(session_factory=session_factory)
 

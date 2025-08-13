@@ -1,5 +1,4 @@
-from sqlalchemy import String, \
-    BigInteger
+from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.settings.database.database import Base

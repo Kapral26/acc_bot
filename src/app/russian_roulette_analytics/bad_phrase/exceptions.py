@@ -7,4 +7,3 @@ class PhraseAlreadyExist(HTTPException):
         self.status_code = status.HTTP_409_CONFLICT
         self.detail = detail
         super().__init__(status_code=self.status_code, detail=self.detail)
-

@@ -14,14 +14,12 @@ class UserInChatFilter(BaseFilter):
         # Получаем текущее время
         user = await user_bot_service.is_user_in_chat(message)
         if not user.in_chat:
-            filter_text = (
-                f"""
+            filter_text = f"""
                 @{message.from_user.username} - иди нахуй!
                 Потом не забудь зарегистрироваться.
                 'Основное меню' -> 'Зарегистрироваться'
                 Для тупых: /reg_user
                 """
-            )
             await message.answer(filter_text)
             return False
         else:

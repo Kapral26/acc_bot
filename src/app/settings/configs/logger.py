@@ -2,7 +2,6 @@ import logging
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from tempfile import gettempdir
 
 
 def setup_file_logger(
@@ -14,7 +13,7 @@ def setup_file_logger(
     logger.setLevel(log_level)
 
     if not logger.handlers:
-        log_dir = Path(gettempdir())
+        log_dir = Path(__file__).parent.parent.parent.absolute()
         handler = logging.FileHandler(log_dir / log_file, encoding="utf-8")
         formatter = logging.Formatter(
             fmt="%(asctime)s| %(levelname)s | %(pathname)s | %(funcName)s | %(lineno)d | %(message)s",

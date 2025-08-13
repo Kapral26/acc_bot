@@ -1,7 +1,7 @@
 from aiogram import Bot, F, types
 from aiogram.enums import ChatType
 from aiogram.filters import Command, CommandObject, CommandStart
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from dishka import FromDishka
 from dishka.integrations.aiogram import inject
 
