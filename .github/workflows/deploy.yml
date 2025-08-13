@@ -23,6 +23,14 @@ jobs:
             -e "ssh -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.DEPLOY_DIR }}
 
+      - name: Upload API .env to server
+        run: |
+          echo "${{ secrets.DEV_ENV_FILE_API }}" | ssh -i ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/app/.dev.env"
+
+      - name: Upload BOT .env to server
+        run: |
+          echo "${{ secrets.DEV_ENV_FILE_BOT }}" | ssh -i ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/tg_bot/.dev.env"
+
       - name: 🚀 Deploy with docker-compose
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
