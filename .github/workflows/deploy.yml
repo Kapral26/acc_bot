@@ -1,0 +1,48 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📦 Copy files to VPS
+        run: |
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.DEPLOY_DIR }}
+
+      - name: 🚀 Deploy with docker-compose
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            set -e  # Прерывать выполнение при ошибке
+          
+            cd ${{ secrets.DEPLOY_DIR }}
+          
+            echo "📦 Stopping and removing old containers"
+            docker-compose down --remove-orphans
+          
+            echo "🧹 Removing old images"
+            docker image prune -af
+          
+            echo "🔧 Building new containers"
+            docker-compose build
+          
+            echo "🚀 Starting services"
+            docker-compose up -d
+          
+            echo "📁 Running Alembic migrations"
+            # Замените fastapi_app на имя контейнера из docker-compose (service name)
+            docker-compose exec -T "fastapi-app" uv run alembic upgrade head
+          EOF
