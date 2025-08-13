@@ -1,8 +1,8 @@
 import logging
-import os
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
+from tempfile import gettempdir
 
 
 def setup_file_logger(
@@ -10,30 +10,12 @@ def setup_file_logger(
     log_level: int = logging.INFO,
     logger_name: str = "app_logger",
 ) -> logging.Logger:
-    """
-    Инициализирует и возвращает логгер, который пишет в файл с заданным форматом.
-
-    Формат: дата| уровень | путь к файлу | функция | номер строки | Сообщение
-
-    Args:
-        log_file (str): Имя файла для логов.
-        log_level (int): Уровень логирования.
-        logger_name (str): Имя логгера.
-
-    Returns:
-        logging.Logger: Настроенный логгер.
-
-    """
     logger = logging.getLogger(logger_name)
     logger.setLevel(log_level)
 
-    # Не добавлять повторно хендлеры
     if not logger.handlers:
-        log_dir = Path(log_file).parent
-        if log_dir and not log_dir.exists():
-            os.makedirs(log_dir, exist_ok=True)
-
-        handler = logging.FileHandler(log_file, encoding="utf-8")
+        log_dir = Path(gettempdir())
+        handler = logging.FileHandler(log_dir / log_file, encoding="utf-8")
         formatter = logging.Formatter(
             fmt="%(asctime)s| %(levelname)s | %(pathname)s | %(funcName)s | %(lineno)d | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",

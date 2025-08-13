@@ -40,4 +40,4 @@ dist/
 /.qodo/
 /tmp
 /tmp/
-/src/app/.dev.env
+/src/app/.env

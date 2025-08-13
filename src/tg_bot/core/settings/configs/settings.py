@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.tg_bot.core.settings.configs.logger import setup_file_logger
 
-dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".dev.env"
+dotenv_path = Path(__file__).parent.parent.parent.parent.absolute() / ".env"
 
 
 class Settings(BaseSettings):

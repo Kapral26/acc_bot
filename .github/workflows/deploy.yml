@@ -23,18 +23,32 @@ jobs:
             -e "ssh -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.DEPLOY_DIR }}
 
-      - name: Upload API .env to server
+      - name: Generate api .env file
         run: |
-          printf '%s' "${{ secrets.DEV_ENV_FILE_API }}" | ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/app/.dev.env"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          cat <<EOT > ${{ secrets.DEPLOY_DIR }}/src/app/.env
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          POSTGRES_DB=akk_bot
+          POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT=5432
+          DEBUG=${{ secrets.DEBUG }}
+          EOT
+          EOF
 
-      - name: Upload BOT .env to server
+      - name: Generate tg_bot .env file on server
         run: |
-          echo "${{ secrets.DEV_ENV_FILE_BOT }}" | ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/tg_bot/.dev.env"
-
-      - name: Show .env contents
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-          "cat /var/www/acc_bot/src/app/.dev.env"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          cat <<EOT > ${{ secrets.DEPLOY_DIR }}/src/tg_bot/.env
+          KAFKA_BOOTSTRAP_SERVERS=localhost
+          KAFKA_PORT=29092
+          KAFKA_TOPIC=analytics-events
+          KAFKA_CONSUMER_GROUP=analytics-consumer-group
+      
+          BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+          DEBUG=${{ secrets.DEBUG }}
+          EOT
+          EOF
 
 
 

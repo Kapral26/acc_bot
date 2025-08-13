@@ -3,6 +3,7 @@ import os
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
+from tempfile import gettempdir
 
 
 def setup_file_logger(
@@ -16,11 +17,8 @@ def setup_file_logger(
 
     # Не добавлять повторно хендлеры
     if not logger.handlers:
-        log_dir = Path(log_file).parent
-        if log_dir and not log_dir.exists():
-            os.makedirs(log_dir, exist_ok=True)
-
-        handler = logging.FileHandler(log_file, encoding="utf-8")
+        log_dir = Path(gettempdir())
+        handler = logging.FileHandler(log_dir / log_file, encoding="utf-8")
         formatter = logging.Formatter(
             fmt="%(asctime)s| %(levelname)s | %(pathname)s | %(funcName)s | %(lineno)d | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
