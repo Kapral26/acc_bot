@@ -32,9 +32,10 @@ jobs:
           echo "${{ secrets.DEV_ENV_FILE_BOT }}" | ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/tg_bot/.dev.env"
 
 
-      - name: echo settings
+      - name: echo settings keys
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat /var/www/acc_bot/src/app/.dev.env"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cut -d '=' -f 1 /var/www/acc_bot/src/app/.dev.env"
+      
 
 
       - name: 🚀 Deploy with docker-compose
