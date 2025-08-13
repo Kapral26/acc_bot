@@ -25,7 +25,7 @@ jobs:
 
       - name: Upload API .env to server
         run: |
-          echo "${{ secrets.DEV_ENV_FILE_API }}" | ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/app/.dev.env"
+          printf '%s' "${{ secrets.DEV_ENV_FILE_API }}" | ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > /var/www/acc_bot/src/app/.dev.env"
 
       - name: Upload BOT .env to server
         run: |
