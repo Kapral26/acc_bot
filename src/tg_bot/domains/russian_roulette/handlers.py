@@ -1,6 +1,5 @@
 from aiogram import Bot, F
 from aiogram.types import CallbackQuery
-from dishka import FromDishka
 from dishka.integrations.aiogram import inject
 
 from src.task_manager.tasks import task_collect_analytics
@@ -19,26 +18,20 @@ from src.tg_bot.domains.user_management.filters import UserInChatFilter
 async def handle_russian_roulette(
     callback: CallbackQuery,
     bot: Bot,
-    russian_roulette_service: FromDishka[RussianRouletteService],
+#    russian_roulette_service: FromDishka[RussianRouletteService],
 ):
     await callback.answer("Поиск подходящей фразы....")
 
-    print("перед постановкой задачи")
-    try:
-        await task_collect_analytics.kiq(callback)
-    except Exception as e:
-        print(e)
-    else:
-        print("Поставлена задача")
+    await task_collect_analytics.kiq(callback)
 
-    try:
-        bad_phrase = await russian_roulette_service.start(callback)
-    except Exception as e:
-        await callback.message.edit_text(f"Проблема при поиске фразы: {e}")
-    else:
-        await callback.message.edit_text(
-            bad_phrase.phrase, reply_markup=await get_rr_inline_keyboard()
-        )
+    # try:
+    #     bad_phrase = await russian_roulette_service.start(callback)
+    # except Exception as e:
+    #     await callback.message.edit_text(f"Проблема при поиске фразы: {e}")
+    # else:
+    await callback.message.edit_text(
+        "Ваш запрос принят.", reply_markup=await get_rr_inline_keyboard()
+    )
 
 
 @russian_roulette_router.callback_query(
