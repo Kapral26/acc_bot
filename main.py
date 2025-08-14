@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from src.app import all_routers
 from src.app.settings.di.containers import create_api_container
+from src.task_manager.worker import broker
 from src.tg_bot.bot import TelegramBot
 
 bot_instance = None  # Глобальная переменная для хранения экземпляра бота
@@ -17,7 +18,7 @@ async def lifespan(app: FastAPI):
 
     # Создаём экземпляр бота
     bot_instance = TelegramBot()
-
+    await broker.startup()
     # Запускаем бота в фоне без await
     bot_task = asyncio.create_task(bot_instance.start())
 
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
 
     # Корректно останавливаем бота
     bot_task.cancel()
+    await broker.shutdown()
     try:
         await bot_task
     except asyncio.CancelledError:

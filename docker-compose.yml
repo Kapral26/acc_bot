@@ -31,6 +31,22 @@ services:
     depends_on:
       - database
 
+  task-queue:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    container_name: task-queue
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    networks:
+      - my_app_network
+
+
 networks:
   my_app_network:
     driver: bridge

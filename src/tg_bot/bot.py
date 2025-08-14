@@ -33,7 +33,7 @@ class TelegramBot:
             self.dp.include_router(router)
 
     def _register_middleware(self):
-        self.dp.update.middleware(RateLimitMiddleware(limit=30, per_seconds=1))
+      #  self.dp.update.middleware(RateLimitMiddleware(limit=30, per_seconds=1))
         self.dp.update.middleware(LoggingMiddleware())
 
     async def on_shutdown(self) -> None:

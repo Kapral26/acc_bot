@@ -47,6 +47,9 @@ migrate-create: ## Создать новую миграцию
 migrate-apply: ## Применить миграцию
 	alembic upgrade head
 
+taskiq-worker:
+	taskiq worker src.task_manager.worker:broker --no-configure-logging --fs-discover --tasks-pattern "**/tasks" --tasks-pattern "**/tasks.py"
+
 help: ## Показать это сообщение о помощи
 	@echo "Использование: make [команда] [аргумент]"
 	@echo ""

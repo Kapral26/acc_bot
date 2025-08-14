@@ -24,7 +24,6 @@ async def start_private(message: types.Message, bot: Bot):
 
 @personal_account_router.callback_query(
     F.data == "main_menu",
-    # F.chat.type == ChatType.PRIVATE
 )
 async def private_actions(callback: CallbackQuery):
     await callback.answer("Жую хуи...")

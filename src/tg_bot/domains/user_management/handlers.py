@@ -31,16 +31,15 @@ async def handle_register(
 
     user = await user_bot_service.is_user_in_chat(callback)
 
+    kb = await get_start_inline_keyboard(bot, user.in_chat, callback.message.chat.title)
     if user.in_chat:
         await callback.message.edit_text(
             "Ты шо дурак? Ты уже зарегистрирован!",
-            reply_markup=await get_start_inline_keyboard(
-                bot, user.in_chat, callback.message.chat.title
-            ),
+            reply_markup=kb,
         )
     try:
         register_suer_result = await user_bot_service.register_user(callback)
     except Exception as e:
         await callback.message.edit_text(f"Проблема при добавлении пользователя: {e}")
     else:
-        await callback.message.edit_text(register_suer_result)
+        await callback.message.edit_text(register_suer_result, reply_markup=kb)
